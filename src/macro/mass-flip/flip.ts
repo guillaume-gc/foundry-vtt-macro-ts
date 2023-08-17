@@ -57,6 +57,8 @@ export const flipTokens = async (
     return {
       _id: token.id,
       'texture.src': newTextureFullFileName,
+      'texture.scaleX': actorGroup.images[imageLabel].scale.x,
+      'texture.scaleY': actorGroup.images[imageLabel].scale.y,
     }
   })
 

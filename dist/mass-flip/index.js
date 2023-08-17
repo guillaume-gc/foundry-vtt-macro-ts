@@ -25,15 +25,6 @@ var knownActorGroups = {
   // Cheval Léger
   "Cheval%20L%C3%A9ger": {
     images: {
-      rest: {
-        name: "Repos",
-        fileName: "horse-*-plain-idle2.webm",
-        scrolling: {
-          enable: false,
-          tag: "scrolling",
-          speed: "0"
-        }
-      },
       idle: {
         name: "Immobile",
         fileName: "horse-*-plain-idle.webm",
@@ -41,6 +32,23 @@ var knownActorGroups = {
           enable: false,
           tag: "scrolling",
           speed: "0"
+        },
+        scale: {
+          x: 1.8,
+          y: 1.8
+        }
+      },
+      rest: {
+        name: "Repos",
+        fileName: "horse-*-plain-idle2.webm",
+        scrolling: {
+          enable: false,
+          tag: "scrolling",
+          speed: "0"
+        },
+        scale: {
+          x: 1.6,
+          y: 1.6
         }
       },
       walk: {
@@ -53,6 +61,10 @@ var knownActorGroups = {
         },
         sound: {
           tag: "horseWalking"
+        },
+        scale: {
+          x: 1.6,
+          y: 1.6
         }
       },
       run: {
@@ -61,10 +73,14 @@ var knownActorGroups = {
         scrolling: {
           enable: true,
           tag: "scrolling",
-          speed: "0.24"
+          speed: "0.36"
         },
         sound: {
           tag: "horseRunning"
+        },
+        scale: {
+          x: 1.9,
+          y: 1.9
         }
       }
     }
@@ -183,7 +199,9 @@ var flipTokens = async (htm, ownedTokens) => {
     );
     return {
       _id: token.id,
-      "texture.src": newTextureFullFileName
+      "texture.src": newTextureFullFileName,
+      "texture.scaleX": actorGroup.images[imageLabel].scale.x,
+      "texture.scaleY": actorGroup.images[imageLabel].scale.y
     };
   });
   await game.scenes.viewed.updateEmbeddedDocuments("Token", updates);
