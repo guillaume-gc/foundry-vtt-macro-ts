@@ -3,5 +3,5 @@
   "compilerOptions": {
     // Allow src to be "referenced" from the outside by declaring it as "composite":
     "composite": true
-  },
+  }
 }

@@ -1,8 +1,8 @@
-import { knownActorGroups } from './config'
-import { FoundryVTT } from '../../global'
 import { editInnerHtml } from '../../common/util/jquery'
-import { createForm, createImageOptions } from './html'
+import { FoundryVTT } from '../../global'
+import { knownActorGroups } from './config'
 import { flipTokens } from './flip'
+import { createForm, createImageOptions } from './html'
 
 const openDialog = (
   currentActorGroups: Set<string>,

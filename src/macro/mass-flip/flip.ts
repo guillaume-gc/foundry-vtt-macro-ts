@@ -1,5 +1,5 @@
-import { FoundryVTT } from '../../global'
 import { getSelectElementValue } from '../../common/util/jquery'
+import { FoundryVTT } from '../../global'
 import { ActorGroup, knownActorGroups } from './config'
 import { startSound, stopCurrentSounds } from './sound'
 

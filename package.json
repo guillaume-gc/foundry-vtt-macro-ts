@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/guillaume-gc/foundry-vtt-macros-ts.git"
+    "url": "git+https://github.com/guillaume-gc/foundry-vtt-macro-ts.git"
   },
   "author": "Guillaume C",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/guillaume-gc/foundry-vtt-macros-ts/issues"
+    "url": "https://github.com/guillaume-gc/foundry-vtt-macro-ts/issues"
   },
-  "homepage": "https://github.com/guillaume-gc/foundry-vtt-macros-ts#readme",
+  "homepage": "https://github.com/guillaume-gc/foundry-vtt-macro-ts#readme",
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/jquery": "^3.5.16",
