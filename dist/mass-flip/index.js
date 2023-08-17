@@ -43,8 +43,7 @@ var knownActorGroups = {
           speed: "0.12"
         },
         sound: {
-          playlist: "Monsters",
-          soundName: "Horse Walking"
+          tag: "horseWalking"
         }
       },
       run: {
@@ -56,8 +55,7 @@ var knownActorGroups = {
           speed: "0.24"
         },
         sound: {
-          playlist: "Monsters",
-          soundName: "Horse Running"
+          tag: "horseRunning"
         }
       }
     }
@@ -91,46 +89,46 @@ var updateScrolling = async (scrolling) => {
 
 // src/macro/mass-flip/sound.ts
 var startSound = async (sound) => {
-  const playlistToUse = game.playlists.find((p) => p.name === sound.playlist);
-  if (playlistToUse === void 0) {
-    throw new Error(`Could not find "${sound.playlist}" playlist to play sound`);
-  }
-  console.log(`Found playlist ${sound.playlist} to play sound`, playlistToUse);
-  const soundToPlay = playlistToUse.sounds.find(
-    (s) => s.name === sound.soundName
-  );
+  const soundToPlay = canvas.scene.sounds.find((e) => {
+    const {
+      flags: { tagger: { tags = "" } = {} }
+    } = e;
+    if (!Array.isArray(tags)) {
+      return tags === sound.tag;
+    }
+    return tags.includes(sound.tag);
+  });
   if (soundToPlay === void 0) {
-    throw new Error(`Could not find "${sound.soundName}" sound to play`);
+    throw new Error(`Could not find to play sound with ${sound.tag} tag`);
   }
-  console.log(`Found sound ${sound.soundName} to play`, soundToPlay);
-  await playlistToUse.playSound(soundToPlay);
+  console.log(`Found sound to play with tag ${sound.tag}`, soundToPlay);
+  await soundToPlay.update({ hidden: false });
 };
 var stopCurrentSounds = async () => {
   const sounds = Object.values(knownActorGroups).flatMap((item) => Object.values(item.images)).filter((image) => image.sound).map((image) => image.sound);
   console.log("Stop all sounds", sounds);
   for (const sound of sounds) {
-    const playlistToUse = game.playlists.find((p) => p.name === sound.playlist);
-    if (playlistToUse === void 0) {
-      throw new Error(
-        `Could not find "${sound.playlist}" playlist to stop sounds`
-      );
-    }
-    console.log(`Found playlist ${sound.playlist} to stop sound`, playlistToUse);
-    const soundToStop = playlistToUse.sounds.find(
-      (s) => s.name === sound.soundName
-    );
+    const soundToStop = canvas.scene.sounds.find((e) => {
+      const {
+        flags: { tagger: { tags = "" } = {} }
+      } = e;
+      if (!Array.isArray(tags)) {
+        return tags === sound.tag;
+      }
+      return tags.includes(sound.tag);
+    });
     if (soundToStop === void 0) {
-      throw new Error(`Could not find "${sound.soundName}" sound to stop`);
+      throw new Error(`Could not find sound to stop with ${sound.tag} tag`);
     }
-    if (!soundToStop.playing) {
+    if (soundToStop.hidden) {
       console.log(
-        `Found sound ${sound.soundName} to stop, but it's not being played by the playlist`,
+        `Found sound to stop with tag ${sound.tag}, but it's already hidden`,
         soundToStop
       );
       continue;
     }
-    console.log(`Found sound ${sound.soundName} to stop`, soundToStop);
-    await playlistToUse.stopSound(soundToStop);
+    console.log(`Found sound to stop with tag ${sound.tag}`, soundToStop);
+    await soundToStop.update({ hidden: true });
   }
 };
 

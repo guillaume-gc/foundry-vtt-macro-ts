@@ -1,6 +1,5 @@
 export interface ActorGroupSound {
-  playlist: string
-  soundName: string
+  tag: string
 }
 
 export interface ActorGroupScrolling {
@@ -46,8 +45,7 @@ export const knownActorGroups: ActorGroups = {
           speed: '0.12',
         },
         sound: {
-          playlist: 'Monsters',
-          soundName: 'Horse Walking',
+          tag: 'horseWalking',
         },
       },
       run: {
@@ -59,8 +57,7 @@ export const knownActorGroups: ActorGroups = {
           speed: '0.24',
         },
         sound: {
-          playlist: 'Monsters',
-          soundName: 'Horse Running',
+          tag: 'horseRunning',
         },
       },
     },

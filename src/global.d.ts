@@ -29,26 +29,53 @@ export namespace FoundryVTT {
     ownedTokens: TokenPF[]
   }
 
-  interface TilesObjectChildren {
-    document: {
-      flags: {
-        [key: string]: {
-          [key: string]: string[] | string
-        }
-      }
-      setFlag
+  interface Flags {
+    [key: string]: {
+      [key: string]: string[] | string
     }
   }
 
-  interface Tiles {
-    objects: {
-      children: TilesObjectChildren[]
+  type SetFlag = (
+    namespace: string,
+    flagName: string,
+    flagValue: string | boolean,
+  ) => Primise<void>
+
+  interface TilesLayerObjectChildren {
+    document: {
+      flags: Flags
+      setFlag: SetFlag
     }
+  }
+
+  interface TilesLayer {
+    objects: {
+      children: TilesLayerObjectChildren[]
+    }
+  }
+
+  interface TileDocument {
+    flags: Flags
+    setFlag: SetFlag
+  }
+
+  interface AmbiantSoundDocument {
+    flags: Flags
+    setFlag: SetFlag
+    hidden: boolean
+    path: string
+    update: ({ hidden: boolean }) => Promise<void>
+  }
+
+  interface Scene {
+    sounds: AmbiantSoundDocument[]
+    tiles: TileDocument[]
   }
 
   interface Canvas {
     tokens: TokenLayer
-    tiles: Tiles
+    tiles: TilesLayer
+    scene: Scene
   }
 
   interface UserInterface {
