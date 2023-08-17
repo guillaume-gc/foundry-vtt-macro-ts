@@ -25,6 +25,15 @@ var knownActorGroups = {
   // Cheval Léger
   "Cheval%20L%C3%A9ger": {
     images: {
+      rest: {
+        name: "Repos",
+        fileName: "horse-*-plain-idle2.webm",
+        scrolling: {
+          enable: false,
+          tag: "scrolling",
+          speed: "0"
+        }
+      },
       idle: {
         name: "Immobile",
         fileName: "horse-*-plain-idle.webm",
@@ -97,7 +106,8 @@ var startSound = async (sound) => {
     return tags.includes(sound.tag);
   });
   if (soundToPlay === void 0) {
-    throw new Error(`Could not find to play sound with ${sound.tag} tag`);
+    console.warn(`Could not find to play sound with ${sound.tag} tag`);
+    return;
   }
   console.log(`Found sound to play with tag ${sound.tag}`, soundToPlay);
   await soundToPlay.update({ hidden: false });
@@ -116,7 +126,8 @@ var stopCurrentSounds = async () => {
       return tags.includes(sound.tag);
     });
     if (soundToStop === void 0) {
-      throw new Error(`Could not find sound to stop with ${sound.tag} tag`);
+      console.warn(`Could not find sound to stop with ${sound.tag} tag`);
+      continue;
     }
     if (soundToStop.hidden) {
       console.log(

@@ -14,7 +14,8 @@ export const startSound = async (sound: ActorGroupSound) => {
   })
 
   if (soundToPlay === undefined) {
-    throw new Error(`Could not find to play sound with ${sound.tag} tag`)
+    console.warn(`Could not find to play sound with ${sound.tag} tag`)
+    return
   }
 
   console.log(`Found sound to play with tag ${sound.tag}`, soundToPlay)
@@ -44,7 +45,8 @@ export const stopCurrentSounds = async () => {
     })
 
     if (soundToStop === undefined) {
-      throw new Error(`Could not find sound to stop with ${sound.tag} tag`)
+      console.warn(`Could not find sound to stop with ${sound.tag} tag`)
+      continue
     }
 
     if (soundToStop.hidden) {

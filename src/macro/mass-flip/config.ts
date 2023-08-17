@@ -27,6 +27,15 @@ export const knownActorGroups: ActorGroups = {
   // Cheval Léger
   'Cheval%20L%C3%A9ger': {
     images: {
+      rest: {
+        name: 'Repos',
+        fileName: 'horse-*-plain-idle2.webm',
+        scrolling: {
+          enable: false,
+          tag: 'scrolling',
+          speed: '0',
+        },
+      },
       idle: {
         name: 'Immobile',
         fileName: 'horse-*-plain-idle.webm',
