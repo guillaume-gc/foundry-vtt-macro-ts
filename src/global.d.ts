@@ -3,7 +3,7 @@ export namespace FoundryVTT {
   interface DialogButton {
     icon: string
     label: string
-    callback: (htm: any) => void
+    callback: (htm: JQuery) => void
   }
 
   interface DialogOptions {
