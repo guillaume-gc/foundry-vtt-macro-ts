@@ -2,7 +2,7 @@ import * as esbuild from 'esbuild'
 import * as fs from 'fs'
 import * as path from 'path'
 
-const srcDir = __dirname
+const macroDir = path.resolve(__dirname, 'macro')
 const distDir = path.resolve(__dirname, '..', 'dist')
 
 // Ensure the dist directory exists.
@@ -17,11 +17,11 @@ const getDirectories = (source: string) =>
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
 
-const subDirs = getDirectories(srcDir)
+const subDirs = getDirectories(macroDir)
 
 // Build each subdirectory.
 subDirs.forEach((dir) => {
-  const entryFile = path.join(srcDir, dir, 'index.ts')
+  const entryFile = path.join(macroDir, dir, 'index.ts')
   const outputDir = path.join(distDir, dir)
 
   if (!fs.existsSync(outputDir)) {

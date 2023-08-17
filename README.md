@@ -1,1 +1,1 @@
-# foundryvtt-macro-ts
+# foundry-vtt-macro-ts
