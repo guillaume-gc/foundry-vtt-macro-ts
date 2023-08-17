@@ -1,5 +1,5 @@
 {
-  "name": "foundryvtt-macros-ts",
+  "name": "foundry-vtt-macros-ts",
   "version": "1.0.0",
   "description": "Basic macros used for personal usage in foundry",
   "scripts": {
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/guillaume-gc/foundryvtt-macros-ts.git"
+    "url": "git+https://github.com/guillaume-gc/foundry-vtt-macros-ts.git"
   },
   "author": "Guillaume C",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/guillaume-gc/foundryvtt-macros-ts/issues"
+    "url": "https://github.com/guillaume-gc/foundry-vtt-macros-ts/issues"
   },
-  "homepage": "https://github.com/guillaume-gc/foundryvtt-macros-ts#readme",
+  "homepage": "https://github.com/guillaume-gc/foundry-vtt-macros-ts#readme",
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/jquery": "^3.5.16",
