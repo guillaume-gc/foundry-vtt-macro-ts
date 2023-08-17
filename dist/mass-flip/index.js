@@ -64,11 +64,9 @@ var knownActorGroups = {
 
 // src/macro/mass-flip/scrolling.ts
 var updateScrolling = async (scrolling) => {
-  const tilesToUpdate = canvas.tiles.objects.children.filter((e) => {
+  const tilesToUpdate = canvas.scene.tiles.filter((e) => {
     const {
-      document: {
-        flags: { tagger: { tags = "" } = {} }
-      }
+      flags: { tagger: { tags = "" } = {} }
     } = e;
     if (!Array.isArray(tags)) {
       return tags === scrolling.tag;
@@ -78,10 +76,10 @@ var updateScrolling = async (scrolling) => {
   const operations = [];
   for (const child of tilesToUpdate) {
     operations.push(
-      child.document.setFlag("tile-scroll", "scrollSpeed", scrolling.speed)
+      child.setFlag("tile-scroll", "scrollSpeed", scrolling.speed)
     );
     operations.push(
-      child.document.setFlag("tile-scroll", "enableScroll", scrolling.enable)
+      child.setFlag("tile-scroll", "enableScroll", scrolling.enable)
     );
   }
   await Promise.all(operations);
