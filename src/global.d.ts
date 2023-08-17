@@ -29,8 +29,26 @@ export namespace FoundryVTT {
     ownedTokens: TokenPF[]
   }
 
+  interface TilesObjectChildren {
+    document: {
+      flags: {
+        [key: string]: {
+          [key: string]: string[] | string
+        }
+      }
+      setFlag
+    }
+  }
+
+  interface Tiles {
+    objects: {
+      children: TilesObjectChildren[]
+    }
+  }
+
   interface Canvas {
     tokens: TokenLayer
+    tiles: Tiles
   }
 
   interface UserInterface {

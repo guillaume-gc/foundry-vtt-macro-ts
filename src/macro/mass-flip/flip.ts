@@ -1,6 +1,7 @@
 import { getSelectElementValue } from '../../common/util/jquery'
 import { FoundryVTT } from '../../global'
 import { ActorGroup, knownActorGroups } from './config'
+import { updateScrolling } from './scrolling'
 import { startSound, stopCurrentSounds } from './sound'
 
 export const flipTokens = async (
@@ -63,10 +64,14 @@ export const flipTokens = async (
 
   await stopCurrentSounds()
 
-  const { sound } = actorGroup.images[imageLabel]
+  const { sound, scrolling } = actorGroup.images[imageLabel]
 
   if (sound) {
     await startSound(sound)
+  }
+
+  if (scrolling) {
+    await updateScrolling(scrolling)
   }
 }
 

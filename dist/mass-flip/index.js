@@ -27,11 +27,21 @@ var knownActorGroups = {
     images: {
       idle: {
         name: "Immobile",
-        fileName: "horse-*-plain-idle.webm"
+        fileName: "horse-*-plain-idle.webm",
+        scrolling: {
+          enable: false,
+          tag: "scrolling",
+          speed: "0"
+        }
       },
       walk: {
         name: "Marcher",
         fileName: "horse-*-plain-walk.webm",
+        scrolling: {
+          enable: true,
+          tag: "scrolling",
+          speed: "0.12"
+        },
         sound: {
           playlist: "Monsters",
           soundName: "Horse Walking"
@@ -40,6 +50,11 @@ var knownActorGroups = {
       run: {
         name: "Galoper",
         fileName: "horse-*-plain-gallop.webm",
+        scrolling: {
+          enable: true,
+          tag: "scrolling",
+          speed: "0.24"
+        },
         sound: {
           playlist: "Monsters",
           soundName: "Horse Running"
@@ -47,6 +62,31 @@ var knownActorGroups = {
       }
     }
   }
+};
+
+// src/macro/mass-flip/scrolling.ts
+var updateScrolling = async (scrolling) => {
+  const tilesToUpdate = canvas.tiles.objects.children.filter((e) => {
+    const {
+      document: {
+        flags: { tagger: { tags = "" } = {} }
+      }
+    } = e;
+    if (!Array.isArray(tags)) {
+      return tags === scrolling.tag;
+    }
+    return tags.includes(scrolling.tag);
+  });
+  const operations = [];
+  for (const child of tilesToUpdate) {
+    operations.push(
+      child.document.setFlag("tile-scroll", "scrollSpeed", scrolling.speed)
+    );
+    operations.push(
+      child.document.setFlag("tile-scroll", "enableScroll", scrolling.enable)
+    );
+  }
+  await Promise.all(operations);
 };
 
 // src/macro/mass-flip/sound.ts
@@ -141,9 +181,12 @@ var flipTokens = async (htm, ownedTokens) => {
   });
   await game.scenes.viewed.updateEmbeddedDocuments("Token", updates);
   await stopCurrentSounds();
-  const { sound } = actorGroup.images[imageLabel];
+  const { sound, scrolling } = actorGroup.images[imageLabel];
   if (sound) {
     await startSound(sound);
+  }
+  if (scrolling) {
+    await updateScrolling(scrolling);
   }
 };
 var handleWildCard = (actorGroup, actorGroupFileName, currentRelativeTextureFileName) => {

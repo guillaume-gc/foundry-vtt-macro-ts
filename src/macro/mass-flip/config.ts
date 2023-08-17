@@ -3,12 +3,19 @@ export interface ActorGroupSound {
   soundName: string
 }
 
+export interface ActorGroupScrolling {
+  enable: boolean
+  tag: string
+  speed: string
+}
+
 export interface ActorGroup {
   images: {
     [key: string]: {
       name: string
       fileName: string
       sound?: ActorGroupSound
+      scrolling?: ActorGroupScrolling
     }
   }
 }
@@ -24,10 +31,20 @@ export const knownActorGroups: ActorGroups = {
       idle: {
         name: 'Immobile',
         fileName: 'horse-*-plain-idle.webm',
+        scrolling: {
+          enable: false,
+          tag: 'scrolling',
+          speed: '0',
+        },
       },
       walk: {
         name: 'Marcher',
         fileName: 'horse-*-plain-walk.webm',
+        scrolling: {
+          enable: true,
+          tag: 'scrolling',
+          speed: '0.12',
+        },
         sound: {
           playlist: 'Monsters',
           soundName: 'Horse Walking',
@@ -36,6 +53,11 @@ export const knownActorGroups: ActorGroups = {
       run: {
         name: 'Galoper',
         fileName: 'horse-*-plain-gallop.webm',
+        scrolling: {
+          enable: true,
+          tag: 'scrolling',
+          speed: '0.24',
+        },
         sound: {
           playlist: 'Monsters',
           soundName: 'Horse Running',
