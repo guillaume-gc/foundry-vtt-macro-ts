@@ -47,7 +47,7 @@ export const stopCurrentSounds = async () => {
 
     if (!soundToStop.playing) {
       console.log(
-        `Found sound ${sound.soundName} to stop, but it's not playing`,
+        `Found sound ${sound.soundName} to stop, but it's not being played by the playlist`,
         soundToStop,
       )
       continue

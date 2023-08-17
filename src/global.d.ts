@@ -56,14 +56,15 @@ export namespace FoundryVTT {
 
   interface Sound {
     name: string
+    playing: boolean
   }
 
   interface PlayList {
     name: string
-    // Technically, it's an EmbeddedCollection, which is a custom Foundry VTT type, but for now treating it as a array does the job.
-    sounds: Sounds[]
-    playSound: (name: string) => Promise<void>
-    stopSound: (name: string) => Promise<void>
+    // Technically, it's an EmbeddedCollection, which is a custom Foundry VTT type, but for now treating it as an array does the job.
+    sounds: Sound[]
+    playSound: (sound: Sound) => Promise<void>
+    stopSound: (sound: Sound) => Promise<void>
   }
 }
 
