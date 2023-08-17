@@ -8,11 +8,11 @@ export namespace FoundryVTT {
 
   interface DialogOptions {
     title: string
-    content: any
+    content: string
     buttons: {
       [key: string]: DialogButton
     }
-    render: (htm: any) => void
+    render: (htm: JQuery) => void
   }
 
   interface TokenPF {
