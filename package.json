@@ -5,7 +5,8 @@
   "scripts": {
     "prettier:write": "prettier -w .",
     "esbuild:run": "ts-node src/build.ts",
-    "esbuild:watch": "ts-node src/build.ts --watch"
+    "esbuild:watch": "ts-node src/build.ts --watch",
+    "eslint:check": "npx eslint . --ext .ts"
   },
   "repository": {
     "type": "git",
