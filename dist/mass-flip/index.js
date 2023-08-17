@@ -1,34 +1,5 @@
 "use strict";
 
-// src/macro/mass-flip/config.ts
-var knownActorGroups = {
-  // Cheval Léger
-  "Cheval%20L%C3%A9ger": {
-    images: {
-      idle: {
-        name: "Immobile",
-        fileName: "horse-*-plain-idle.webm"
-      },
-      walk: {
-        name: "Marcher",
-        fileName: "horse-*-plain-walk.webm",
-        sound: {
-          playlist: "Monsters",
-          soundName: "Horse Walking Wagon"
-        }
-      },
-      run: {
-        name: "Galoper",
-        fileName: "horse-*-plain-gallop.webm",
-        sound: {
-          playlist: "Monsters",
-          soundName: "Horse Running Wagon"
-        }
-      }
-    }
-  }
-};
-
 // src/common/util/jquery.ts
 var editInnerHtml = (htm, selector, value) => {
   const element = htm.find(selector)?.[0];
@@ -49,41 +20,33 @@ var getSelectElementValue = (htm, selector) => {
   return element.value;
 };
 
-// src/macro/mass-flip/html.ts
-var createForm = (actorGroupNames) => `
-    <form class="flexcol">
-      <div class="form-group">
-        <label>Groupe d'acteur :</label>
-        <select id="mass-flip-current-actor-groups" style="text-transform: capitalize">${createActorGroupOptions(
-  actorGroupNames
-)}</select>
-       </div>
-       <div class="form-group">
-        <label>Image :</label>
-        <select id="mass-flip-images" style="text-transform: capitalize"></select>
-      </div>
-    </form>
-  `;
-var createActorGroupOptions = (actorGroupNames) => {
-  if (actorGroupNames.size === 0) {
-    return "<option>Aucun acteur compatible</option>";
+// src/macro/mass-flip/config.ts
+var knownActorGroups = {
+  // Cheval Léger
+  "Cheval%20L%C3%A9ger": {
+    images: {
+      idle: {
+        name: "Immobile",
+        fileName: "horse-*-plain-idle.webm"
+      },
+      walk: {
+        name: "Marcher",
+        fileName: "horse-*-plain-walk.webm",
+        sound: {
+          playlist: "Monsters",
+          soundName: "Horse Walking"
+        }
+      },
+      run: {
+        name: "Galoper",
+        fileName: "horse-*-plain-gallop.webm",
+        sound: {
+          playlist: "Monsters",
+          soundName: "Horse Running"
+        }
+      }
+    }
   }
-  return [...actorGroupNames].map(
-    (actorGroup) => `<option value='${actorGroup}'>${decodeURI(actorGroup)}</option>`
-  );
-};
-var createImageOptions = (htm) => {
-  const currentActorGroupsLabel = getSelectElementValue(
-    htm,
-    "#mass-flip-current-actor-groups"
-  );
-  console.log("currentActorGroupsLabel", currentActorGroupsLabel);
-  const actorGroup = knownActorGroups[currentActorGroupsLabel];
-  if (actorGroup === void 0) {
-    return "<option>Aucune option disponible</option>";
-  }
-  const { images } = actorGroup;
-  return Object.keys(images).map((key) => `<option value='${key}'>${images[key].name}</option>`).join("");
 };
 
 // src/macro/mass-flip/sound.ts
@@ -121,7 +84,7 @@ var stopCurrentSounds = async () => {
     }
     if (!soundToStop.playing) {
       console.log(
-        `Found sound ${sound.soundName} to stop, but it's not playing`,
+        `Found sound ${sound.soundName} to stop, but it's not being played by the playlist`,
         soundToStop
       );
       continue;
@@ -212,6 +175,43 @@ var getTokenCurrentTextureWildCartValue = (actorGroup, currentRelativeTextureFil
   throw new Error(
     `Could not find texture ${currentRelativeTextureFileName} actor group`
   );
+};
+
+// src/macro/mass-flip/html.ts
+var createForm = (actorGroupNames) => `
+    <form class="flexcol">
+      <div class="form-group">
+        <label>Groupe d'acteur :</label>
+        <select id="mass-flip-current-actor-groups" style="text-transform: capitalize">${createActorGroupOptions(
+  actorGroupNames
+)}</select>
+       </div>
+       <div class="form-group">
+        <label>Image :</label>
+        <select id="mass-flip-images" style="text-transform: capitalize"></select>
+      </div>
+    </form>
+  `;
+var createActorGroupOptions = (actorGroupNames) => {
+  if (actorGroupNames.size === 0) {
+    return "<option>Aucun acteur compatible</option>";
+  }
+  return [...actorGroupNames].map(
+    (actorGroup) => `<option value='${actorGroup}'>${decodeURI(actorGroup)}</option>`
+  );
+};
+var createImageOptions = (htm) => {
+  const currentActorGroupsLabel = getSelectElementValue(
+    htm,
+    "#mass-flip-current-actor-groups"
+  );
+  console.log("currentActorGroupsLabel", currentActorGroupsLabel);
+  const actorGroup = knownActorGroups[currentActorGroupsLabel];
+  if (actorGroup === void 0) {
+    return "<option>Aucune option disponible</option>";
+  }
+  const { images } = actorGroup;
+  return Object.keys(images).map((key) => `<option value='${key}'>${images[key].name}</option>`).join("");
 };
 
 // src/macro/mass-flip/index.ts

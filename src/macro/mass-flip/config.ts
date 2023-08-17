@@ -30,7 +30,7 @@ export const knownActorGroups: ActorGroups = {
         fileName: 'horse-*-plain-walk.webm',
         sound: {
           playlist: 'Monsters',
-          soundName: 'Horse Walking Wagon',
+          soundName: 'Horse Walking',
         },
       },
       run: {
@@ -38,7 +38,7 @@ export const knownActorGroups: ActorGroups = {
         fileName: 'horse-*-plain-gallop.webm',
         sound: {
           playlist: 'Monsters',
-          soundName: 'Horse Running Wagon',
+          soundName: 'Horse Running',
         },
       },
     },
