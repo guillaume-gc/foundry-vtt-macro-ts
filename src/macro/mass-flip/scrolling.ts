@@ -20,7 +20,7 @@ export const updateScrolling = async (scrolling: ActorGroupScrolling) => {
       child.setFlag('tile-scroll', 'scrollSpeed', scrolling.speed),
     )
     operations.push(
-      child.setFlag('tile-scroll', 'enableScroll', scrolling.enable),
+      child.setFlag('tile-scroll', 'enableScroll', scrolling.enabled),
     )
   }
 

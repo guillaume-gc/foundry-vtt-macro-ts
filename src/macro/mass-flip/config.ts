@@ -3,7 +3,7 @@ export interface ActorGroupSound {
 }
 
 export interface ActorGroupScrolling {
-  enable: boolean
+  enabled: boolean
   tag: string
   speed: string
 }
@@ -35,7 +35,7 @@ export const knownActorGroups: ActorGroups = {
         name: 'Immobile',
         fileName: 'horse-*-plain-idle.webm',
         scrolling: {
-          enable: false,
+          enabled: false,
           tag: 'scrolling',
           speed: '0',
         },
@@ -48,7 +48,7 @@ export const knownActorGroups: ActorGroups = {
         name: 'Repos',
         fileName: 'horse-*-plain-idle2.webm',
         scrolling: {
-          enable: false,
+          enabled: false,
           tag: 'scrolling',
           speed: '0',
         },
@@ -61,7 +61,7 @@ export const knownActorGroups: ActorGroups = {
         name: 'Marcher',
         fileName: 'horse-*-plain-walk.webm',
         scrolling: {
-          enable: true,
+          enabled: true,
           tag: 'scrolling',
           speed: '0.12',
         },
@@ -77,7 +77,7 @@ export const knownActorGroups: ActorGroups = {
         name: 'Galoper',
         fileName: 'horse-*-plain-gallop.webm',
         scrolling: {
-          enable: true,
+          enabled: true,
           tag: 'scrolling',
           speed: '0.36',
         },
@@ -85,8 +85,8 @@ export const knownActorGroups: ActorGroups = {
           tag: 'horseRunning',
         },
         scale: {
-          x: 1.9,
-          y: 1.9,
+          x: 1.8,
+          y: 1.8,
         },
       },
     },

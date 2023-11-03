@@ -21,6 +21,8 @@ export namespace FoundryVTT {
       texture: {
         src: string
       }
+      x: number
+      y: number
     }
     id: string
   }

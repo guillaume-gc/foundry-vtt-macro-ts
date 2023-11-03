@@ -37,6 +37,8 @@ export const flipTokens = async (
     )
   }
 
+  console.log('Token to update: ', tokensGroup)
+
   const updates = tokensGroup.map((token) => {
     const currentFullTextureFileName = token.document.texture.src
     const currentRelativeTextureFileName = getRelativeTextureFileName(

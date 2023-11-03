@@ -33,8 +33,6 @@ export const createImageOptions = (htm: JQuery) => {
     '#mass-flip-current-actor-groups',
   )
 
-  console.log('currentActorGroupsLabel', currentActorGroupsLabel)
-
   const actorGroup = knownActorGroups[currentActorGroupsLabel]
   if (actorGroup === undefined) {
     return '<option>Aucune option disponible</option>'

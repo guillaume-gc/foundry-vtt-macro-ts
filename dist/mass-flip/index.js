@@ -29,7 +29,7 @@ var knownActorGroups = {
         name: "Immobile",
         fileName: "horse-*-plain-idle.webm",
         scrolling: {
-          enable: false,
+          enabled: false,
           tag: "scrolling",
           speed: "0"
         },
@@ -42,7 +42,7 @@ var knownActorGroups = {
         name: "Repos",
         fileName: "horse-*-plain-idle2.webm",
         scrolling: {
-          enable: false,
+          enabled: false,
           tag: "scrolling",
           speed: "0"
         },
@@ -55,7 +55,7 @@ var knownActorGroups = {
         name: "Marcher",
         fileName: "horse-*-plain-walk.webm",
         scrolling: {
-          enable: true,
+          enabled: true,
           tag: "scrolling",
           speed: "0.12"
         },
@@ -71,7 +71,7 @@ var knownActorGroups = {
         name: "Galoper",
         fileName: "horse-*-plain-gallop.webm",
         scrolling: {
-          enable: true,
+          enabled: true,
           tag: "scrolling",
           speed: "0.36"
         },
@@ -79,8 +79,8 @@ var knownActorGroups = {
           tag: "horseRunning"
         },
         scale: {
-          x: 1.9,
-          y: 1.9
+          x: 1.8,
+          y: 1.8
         }
       }
     }
@@ -104,7 +104,7 @@ var updateScrolling = async (scrolling) => {
       child.setFlag("tile-scroll", "scrollSpeed", scrolling.speed)
     );
     operations.push(
-      child.setFlag("tile-scroll", "enableScroll", scrolling.enable)
+      child.setFlag("tile-scroll", "enableScroll", scrolling.enabled)
     );
   }
   await Promise.all(operations);
@@ -183,6 +183,7 @@ var flipTokens = async (htm, ownedTokens) => {
       `Token group ${decodedActorGroup} has no controlled token present in the scene`
     );
   }
+  console.log("Token to update: ", tokensGroup);
   const updates = tokensGroup.map((token) => {
     const currentFullTextureFileName = token.document.texture.src;
     const currentRelativeTextureFileName = getRelativeTextureFileName(
@@ -273,7 +274,6 @@ var createImageOptions = (htm) => {
     htm,
     "#mass-flip-current-actor-groups"
   );
-  console.log("currentActorGroupsLabel", currentActorGroupsLabel);
   const actorGroup = knownActorGroups[currentActorGroupsLabel];
   if (actorGroup === void 0) {
     return "<option>Aucune option disponible</option>";
