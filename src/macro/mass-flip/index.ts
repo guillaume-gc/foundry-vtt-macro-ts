@@ -1,5 +1,5 @@
+import { FoundryVTT } from '../../../type/foundryVtt.type'
 import { editInnerHtml } from '../../common/util/jquery'
-import { FoundryVTT } from '../../global'
 import { knownActorGroups } from './config'
 import { flipTokens } from './flip'
 import { createForm, createImageOptions } from './html'

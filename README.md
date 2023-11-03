@@ -20,4 +20,4 @@ Macros are available in the `dist` folder and in their respective sub folder, th
 
 Type definition is based on League of Foundry Developers [foundry-vtt-types](https://github.com/League-of-Foundry-Developers/foundry-vtt-types).
 
-Some macros are based on websterguy [foundry-pf1e-macros](https://github.com/websterguy/foundry-pf1e-macros).
+Some macros are based on websterguy's work [foundry-pf1e-macros](https://github.com/websterguy/foundry-pf1e-macros).

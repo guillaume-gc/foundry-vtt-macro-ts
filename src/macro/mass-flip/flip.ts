@@ -1,5 +1,5 @@
+import { FoundryVTT } from '../../../type/foundryVtt.type'
 import { getSelectElementValue } from '../../common/util/jquery'
-import { FoundryVTT } from '../../global'
 import { ActorGroup, knownActorGroups } from './config'
 import { updateScrolling } from './scrolling'
 import { startSound, stopCurrentSounds } from './sound'
