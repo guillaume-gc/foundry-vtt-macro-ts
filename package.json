@@ -33,5 +33,6 @@
   },
   "dependencies": {
     "esbuild": "^0.19.2"
-  }
+  },
+  "packageManager": "yarn@4.0.1"
 }
