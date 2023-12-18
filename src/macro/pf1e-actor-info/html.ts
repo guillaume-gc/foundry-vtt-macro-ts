@@ -1,8 +1,6 @@
-import { FoundryVTT } from '../../../type/foundryVtt.type'
 import { translatePf1 } from '../../common/lang/pf1/fr'
+import { ActorPF } from '../../type/foundryVTT/system/pf1e.type'
 import { cellStyle } from './config'
-
-import ActorPF = FoundryVTT.ActorPF
 
 export interface RowData {
   label: string
@@ -38,7 +36,7 @@ const getTableSubRows = (rowsData: RowData[]) => {
   return dipRows.join('')
 }
 
-export const getInitialMsg = (actors: FoundryVTT.ActorPF[]) => {
+export const getInitialMsg = (actors: ActorPF[]) => {
   if (actors.length === 1) {
     return `<a>Acteur selectionné : <strong>${actors[0].name}</strong>`
   }

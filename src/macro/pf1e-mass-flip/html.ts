@@ -30,7 +30,7 @@ const createActorGroupOptions = (actorGroupNames: Set<string>) => {
 export const createImageOptions = (htm: JQuery) => {
   const currentActorGroupsLabel = getSelectElementValue(
     htm,
-    '#mass-flip-current-actor-groups',
+    '#pf1e-mass-flip-current-actor-groups',
   )
 
   const actorGroup = knownActorGroups[currentActorGroupsLabel]

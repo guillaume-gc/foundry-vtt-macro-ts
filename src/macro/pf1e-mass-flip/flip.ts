@@ -1,16 +1,13 @@
-import { FoundryVTT } from '../../../type/foundryVtt.type'
 import { getSelectElementValue } from '../../common/util/jquery'
+import { TokenPF } from '../../type/foundryVTT/system/pf1e.type'
 import { ActorGroup, knownActorGroups } from './config'
 import { updateScrolling } from './scrolling'
 import { startSound, stopCurrentSounds } from './sound'
 
-export const flipTokens = async (
-  htm: JQuery,
-  ownedTokens: FoundryVTT.TokenPF[],
-) => {
+export const flipTokens = async (htm: JQuery, ownedTokens: TokenPF[]) => {
   const actorGroupsLabel = getSelectElementValue(
     htm,
-    '#mass-flip-current-actor-groups',
+    '#pf1e-mass-flip-current-actor-groups',
   )
   const decodedActorGroup = decodeURI(actorGroupsLabel)
 
@@ -19,7 +16,7 @@ export const flipTokens = async (
     throw new Error(`Actor group "${decodedActorGroup}" not known`)
   }
 
-  const imageLabel = getSelectElementValue(htm, '#mass-flip-images')
+  const imageLabel = getSelectElementValue(htm, '#pf1e-mass-flip-images')
 
   const actorGroupFileName = actorGroup.images[imageLabel].fileName
   if (actorGroupFileName === undefined) {

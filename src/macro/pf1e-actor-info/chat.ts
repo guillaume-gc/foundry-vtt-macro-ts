@@ -1,7 +1,6 @@
-import { FoundryVTT } from '../../../type/foundryVtt.type'
+import { ChatMessageType } from '../../type/foundryVTT/core/core.type'
+import { ActorPF } from '../../type/foundryVTT/system/pf1e.type'
 import { getCombatDefensesTable, getSocialDefensesTable } from './html'
-
-import ActorPF = FoundryVTT.ActorPF
 
 const renderChatMessage = (chatMessage: string): void => {
   const chatMessageData = ChatMessage.applyRollMode(
@@ -9,7 +8,7 @@ const renderChatMessage = (chatMessage: string): void => {
       content: chatMessage,
       user: game.user._id,
       speaker: ChatMessage.getSpeaker({ user: game.user }),
-      type: FoundryVTT.ChatMessageType.OTHER,
+      type: ChatMessageType.OTHER,
     },
     game.settings.get('core', 'rollMode'),
   )

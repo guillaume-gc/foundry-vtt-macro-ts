@@ -1,12 +1,12 @@
-import { FoundryVTT } from '../../../type/foundryVtt.type'
 import { editInnerHtml } from '../../common/util/jquery'
+import { TokenPF } from '../../type/foundryVTT/system/pf1e.type'
 import { knownActorGroups } from './config'
 import { flipTokens } from './flip'
 import { createForm, createImageOptions } from './html'
 
 const openDialog = (
   currentActorGroups: Set<string>,
-  ownedTokens: FoundryVTT.TokenPF[],
+  ownedTokens: TokenPF[],
 ) => {
   const form = createForm(currentActorGroups)
 
@@ -31,7 +31,7 @@ const openDialog = (
 const refreshImageOptions = (htm: JQuery) => {
   const imageOptions = createImageOptions(htm)
 
-  editInnerHtml(htm, '#mass-flip-images', imageOptions)
+  editInnerHtml(htm, '#pf1e-mass-flip-images', imageOptions)
 }
 
 try {

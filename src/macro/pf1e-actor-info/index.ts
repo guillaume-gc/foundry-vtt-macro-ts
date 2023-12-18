@@ -1,8 +1,8 @@
-import { FoundryVTT } from '../../../type/foundryVtt.type'
+import { ActorPF } from '../../type/foundryVTT/system/pf1e.type'
 import { renderAll, renderCombatDefenses, renderSocialDefenses } from './chat'
 import { getInitialMsg } from './html'
 
-const openDialog = (actors: FoundryVTT.ActorPF[]) => {
+const openDialog = (actors: ActorPF[]) => {
   new Dialog({
     title: "Obtenir les informations d'acteurs",
     content: getInitialMsg(actors),

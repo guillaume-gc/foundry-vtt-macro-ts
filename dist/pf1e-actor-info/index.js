@@ -1,14 +1,5 @@
 "use strict";
 
-// type/foundryVtt.type.ts
-var FoundryVTT;
-((FoundryVTT2) => {
-  let ChatMessageType;
-  ((ChatMessageType2) => {
-    ChatMessageType2[ChatMessageType2["OTHER"] = 0] = "OTHER";
-  })(ChatMessageType = FoundryVTT2.ChatMessageType || (FoundryVTT2.ChatMessageType = {}));
-})(FoundryVTT || (FoundryVTT = {}));
-
 // src/common/lang/pf1/fr.ts
 var translatePf1 = (value) => {
   const translationMap = {
@@ -365,7 +356,7 @@ var renderChatMessage = (chatMessage) => {
       content: chatMessage,
       user: game.user._id,
       speaker: ChatMessage.getSpeaker({ user: game.user }),
-      type: FoundryVTT.ChatMessageType.OTHER
+      type: 0 /* OTHER */
     },
     game.settings.get("core", "rollMode")
   );
