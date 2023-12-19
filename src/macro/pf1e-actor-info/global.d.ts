@@ -7,7 +7,7 @@ import {
   RollMode,
   RollModeOptions,
   UserInterface,
-} from '../../type/foundryVTT/core/core.type'
+} from '../../type/foundry/foundry'
 
 declare global {
   const canvas: Canvas<'PF1'>

@@ -1,4 +1,4 @@
-import { GetRollDataOptions, Permission, User } from '../core/core.type'
+import { GetRollDataOptions, Permission, User } from '../foundry'
 
 interface ActorPFDetails {}
 

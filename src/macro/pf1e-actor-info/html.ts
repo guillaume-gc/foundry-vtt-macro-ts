@@ -1,5 +1,5 @@
 import { translatePf1 } from '../../common/lang/pf1/fr'
-import { ActorPF } from '../../type/foundryVTT/system/pf1e.type'
+import { ActorPF } from '../../type/foundry/system/pf1e'
 import { cellStyle } from './config'
 
 export interface RowData {

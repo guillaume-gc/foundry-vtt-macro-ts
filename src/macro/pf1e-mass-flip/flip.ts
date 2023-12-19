@@ -1,5 +1,5 @@
 import { getSelectElementValue } from '../../common/util/jquery'
-import { TokenPF } from '../../type/foundryVTT/system/pf1e.type'
+import { TokenPF } from '../../type/foundry/system/pf1e'
 import { ActorGroup, knownActorGroups } from './config'
 import { updateScrolling } from './scrolling'
 import { startSound, stopCurrentSounds } from './sound'

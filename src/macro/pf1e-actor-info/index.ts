@@ -1,4 +1,4 @@
-import { ActorPF } from '../../type/foundryVTT/system/pf1e.type'
+import { ActorPF } from '../../type/foundry/system/pf1e'
 import { renderAll, renderCombatDefenses, renderSocialDefenses } from './chat'
 import { getInitialMsg } from './html'
 

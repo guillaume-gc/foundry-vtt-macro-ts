@@ -1,4 +1,5 @@
-import { TokenPF } from '../system/pf1e.type'
+import { EmbeddedCollection } from './abstract/embedded-collection'
+import { TokenPF } from './system/pf1e'
 
 export type SystemName = 'PF1'
 
@@ -7,57 +8,6 @@ type SystemToken<CurrentSystemName extends SystemName> =
 
 export enum ChatMessageType {
   OTHER = 0,
-}
-
-interface CollectionInstance<T> extends Map<string, T> {
-  get contents(): T[]
-}
-
-interface Collection<T> {
-  new (entries: T[]): CollectionInstance<T>
-
-  // Find an entry in the Map using a functional condition.
-  find: (
-    condition: (
-      element: T,
-      index: number,
-      collection: Collection<T>,
-    ) => boolean,
-  ) => T
-
-  // Filter the Collection, returning an Array of entries which match a functional condition.
-  filter: (
-    condition: (
-      element: T,
-      index: number,
-      collection: Collection<T>,
-    ) => boolean,
-  ) => T[]
-
-  forEach: (fn: (element: T) => void) => void
-
-  get: (key: string, options?: { strict: boolean }) => T
-
-  // Get an entry from the Collection by name. Use of this method assumes that the objects stored in the collection have a "name" attribute.
-  getName: (name: string, options?: { strict: boolean }) => T
-
-  map: (
-    transformer: (value: T[], index: number, collection: Collection<T>) => any,
-  ) => T[]
-
-  reduce: (
-    reducer: (
-      accumulator: T,
-      currentValue: T,
-      index: number,
-      collection: Collection<T>,
-    ) => any,
-    initial: T,
-  ) => T
-
-  some: (
-    condition: (value: T, index: number, collection: Collection<T>) => boolean,
-  ) => boolean
 }
 
 export interface DocumentModificationContext {}
@@ -194,8 +144,7 @@ export interface Sound {
 
 export interface PlayList {
   name: string
-  // Technically, it's an EmbeddedCollection, which is a custom Foundry VTT type, but for now treating it as an array does the job.
-  sounds: Sound[]
+  sounds: EmbeddedCollection<Sound>
   playSound: (sound: Sound) => Promise<void>
   stopSound: (sound: Sound) => Promise<void>
 }
