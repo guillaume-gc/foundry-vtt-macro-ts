@@ -1,4 +1,6 @@
-import { GetRollDataOptions, Permission, User } from '../foundry'
+import { EmbeddedCollection } from '../../abstract/embedded-collection'
+import { GetRollDataOptions, Permission, User } from '../../foundry'
+import { ItemPF } from './documents/item/item-pf'
 
 interface ActorPFDetails {}
 
@@ -72,6 +74,7 @@ export interface ActorBasePF {
   details: ActorPFDetails
   testUserPermission: (user: User, permission: Permission) => boolean
   getRollData: (options: GetRollDataOptions) => PFRollData
+  items: EmbeddedCollection<ItemPF>
 }
 
 interface ActorNPCPF extends ActorBasePF {

@@ -1,5 +1,7 @@
 import { EmbeddedCollection } from './abstract/embedded-collection'
-import { TokenPF } from './system/pf1e'
+import { CompendiumCollection } from './client/compendium-collection'
+import { CompendiumPack } from './client/compendium-pack'
+import { TokenPF } from './system/pf1/pf1'
 
 export type SystemName = 'PF1'
 
@@ -135,6 +137,7 @@ export interface Game {
   settings: {
     get: (module: string, key: string) => string
   }
+  packs: CompendiumPack
 }
 
 export interface Sound {

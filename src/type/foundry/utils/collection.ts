@@ -39,9 +39,9 @@ export declare class Collection<T> extends Map<string, T> {
 
   forEach(fn: (element: T) => void): void
 
-  get(key: string, options: { strict: boolean } | undefined): T
+  get(key: string, options?: { strict: boolean } | undefined): T
 
-  getName(name: string, options: { strict: boolean } | undefined): T
+  getName(name: string, options?: { strict: boolean } | undefined): T
 
   map(
     transformer: (value: T[], index: number, collection: Collection<T>) => any,
