@@ -20,7 +20,7 @@ var getSelectElementValue = (htm, selector) => {
   return element.value;
 };
 
-// src/macro/pf1e-mass-flip/config.ts
+// src/macro/pf1-mass-flip/config.ts
 var knownActorGroups = {
   // Cheval Léger
   "Cheval%20L%C3%A9ger": {
@@ -87,7 +87,7 @@ var knownActorGroups = {
   }
 };
 
-// src/macro/pf1e-mass-flip/scrolling.ts
+// src/macro/pf1-mass-flip/scrolling.ts
 var updateScrolling = async (scrolling) => {
   const tilesToUpdate = canvas.scene.tiles.filter((e) => {
     const {
@@ -110,7 +110,7 @@ var updateScrolling = async (scrolling) => {
   await Promise.all(operations);
 };
 
-// src/macro/pf1e-mass-flip/sound.ts
+// src/macro/pf1-mass-flip/sound.ts
 var startSound = async (sound) => {
   const soundToPlay = canvas.scene.sounds.find((e) => {
     const {
@@ -157,18 +157,18 @@ var stopCurrentSounds = async () => {
   }
 };
 
-// src/macro/pf1e-mass-flip/flip.ts
+// src/macro/pf1-mass-flip/flip.ts
 var flipTokens = async (htm, ownedTokens) => {
   const actorGroupsLabel = getSelectElementValue(
     htm,
-    "#pf1e-mass-flip-current-actor-groups"
+    "#pf1-mass-flip-current-actor-groups"
   );
   const decodedActorGroup = decodeURI(actorGroupsLabel);
   const actorGroup = knownActorGroups[actorGroupsLabel];
   if (actorGroup === void 0) {
     throw new Error(`Actor group "${decodedActorGroup}" not known`);
   }
-  const imageLabel = getSelectElementValue(htm, "#pf1e-mass-flip-images");
+  const imageLabel = getSelectElementValue(htm, "#pf1-mass-flip-images");
   const actorGroupFileName = actorGroup.images[imageLabel].fileName;
   if (actorGroupFileName === void 0) {
     throw new Error(
@@ -246,7 +246,7 @@ var getTokenCurrentTextureWildCartValue = (actorGroup, currentRelativeTextureFil
   );
 };
 
-// src/macro/pf1e-mass-flip/html.ts
+// src/macro/pf1-mass-flip/html.ts
 var createForm = (actorGroupNames) => `
     <form class="flexcol">
       <div class="form-group">
@@ -272,7 +272,7 @@ var createActorGroupOptions = (actorGroupNames) => {
 var createImageOptions = (htm) => {
   const currentActorGroupsLabel = getSelectElementValue(
     htm,
-    "#pf1e-mass-flip-current-actor-groups"
+    "#pf1-mass-flip-current-actor-groups"
   );
   const actorGroup = knownActorGroups[currentActorGroupsLabel];
   if (actorGroup === void 0) {
@@ -282,7 +282,7 @@ var createImageOptions = (htm) => {
   return Object.keys(images).map((key) => `<option value='${key}'>${images[key].name}</option>`).join("");
 };
 
-// src/macro/pf1e-mass-flip/index.ts
+// src/macro/pf1-mass-flip/index.ts
 var openDialog = (currentActorGroups, ownedTokens) => {
   const form = createForm(currentActorGroups);
   new Dialog({
@@ -303,7 +303,7 @@ var openDialog = (currentActorGroups, ownedTokens) => {
 };
 var refreshImageOptions = (htm) => {
   const imageOptions = createImageOptions(htm);
-  editInnerHtml(htm, "#pf1e-mass-flip-images", imageOptions);
+  editInnerHtml(htm, "#pf1-mass-flip-images", imageOptions);
 };
 try {
   const {

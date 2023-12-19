@@ -31,7 +31,7 @@ const openDialog = (
 const refreshImageOptions = (htm: JQuery) => {
   const imageOptions = createImageOptions(htm)
 
-  editInnerHtml(htm, '#pf1e-mass-flip-images', imageOptions)
+  editInnerHtml(htm, '#pf1-mass-flip-images', imageOptions)
 }
 
 try {

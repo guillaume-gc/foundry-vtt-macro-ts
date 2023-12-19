@@ -39,10 +39,10 @@ var translatePf1 = (value) => {
   return translationMap[value] ?? value;
 };
 
-// src/macro/pf1e-actor-info/config.ts
+// src/macro/pf1-actor-info/config.ts
 var cellStyle = "min-width: 100px";
 
-// src/macro/pf1e-actor-info/html.ts
+// src/macro/pf1-actor-info/html.ts
 var getTable = (header, rows) => `
     <table>
       <thead>
@@ -349,7 +349,7 @@ var getCombatDefensesTable = (actors) => {
   return acTable + dmdTable + feintTable + srTable + energyResistanceTable + resistanceTable + damageImmunities + immunities + damageVulnerabilities;
 };
 
-// src/macro/pf1e-actor-info/chat.ts
+// src/macro/pf1-actor-info/chat.ts
 var renderChatMessage = (chatMessage) => {
   const chatMessageData = ChatMessage.applyRollMode(
     {
@@ -377,7 +377,7 @@ var renderAll = (actors) => {
   renderChatMessage(chatMessage);
 };
 
-// src/macro/pf1e-actor-info/index.ts
+// src/macro/pf1-actor-info/index.ts
 var openDialog = (actors) => {
   new Dialog({
     title: "Obtenir les informations d'acteurs",

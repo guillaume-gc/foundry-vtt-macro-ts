@@ -7,7 +7,7 @@ import { startSound, stopCurrentSounds } from './sound'
 export const flipTokens = async (htm: JQuery, ownedTokens: TokenPF[]) => {
   const actorGroupsLabel = getSelectElementValue(
     htm,
-    '#pf1e-mass-flip-current-actor-groups',
+    '#pf1-mass-flip-current-actor-groups',
   )
   const decodedActorGroup = decodeURI(actorGroupsLabel)
 
@@ -16,7 +16,7 @@ export const flipTokens = async (htm: JQuery, ownedTokens: TokenPF[]) => {
     throw new Error(`Actor group "${decodedActorGroup}" not known`)
   }
 
-  const imageLabel = getSelectElementValue(htm, '#pf1e-mass-flip-images')
+  const imageLabel = getSelectElementValue(htm, '#pf1-mass-flip-images')
 
   const actorGroupFileName = actorGroup.images[imageLabel].fileName
   if (actorGroupFileName === undefined) {
