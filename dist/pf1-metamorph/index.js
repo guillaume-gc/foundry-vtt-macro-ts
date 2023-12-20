@@ -4,24 +4,27 @@
 var findBuffInActor = (actor, buffName) => actor.items.find(
   ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
 );
-var findBuffInCompendium = (compendiumName, buffName) => game.packs.get(compendiumName).index.find(
-  ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
-);
 
 // src/macro/pf1-metamorph/index.ts
-try {
+var applyMetamorph = async (tokens, buffName, buffLevel) => {
+  const operations = tokens.map(async ({ actor }) => {
+    const buff = findBuffInActor(actor, buffName);
+    console.log("buff", buff);
+    const updateQuery = {
+      "system.level": buffLevel,
+      "system.active": true
+    };
+    return buff.update(updateQuery);
+  });
+  await Promise.all(operations);
+};
+var main = async () => {
   const {
     tokens: { controlled }
   } = canvas;
-  const actor = controlled[0].actor;
-  const actorBuff = findBuffInActor(actor, "Vision magique");
-  const compendiumBuff = findBuffInCompendium(
-    "world.effets-de-sorts",
-    "Rapetissement (n)"
-  );
-  console.log("actorBuff", actorBuff);
-  console.log("compendiumBuff", compendiumBuff);
-} catch (error) {
+  await applyMetamorph(controlled, "Vision des H\xE9ros des Terres Inond\xE9es", 15);
+};
+main().catch((error) => {
   ui.notifications.error("Erreur, voir la console pour plus d'information");
   console.error(error);
-}
+});

@@ -7,12 +7,12 @@ import {
   RollMode,
   RollModeOptions,
   UserInterface,
-} from '../../type/foundry/foundry'
+} from './type/foundry/foundry'
 
 declare global {
   const canvas: Canvas<'PF1'>
   const ui: UserInterface
-  const game: Game
+  const game: Game<'PF1'>
 
   class Dialog {
     constructor(options: DialogOptions)
@@ -22,7 +22,7 @@ declare global {
   class ChatMessage {
     static applyRollMode(options: RollModeOptions, gameString: string): RollMode
     static getSpeaker(options: GetSpeakerOptions): ChatSpeaker
-    static create(rollMode: RollMode)
+    static create(rollMode: RollMode): void
   }
 }
 

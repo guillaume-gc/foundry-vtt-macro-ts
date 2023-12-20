@@ -15,6 +15,6 @@ export const findBuffInCompendium = (
   game.packs
     .get(compendiumName)
     .index.find(
-      ({ name, type }: ItemPF) =>
+      ({ name, type }) =>
         name.toLowerCase() === buffName.toLowerCase() && type === 'buff',
     )

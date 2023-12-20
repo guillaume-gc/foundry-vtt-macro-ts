@@ -1,21 +1,36 @@
-import { findBuffInActor, findBuffInCompendium } from './buff'
+import { TokenPF } from '../../type/foundry/system/pf1/pf1'
+import { findBuffInActor } from './buff'
 
-try {
+const applyMetamorph = async (
+  tokens: TokenPF[],
+  buffName: string,
+  buffLevel?: number,
+) => {
+  const operations = tokens.map(async ({ actor }) => {
+    const buff = findBuffInActor(actor, buffName)
+
+    console.log('buff', buff)
+
+    const updateQuery = {
+      'system.level': buffLevel,
+      'system.active': true,
+    }
+
+    return buff.update(updateQuery)
+  })
+
+  await Promise.all(operations)
+}
+
+const main = async (): Promise<void> => {
   const {
     tokens: { controlled },
   } = canvas
 
-  const actor = controlled[0].actor
+  await applyMetamorph(controlled, 'Vision des Héros des Terres Inondées', 15)
+}
 
-  const actorBuff = findBuffInActor(actor, 'Vision magique')
-  const compendiumBuff = findBuffInCompendium(
-    'world.effets-de-sorts',
-    'Rapetissement (n)',
-  )
-
-  console.log('actorBuff', actorBuff)
-  console.log('compendiumBuff', compendiumBuff)
-} catch (error) {
+main().catch((error) => {
   ui.notifications.error("Erreur, voir la console pour plus d'information")
   console.error(error)
-}
+})
