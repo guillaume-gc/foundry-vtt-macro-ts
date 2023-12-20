@@ -1,4 +1,5 @@
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
+import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { findBuffInActor } from './buff'
 
 const applyMetamorph = async (
@@ -39,15 +40,44 @@ const applyMetamorph = async (
   await Promise.all(operations)
 }
 
+const saveActorRelevantData = async (tokens: TokenPF[]) => {
+  const operations = tokens.map(async (token) => {
+    const actorData = {
+      'system.traits.size': token.actor.system.traits.size,
+    }
+    const tokenData = {
+      'document.texture.src': token.document.texture.src,
+    }
+
+    await token.actor.update({
+      flags: {
+        metamorph: {
+          actorData,
+          tokenData,
+        },
+      },
+    })
+  })
+
+  await Promise.all(operations)
+}
+
 const main = async (): Promise<void> => {
   const {
     tokens: { controlled },
   } = canvas
 
+  if (controlled.length === 0) {
+    ui.notifications.info("Aucun token n'est sélectionné")
+  }
+
+  await saveActorRelevantData(controlled)
   await applyMetamorph(controlled, 'Vision des Héros des Terres Inondées', 15)
 }
 
 main().catch((error) => {
-  ui.notifications.error("Erreur, voir la console pour plus d'information")
+  ui.notifications.error(
+    "L'exécution du script à échoué, voir la console pour plus d'information",
+  )
   console.error(error)
 })

@@ -4,6 +4,8 @@ import { PFRollDataAbility, PFRollDataSkill } from '../../pf1'
 import { ItemPF } from '../item/item-pf'
 import { ActorBasePf } from './actor-base-pf'
 
+export type ActorSize = 'med' | 'huge'
+
 export interface PFActorRollData {
   abilities: {
     str: PFRollDataAbility
@@ -44,6 +46,7 @@ export interface PFActorRollData {
   }
   traits: {
     eres: string
+    size: ActorSize
     di: {
       value: string[]
       custom: string
@@ -66,6 +69,8 @@ export declare class ActorPF extends ActorBasePf {
   name: string
 
   getRollData: (options: GetRollDataOptions) => PFActorRollData
+
+  system: PFActorRollData
 
   details: ActorPFDetails
 

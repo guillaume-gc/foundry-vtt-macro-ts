@@ -31,13 +31,38 @@ var applyMetamorph = async (tokens, buffName, buffLevel) => {
   ];
   await Promise.all(operations);
 };
+var saveActorRelevantData = async (tokens) => {
+  const operations = tokens.map(async (token) => {
+    const actorData = {
+      "system.traits.size": token.actor.system.traits.size
+    };
+    const tokenData = {
+      "texture.src": token.texture.src
+    };
+    await token.actor.update({
+      flags: {
+        metamorph: {
+          actorData,
+          tokenData
+        }
+      }
+    });
+  });
+  await Promise.all(operations);
+};
 var main = async () => {
   const {
     tokens: { controlled }
   } = canvas;
+  if (controlled.length === 0) {
+    ui.notifications.info("Aucun token n'est s\xE9lectionn\xE9");
+  }
+  await saveActorRelevantData(controlled);
   await applyMetamorph(controlled, "Vision des H\xE9ros des Terres Inond\xE9es", 15);
 };
 main().catch((error) => {
-  ui.notifications.error("Erreur, voir la console pour plus d'information");
+  ui.notifications.error(
+    "L'ex\xE9cution du script \xE0 \xE9chou\xE9, voir la console pour plus d'information"
+  );
   console.error(error);
 });
