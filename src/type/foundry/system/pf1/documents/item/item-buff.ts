@@ -1,3 +1,3 @@
-import { ItemBasePF } from './item-pf'
+import { ItemPF } from './item-pf'
 
-export declare class ItemBuffPF extends ItemBasePF {}
+export declare class ItemBuffPF extends ItemPF {}

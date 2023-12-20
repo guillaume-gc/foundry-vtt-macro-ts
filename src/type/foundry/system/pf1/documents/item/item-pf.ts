@@ -1,9 +1,9 @@
 import { ActorPF } from '../../pf1'
-import { ItemBuffPF } from './item-buff'
+import { ItemBasePF } from './item-base'
 
 export type ItemPFType = 'buff'
 
-export declare class ItemBasePF {
+export declare class ItemPF extends ItemBasePF {
   constructor(...args: any[])
 
   type: ItemPFType
@@ -38,5 +38,3 @@ export declare class ItemBasePF {
 
   getRollData(): object
 }
-
-export declare type ItemPF = ItemBuffPF
