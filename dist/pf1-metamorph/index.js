@@ -7,7 +7,7 @@ var findBuffInActor = (actor, buffName) => actor.items.find(
 
 // src/macro/pf1-metamorph/index.ts
 var applyMetamorph = async (tokens, buffName, buffLevel) => {
-  const operations = tokens.map(async ({ actor }) => {
+  const buffOperations = tokens.map(async ({ actor }) => {
     const buff = findBuffInActor(actor, buffName);
     console.log("buff", buff);
     const updateQuery = {
@@ -16,6 +16,19 @@ var applyMetamorph = async (tokens, buffName, buffLevel) => {
     };
     return buff.update(updateQuery);
   });
+  const actorsOperations = tokens.map(async ({ actor }) => {
+    return actor.update({ "system.traits.size": "huge" });
+  });
+  const tokensOperations = tokens.map(async (token) => {
+    return token.document.update({
+      "texture.src": "https://assets.forge-vtt.com/62ab17b89633ba24d7994900/tokens/PC/Seioden%20v2.png"
+    });
+  });
+  const operations = [
+    ...buffOperations,
+    ...actorsOperations,
+    ...tokensOperations
+  ];
   await Promise.all(operations);
 };
 var main = async () => {

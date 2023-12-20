@@ -1,5 +1,5 @@
 import { editInnerHtml } from '../../common/util/jquery'
-import { TokenPF } from '../../type/foundry/system/pf1/pf1'
+import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import { knownActorGroups } from './config'
 import { flipTokens } from './flip'
 import { createForm, createImageOptions } from './html'

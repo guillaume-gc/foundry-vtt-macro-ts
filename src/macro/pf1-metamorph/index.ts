@@ -1,4 +1,4 @@
-import { TokenPF } from '../../type/foundry/system/pf1/pf1'
+import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import { findBuffInActor } from './buff'
 
 const applyMetamorph = async (
@@ -6,7 +6,7 @@ const applyMetamorph = async (
   buffName: string,
   buffLevel?: number,
 ) => {
-  const operations = tokens.map(async ({ actor }) => {
+  const buffOperations = tokens.map(async ({ actor }) => {
     const buff = findBuffInActor(actor, buffName)
 
     console.log('buff', buff)
@@ -18,6 +18,23 @@ const applyMetamorph = async (
 
     return buff.update(updateQuery)
   })
+
+  const actorsOperations = tokens.map(async ({ actor }) => {
+    return actor.update({ 'system.traits.size': 'huge' })
+  })
+
+  const tokensOperations = tokens.map(async (token) => {
+    return token.document.update({
+      'texture.src':
+        'https://assets.forge-vtt.com/62ab17b89633ba24d7994900/tokens/PC/Seioden%20v2.png',
+    })
+  })
+
+  const operations = [
+    ...buffOperations,
+    ...actorsOperations,
+    ...tokensOperations,
+  ]
 
   await Promise.all(operations)
 }

@@ -1,4 +1,4 @@
-import { ActorPF } from '../../type/foundry/system/pf1/pf1'
+import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { renderAll, renderCombatDefenses, renderSocialDefenses } from './chat'
 import { getInitialMsg } from './html'
 
