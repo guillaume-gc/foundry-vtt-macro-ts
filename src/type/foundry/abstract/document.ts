@@ -88,4 +88,12 @@ export declare class Document extends DataModel {
     data?: Record<string, any>,
     context?: DocumentModificationContext,
   ): Promise<Document>
+
+  deleteEmbeddedDocuments(
+    embeddedName: 'Item',
+    ids: string[],
+    context?: DocumentModificationContext,
+  ): Promise<Document[]>
+
+  id: string
 }
