@@ -1,5 +1,4 @@
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
-import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { findBuffInActor } from './buff'
 
 const applyMetamorph = async (

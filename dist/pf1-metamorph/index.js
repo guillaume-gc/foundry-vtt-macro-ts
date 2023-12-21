@@ -37,7 +37,7 @@ var saveActorRelevantData = async (tokens) => {
       "system.traits.size": token.actor.system.traits.size
     };
     const tokenData = {
-      "texture.src": token.texture.src
+      "document.texture.src": token.document.texture.src
     };
     await token.actor.update({
       flags: {
