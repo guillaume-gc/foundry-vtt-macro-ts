@@ -18,6 +18,7 @@ export const applyMetamorph = async (
   compendiumName: string,
   buffName: string,
   buffLevel?: number,
+  tokenTexture?: string,
 ) => {
   logger.info('Apply metamorph')
 
@@ -50,8 +51,7 @@ export const applyMetamorph = async (
     logger.debug('Apply metamorph to token', token)
 
     return token.document.update({
-      'texture.src':
-        'https://assets.forge-vtt.com/62ab17b89633ba24d7994900/tokens/PC/Seioden%20v2.png',
+      'texture.src': tokenTexture,
     })
   })
 

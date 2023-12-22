@@ -9,7 +9,7 @@ var editInnerHtml = (htm, selector, value) => {
   }
   element.innerHTML = value;
 };
-var getSelectElementValue = (htm, selector) => {
+var getSelectElement = (htm, selector) => {
   const element = htm.find(selector)?.[0];
   if (element == null) {
     throw new Error(`Could not find element "${selector}"`);
@@ -17,6 +17,10 @@ var getSelectElementValue = (htm, selector) => {
   if (!(element instanceof HTMLSelectElement)) {
     throw new Error(`Element ${selector} is not a HTML selector`);
   }
+  return element;
+};
+var getSelectElementValue = (htm, selector) => {
+  const element = getSelectElement(htm, selector);
   return element.value;
 };
 

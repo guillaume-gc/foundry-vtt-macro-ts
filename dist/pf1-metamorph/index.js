@@ -1,9 +1,5 @@
 "use strict";
 
-// src/common/error/user-warning.ts
-var UserWarning = class extends Error {
-};
-
 // src/common/log/logger.ts
 var logger = void 0;
 var createLogger = () => {
@@ -54,6 +50,57 @@ var getLoggerInstance = () => {
   return logger;
 };
 
+// src/common/util/jquery.ts
+var getSelectElement = (htm, selector) => {
+  const element = htm.find(selector)?.[0];
+  if (element == null) {
+    throw new Error(`Could not find element "${selector}"`);
+  }
+  if (!(element instanceof HTMLSelectElement)) {
+    throw new Error(`Element ${selector} is not a HTML selector`);
+  }
+  return element;
+};
+var getSelectElementValue = (htm, selector) => {
+  const element = getSelectElement(htm, selector);
+  return element.value;
+};
+
+// src/macro/pf1-metamorph/config.ts
+var config = {
+  transformations: {
+    reducePerson: {
+      label: "Rapetissement",
+      buff: {
+        name: "Rapetissement",
+        compendium: "world.effets-metamorph"
+      },
+      abilities: [],
+      size: "sm"
+    }
+  }
+};
+
+// src/macro/pf1-metamorph/html.ts
+var createForm = () => `
+    <form class="flexcol">
+      <div class="form-group">
+        <label>Transformation :</label>
+        <select id="metamorph-transformation" style="text-transform: capitalize">${createTransformationOptions()}</select>
+       </div>
+    </form>
+  `;
+var createTransformationOptions = () => {
+  const { transformations } = config;
+  return Object.keys(transformations).map(
+    (key) => `<option value='${key}'>${transformations[key].label}</option>`
+  );
+};
+
+// src/common/error/user-warning.ts
+var UserWarning = class extends Error {
+};
+
 // src/macro/pf1-metamorph/buff.ts
 var findBuffInActor = (actor, buffName) => actor.items.find(
   ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
@@ -61,6 +108,20 @@ var findBuffInActor = (actor, buffName) => actor.items.find(
 var findBuffInCompendium = (compendiumName, buffName) => game.packs.get(compendiumName).index.find(
   ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
 );
+var applyBuffToActor = async (actor, compendiumName, buffName) => {
+  const buff = findBuffInCompendium(compendiumName, buffName);
+  if (buff === void 0) {
+    throw new Error(
+      `Could not find buff ${buffName} in compendium ${compendiumName}`
+    );
+  }
+  const documents = await actor.createEmbeddedDocuments("Item", [buff]);
+  const createdBuff = documents[0];
+  if (createdBuff === void 0) {
+    throw new Error(`Could not create buff ${buffName} in actor`);
+  }
+  return createdBuff;
+};
 
 // src/macro/pf1-metamorph/save.ts
 var logger2 = getLoggerInstance();
@@ -89,20 +150,20 @@ var transformToMetamorphSaveIfValid = (value) => {
   return value;
 };
 
-// src/macro/pf1-metamorph/index.ts
+// src/macro/pf1-metamorph/polymorph.ts
 var logger3 = getLoggerInstance();
-var applyMetamorph = async (tokens, compendiumName, buffName, buffLevel) => {
+var applyMetamorph = async (tokens, compendiumName, buffName, buffLevel, tokenTexture) => {
   logger3.info("Apply metamorph");
-  const buffOperations = tokens.map(async ({ actor }) => {
+  const buffActions = tokens.map(async ({ actor }) => {
     logger3.debug("Create metamorph buff in actor", actor);
-    const buff = await createBuff(actor, compendiumName, buffName);
+    const buff = await applyBuffToActor(actor, compendiumName, buffName);
     const updateQuery = {
       "system.level": buffLevel,
       "system.active": true
     };
     return buff.update(updateQuery);
   });
-  const actorsOperations = tokens.map(async ({ actor }) => {
+  const actorsActions = tokens.map(async ({ actor }) => {
     logger3.debug("Apply metamorph to actor", actor);
     return actor.update({
       "system.traits.size": "sm",
@@ -112,32 +173,14 @@ var applyMetamorph = async (tokens, compendiumName, buffName, buffLevel) => {
       }
     });
   });
-  const tokensOperations = tokens.map(async (token) => {
+  const tokensActions = tokens.map(async (token) => {
     logger3.debug("Apply metamorph to token", token);
     return token.document.update({
-      "texture.src": "https://assets.forge-vtt.com/62ab17b89633ba24d7994900/tokens/PC/Seioden%20v2.png"
+      "texture.src": tokenTexture
     });
   });
-  const operations = [
-    ...buffOperations,
-    ...actorsOperations,
-    ...tokensOperations
-  ];
-  await Promise.all(operations);
-};
-var createBuff = async (actor, compendiumName, buffName) => {
-  const buff = findBuffInCompendium(compendiumName, buffName);
-  if (buff === void 0) {
-    throw new Error(
-      `Could not find buff ${buffName} in compendium ${compendiumName}`
-    );
-  }
-  const documents = await actor.createEmbeddedDocuments("Item", [buff]);
-  const createdBuff = documents[0];
-  if (createdBuff === void 0) {
-    throw new Error(`Could not create buff ${buffName} in actor`);
-  }
-  return createdBuff;
+  const applyActions = [...buffActions, ...actorsActions, ...tokensActions];
+  await Promise.all(applyActions);
 };
 var checkTokens = (tokens) => {
   for (const token of tokens) {
@@ -217,30 +260,64 @@ var rollbackToPrePolymorphData = async (tokens) => {
   await Promise.all(rollbackActions);
   logger3.info("Rollback complete");
 };
-var main = async () => {
-  logger3.level = 0 /* DEBUG */;
-  const {
-    tokens: { controlled }
-  } = canvas;
-  if (controlled.length === 0) {
-    ui.notifications.info("Aucun token n'est s\xE9lectionn\xE9");
-    return;
+
+// src/macro/pf1-metamorph/index.ts
+var logger4 = getLoggerInstance();
+var triggerMetamorph = async (htm, controlledTokens) => {
+  const metamorphTransformKey = getSelectElementValue(
+    htm,
+    "#metamorph-transformation"
+  );
+  const metamorphTransform = config.transformations[metamorphTransformKey];
+  if (metamorphTransform === void 0) {
+    throw new Error(`Unknown transform ${metamorphTransformKey} key`);
   }
-  const buffName = "rapetissement";
-  const compendiumName = "world.effets-metamorph";
-  checkTokens(controlled);
-  await savePolymorphData(controlled, buffName);
-  await applyMetamorph(controlled, compendiumName, buffName, 15);
-  await new Promise((resolve) => setTimeout(resolve, 5e3));
-  await rollbackToPrePolymorphData(controlled);
+  const { buff, tokenTexture } = metamorphTransform;
+  checkTokens(controlledTokens);
+  await savePolymorphData(controlledTokens, buff.name);
+  await applyMetamorph(
+    controlledTokens,
+    buff.compendium,
+    buff.name,
+    15,
+    tokenTexture
+  );
 };
-main().catch((error) => {
-  if (error instanceof UserWarning) {
-    ui.notifications.warn(error.message);
-    return;
+var cancelMetamorph = async (controlledTokens) => {
+  await rollbackToPrePolymorphData(controlledTokens);
+};
+var openDialog = (controlledTokens) => {
+  const form = createForm();
+  new Dialog({
+    title: "Metamorph",
+    content: form,
+    buttons: {
+      cancel: {
+        icon: '<i class="fas fa-dice-d20"></i>',
+        label: "Annuler la transformation",
+        callback: () => cancelMetamorph(controlledTokens)
+      },
+      trigger: {
+        icon: '<i class="fas fa-dice-d20"></i>',
+        label: "Confirmer la transformation",
+        callback: (htm) => triggerMetamorph(htm, controlledTokens)
+      }
+    }
+  }).render(true);
+};
+try {
+  logger4.level = 0 /* DEBUG */;
+  const {
+    tokens: { controlled: controlledTokens }
+  } = canvas;
+  if (controlledTokens.length > 0) {
+    openDialog(controlledTokens);
+  } else {
+    ui.notifications.info("Aucun token n'est s\xE9lectionn\xE9");
   }
+} catch (error) {
   ui.notifications.error(
     "L'ex\xE9cution du script \xE0 \xE9chou\xE9, voir la console pour plus d'information"
   );
-  console.error(error);
-});
+  logger4.error(error);
+}
