@@ -82,11 +82,21 @@ var config = {
     reducePerson: {
       label: "Rapetissement",
       buff: {
-        name: "Rapetissement",
-        compendium: "world.effets-metamorph"
+        name: "Rapetissement (m\xE9tamorphe)",
+        compendiumName: "world.effets-metamorph"
       },
       abilities: [],
       size: "sm"
+    },
+    gorgonBeastShapeIV: {
+      label: "Gorgone (Forme Bestiale IV)",
+      buff: {
+        name: "Forme bestiale IV (cr\xE9ature magique G - m\xE9tamorphe)",
+        compendiumName: "world.effets-metamorph"
+      },
+      abilities: [],
+      size: "lg",
+      tokenTexture: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp"
     }
   }
 };
@@ -177,34 +187,38 @@ var transformToMetamorphSaveIfValid = (value) => {
 
 // src/macro/pf1-metamorph/polymorph.ts
 var logger4 = getLoggerInstance();
-var applyMetamorph = async (tokens, compendiumName, buffName, buffLevel, tokenTexture) => {
+var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellLevel) => {
   logger4.info("Apply metamorph");
+  const { buff, tokenTexture } = metamorphTransform;
   const buffActions = tokens.map(async ({ actor }) => {
     logger4.debug("Create metamorph buff in actor", actor);
-    const compendiumBuff = await findBuffInCompendium(compendiumName, buffName);
+    const compendiumBuff = await findBuffInCompendium(
+      buff.compendiumName,
+      buff.name
+    );
     if (compendiumBuff === void 0) {
       throw new Error(
-        `Could not find buff ${buffName} in compendium ${compendiumName}`
+        `Could not find buff ${buff.name} in compendium ${buff.compendiumName}`
       );
     }
     logger4.debug("Found buff in compendium", {
       compendiumBuff,
-      compendiumName,
-      buffName
+      buffCompendiumName: buff.compendiumName,
+      buffName: buff.name
     });
     const actorBuff = await createBuffInActor(actor, compendiumBuff);
     logger4.debug("Created buff in actor", {
       actorBuff
     });
     return actorBuff.update({
-      "system.level": buffLevel,
+      "system.level": metamorphTransformSpellLevel,
       "system.active": true
     });
   });
   const actorsActions = tokens.map(async ({ actor }) => {
     logger4.debug("Apply metamorph to actor", actor);
     return actor.update({
-      "system.traits.size": "sm",
+      "system.traits.size": metamorphTransform.size ?? actor.system.traits.size,
       "flags.metamorph": {
         ...actor.flags?.metamorph,
         active: true
@@ -322,15 +336,13 @@ var triggerMetamorph = async (htm, controlledTokens) => {
       ui.notifications.error("Cette transformation est inconnue");
       return;
     }
-    const { buff, tokenTexture } = metamorphTransform;
+    const { buff } = metamorphTransform;
     checkTokens(controlledTokens);
     await savePolymorphData(controlledTokens, buff.name);
     await applyMetamorph(
       controlledTokens,
-      buff.compendium,
-      buff.name,
-      metamorphTransformSpellLevel,
-      tokenTexture
+      metamorphTransform,
+      metamorphTransformSpellLevel
     );
   } catch (error) {
     ui.notifications.error(

@@ -4,7 +4,7 @@ import {
   getSelectElementValue,
 } from '../../common/util/jquery'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
-import { config } from './config'
+import { MetamorphTransformation, config } from './config'
 import { createForm } from './html'
 import {
   applyMetamorph,
@@ -39,23 +39,22 @@ const triggerMetamorph = async (
 
     const metamorphTransformSpellLevel = getTransformSpellLevel(htm)
 
-    const metamorphTransform = config.transformations[metamorphTransformKey]
+    const metamorphTransform: MetamorphTransformation | undefined =
+      config.transformations[metamorphTransformKey]
     if (metamorphTransform === undefined) {
       ui.notifications.error('Cette transformation est inconnue')
       return
     }
 
-    const { buff, tokenTexture } = metamorphTransform
+    const { buff } = metamorphTransform
 
     checkTokens(controlledTokens)
 
     await savePolymorphData(controlledTokens, buff.name)
     await applyMetamorph(
       controlledTokens,
-      buff.compendium,
-      buff.name,
+      metamorphTransform,
       metamorphTransformSpellLevel,
-      tokenTexture,
     )
   } catch (error) {
     ui.notifications.error(

@@ -7,6 +7,7 @@ import {
   findBuffInActor,
   findBuffInCompendium,
 } from './buff'
+import { MetamorphTransformation } from './config'
 import {
   MetamorphActorData,
   MetamorphBuffData,
@@ -19,27 +20,31 @@ const logger = getLoggerInstance()
 
 export const applyMetamorph = async (
   tokens: TokenPF[],
-  compendiumName: string,
-  buffName: string,
-  buffLevel?: number,
-  tokenTexture?: string,
+  metamorphTransform: MetamorphTransformation,
+  metamorphTransformSpellLevel?: number,
 ) => {
   logger.info('Apply metamorph')
+
+  const { buff, tokenTexture } = metamorphTransform
 
   const buffActions = tokens.map(async ({ actor }) => {
     logger.debug('Create metamorph buff in actor', actor)
 
-    const compendiumBuff = await findBuffInCompendium(compendiumName, buffName)
+    const compendiumBuff = await findBuffInCompendium(
+      buff.compendiumName,
+      buff.name,
+    )
+
     if (compendiumBuff === undefined) {
       throw new Error(
-        `Could not find buff ${buffName} in compendium ${compendiumName}`,
+        `Could not find buff ${buff.name} in compendium ${buff.compendiumName}`,
       )
     }
 
     logger.debug('Found buff in compendium', {
       compendiumBuff,
-      compendiumName,
-      buffName,
+      buffCompendiumName: buff.compendiumName,
+      buffName: buff.name,
     })
 
     const actorBuff = await createBuffInActor(actor, compendiumBuff)
@@ -49,7 +54,7 @@ export const applyMetamorph = async (
     })
 
     return actorBuff.update({
-      'system.level': buffLevel,
+      'system.level': metamorphTransformSpellLevel,
       'system.active': true,
     })
   })
@@ -58,7 +63,7 @@ export const applyMetamorph = async (
     logger.debug('Apply metamorph to actor', actor)
 
     return actor.update({
-      'system.traits.size': 'sm',
+      'system.traits.size': metamorphTransform.size,
       'flags.metamorph': {
         ...actor.flags?.metamorph,
         active: true,
