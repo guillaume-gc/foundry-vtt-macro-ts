@@ -1,7 +1,10 @@
 import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemBuffPF } from '../../type/foundry/system/pf1/documents/item/item-buff-pf'
 
-export const findBuffInActor = (actor: ActorPF, buffName: string): ItemBuffPF =>
+export const findBuffInActor = (
+  actor: ActorPF,
+  buffName: string,
+): ItemBuffPF | undefined =>
   actor.items.find(
     ({ name, type }) =>
       name.toLowerCase() === buffName.toLowerCase() && type === 'buff',
@@ -10,7 +13,7 @@ export const findBuffInActor = (actor: ActorPF, buffName: string): ItemBuffPF =>
 export const findBuffInCompendium = (
   compendiumName: string,
   buffName: string,
-) =>
+): ItemBuffPF | undefined =>
   game.packs
     .get(compendiumName)
     .index.find(

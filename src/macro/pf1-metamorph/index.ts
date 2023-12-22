@@ -1,7 +1,10 @@
+import { UserWarning } from '../../common/error/user-warning'
 import { LogLevel, getLoggerInstance } from '../../common/log/logger'
 import { Document } from '../../type/foundry/abstract/document'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
-import { findBuffInActor } from './buff'
+import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
+import { ItemBuffPF } from '../../type/foundry/system/pf1/documents/item/item-buff-pf'
+import { findBuffInActor, findBuffInCompendium } from './buff'
 import {
   MetamorphActorData,
   MetamorphBuffData,
@@ -14,15 +17,16 @@ const logger = getLoggerInstance()
 
 const applyMetamorph = async (
   tokens: TokenPF[],
+  compendiumName: string,
   buffName: string,
   buffLevel?: number,
 ) => {
   logger.info('Apply metamorph')
 
   const buffOperations = tokens.map(async ({ actor }) => {
-    logger.debug('Apply metamorph to buff', actor)
+    logger.debug('Create metamorph buff in actor', actor)
 
-    const buff = findBuffInActor(actor, buffName)
+    const buff = await createBuff(actor, compendiumName, buffName)
 
     const updateQuery = {
       'system.level': buffLevel,
@@ -35,7 +39,13 @@ const applyMetamorph = async (
   const actorsOperations = tokens.map(async ({ actor }) => {
     logger.debug('Apply metamorph to actor', actor)
 
-    return actor.update({ 'system.traits.size': 'huge' })
+    return actor.update({
+      'system.traits.size': 'sm',
+      'flags.metamorph': {
+        ...actor.flags?.metamorph,
+        active: true,
+      },
+    })
   })
 
   const tokensOperations = tokens.map(async (token) => {
@@ -54,6 +64,37 @@ const applyMetamorph = async (
   ]
 
   await Promise.all(operations)
+}
+
+const createBuff = async (
+  actor: ActorPF,
+  compendiumName: string,
+  buffName: string,
+): Promise<ItemBuffPF> => {
+  const buff = findBuffInCompendium(compendiumName, buffName)
+  if (buff === undefined) {
+    throw new Error(
+      `Could not find buff ${buffName} in compendium ${compendiumName}`,
+    )
+  }
+
+  const documents = await actor.createEmbeddedDocuments('Item', [buff])
+
+  const createdBuff = documents[0]
+
+  if (createdBuff === undefined) {
+    throw new Error(`Could not create buff ${buffName} in actor`)
+  }
+
+  return createdBuff as ItemBuffPF
+}
+
+const checkTokens = (tokens: TokenPF[]) => {
+  for (const token of tokens) {
+    if (token.actor.flags?.metamorph?.active === true) {
+      throw new UserWarning('Au moins un token a déjà un effet')
+    }
+  }
 }
 
 const savePolymorphData = async (tokens: TokenPF[], buffName: string) => {
@@ -113,13 +154,32 @@ const rollbackToPrePolymorphData = async (tokens: TokenPF[]) => {
         throw new Error('Save is not valid')
       }
 
-      const buff = findBuffInActor(token.actor, save.buffData.name)
-
-      return [
+      const currentRollBackActions: (
+        | Promise<Document>
+        | Promise<Document[]>
+      )[] = [
         token.document.update(save.tokenDocumentData),
-        token.actor.update(save.actorData),
-        token.actor.deleteEmbeddedDocuments('Item', [buff.id]),
+        token.actor.update({
+          ...save.actorData,
+          flags: {
+            metamorph: {
+              ...token.actor.flags?.metamorph,
+              active: false,
+            },
+          },
+        }),
       ]
+
+      const buff = findBuffInActor(token.actor, save.buffData.name)
+      if (buff !== undefined) {
+        currentRollBackActions.push(
+          token.actor.deleteEmbeddedDocuments('Item', [buff.id]),
+        )
+      } else {
+        logger.warn(`Could not find ${save.buffData.name} buff in actor`)
+      }
+
+      return currentRollBackActions
     })
     .flat()
 
@@ -142,10 +202,13 @@ const main = async (): Promise<void> => {
     return
   }
 
-  const buffName = 'Vision des Héros des Terres Inondées'
+  const buffName = 'rapetissement'
+  const compendiumName = 'world.effets-metamorph'
+
+  checkTokens(controlled)
 
   await savePolymorphData(controlled, buffName)
-  await applyMetamorph(controlled, buffName, 15)
+  await applyMetamorph(controlled, compendiumName, buffName, 15)
 
   await new Promise((resolve) => setTimeout(resolve, 5000))
 
@@ -153,6 +216,11 @@ const main = async (): Promise<void> => {
 }
 
 main().catch((error) => {
+  if (error instanceof UserWarning) {
+    ui.notifications.warn(error.message)
+    return
+  }
+
   ui.notifications.error(
     "L'exécution du script à échoué, voir la console pour plus d'information",
   )

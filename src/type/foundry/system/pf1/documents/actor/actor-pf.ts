@@ -4,7 +4,16 @@ import { PFRollDataAbility, PFRollDataSkill } from '../../pf1'
 import { ItemPF } from '../item/item-pf'
 import { ActorBasePf } from './actor-base-pf'
 
-export type ActorSize = 'med' | 'huge'
+export type ActorSize =
+  | 'fine'
+  | 'dim'
+  | 'tiny'
+  | 'sm'
+  | 'med'
+  | 'lg'
+  | 'huge'
+  | 'grg'
+  | 'col'
 
 export interface PFActorRollData {
   abilities: {

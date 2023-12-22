@@ -1,5 +1,9 @@
 "use strict";
 
+// src/common/error/user-warning.ts
+var UserWarning = class extends Error {
+};
+
 // src/common/log/logger.ts
 var logger = void 0;
 var createLogger = () => {
@@ -54,6 +58,9 @@ var getLoggerInstance = () => {
 var findBuffInActor = (actor, buffName) => actor.items.find(
   ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
 );
+var findBuffInCompendium = (compendiumName, buffName) => game.packs.get(compendiumName).index.find(
+  ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
+);
 
 // src/macro/pf1-metamorph/save.ts
 var logger2 = getLoggerInstance();
@@ -84,11 +91,11 @@ var transformToMetamorphSaveIfValid = (value) => {
 
 // src/macro/pf1-metamorph/index.ts
 var logger3 = getLoggerInstance();
-var applyMetamorph = async (tokens, buffName, buffLevel) => {
+var applyMetamorph = async (tokens, compendiumName, buffName, buffLevel) => {
   logger3.info("Apply metamorph");
   const buffOperations = tokens.map(async ({ actor }) => {
-    logger3.debug("Apply metamorph to buff", actor);
-    const buff = findBuffInActor(actor, buffName);
+    logger3.debug("Create metamorph buff in actor", actor);
+    const buff = await createBuff(actor, compendiumName, buffName);
     const updateQuery = {
       "system.level": buffLevel,
       "system.active": true
@@ -97,7 +104,13 @@ var applyMetamorph = async (tokens, buffName, buffLevel) => {
   });
   const actorsOperations = tokens.map(async ({ actor }) => {
     logger3.debug("Apply metamorph to actor", actor);
-    return actor.update({ "system.traits.size": "huge" });
+    return actor.update({
+      "system.traits.size": "sm",
+      "flags.metamorph": {
+        ...actor.flags?.metamorph,
+        active: true
+      }
+    });
   });
   const tokensOperations = tokens.map(async (token) => {
     logger3.debug("Apply metamorph to token", token);
@@ -111,6 +124,27 @@ var applyMetamorph = async (tokens, buffName, buffLevel) => {
     ...tokensOperations
   ];
   await Promise.all(operations);
+};
+var createBuff = async (actor, compendiumName, buffName) => {
+  const buff = findBuffInCompendium(compendiumName, buffName);
+  if (buff === void 0) {
+    throw new Error(
+      `Could not find buff ${buffName} in compendium ${compendiumName}`
+    );
+  }
+  const documents = await actor.createEmbeddedDocuments("Item", [buff]);
+  const createdBuff = documents[0];
+  if (createdBuff === void 0) {
+    throw new Error(`Could not create buff ${buffName} in actor`);
+  }
+  return createdBuff;
+};
+var checkTokens = (tokens) => {
+  for (const token of tokens) {
+    if (token.actor.flags?.metamorph?.active === true) {
+      throw new UserWarning("Au moins un token a d\xE9j\xE0 un effet");
+    }
+  }
 };
 var savePolymorphData = async (tokens, buffName) => {
   logger3.info("Save data to actor flags to ensure rolling back is possible");
@@ -157,12 +191,27 @@ var rollbackToPrePolymorphData = async (tokens) => {
     if (save === void 0) {
       throw new Error("Save is not valid");
     }
-    const buff = findBuffInActor(token.actor, save.buffData.name);
-    return [
+    const currentRollBackActions = [
       token.document.update(save.tokenDocumentData),
-      token.actor.update(save.actorData),
-      token.actor.deleteEmbeddedDocuments("Item", [buff.id])
+      token.actor.update({
+        ...save.actorData,
+        flags: {
+          metamorph: {
+            ...token.actor.flags?.metamorph,
+            active: false
+          }
+        }
+      })
     ];
+    const buff = findBuffInActor(token.actor, save.buffData.name);
+    if (buff !== void 0) {
+      currentRollBackActions.push(
+        token.actor.deleteEmbeddedDocuments("Item", [buff.id])
+      );
+    } else {
+      logger3.warn(`Could not find ${save.buffData.name} buff in actor`);
+    }
+    return currentRollBackActions;
   }).flat();
   logger3.info("Trigger rollback");
   await Promise.all(rollbackActions);
@@ -177,13 +226,19 @@ var main = async () => {
     ui.notifications.info("Aucun token n'est s\xE9lectionn\xE9");
     return;
   }
-  const buffName = "Vision des H\xE9ros des Terres Inond\xE9es";
+  const buffName = "rapetissement";
+  const compendiumName = "world.effets-metamorph";
+  checkTokens(controlled);
   await savePolymorphData(controlled, buffName);
-  await applyMetamorph(controlled, buffName, 15);
+  await applyMetamorph(controlled, compendiumName, buffName, 15);
   await new Promise((resolve) => setTimeout(resolve, 5e3));
   await rollbackToPrePolymorphData(controlled);
 };
 main().catch((error) => {
+  if (error instanceof UserWarning) {
+    ui.notifications.warn(error.message);
+    return;
+  }
   ui.notifications.error(
     "L'ex\xE9cution du script \xE0 \xE9chou\xE9, voir la console pour plus d'information"
   );
