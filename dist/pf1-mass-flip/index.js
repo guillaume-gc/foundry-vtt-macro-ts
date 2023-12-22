@@ -15,7 +15,7 @@ var getSelectElement = (htm, selector) => {
     throw new Error(`Could not find element "${selector}"`);
   }
   if (!(element instanceof HTMLSelectElement)) {
-    throw new Error(`Element ${selector} is not a HTML selector`);
+    throw new Error(`Element ${selector} is not a HTML select element`);
   }
   return element;
 };

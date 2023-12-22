@@ -57,13 +57,23 @@ var getSelectElement = (htm, selector) => {
     throw new Error(`Could not find element "${selector}"`);
   }
   if (!(element instanceof HTMLSelectElement)) {
-    throw new Error(`Element ${selector} is not a HTML selector`);
+    throw new Error(`Element ${selector} is not a HTML select element`);
   }
   return element;
 };
 var getSelectElementValue = (htm, selector) => {
   const element = getSelectElement(htm, selector);
   return element.value;
+};
+var getInputElement = (htm, selector) => {
+  const element = htm.find(selector)?.[0];
+  if (element == null) {
+    throw new Error(`Could not find element "${selector}"`);
+  }
+  if (!(element instanceof HTMLInputElement)) {
+    throw new Error(`Element ${selector} is not a HTML input element`);
+  }
+  return element;
 };
 
 // src/macro/pf1-metamorph/config.ts
@@ -87,7 +97,11 @@ var createForm = () => `
       <div class="form-group">
         <label>Transformation :</label>
         <select id="metamorph-transformation" style="text-transform: capitalize">${createTransformationOptions()}</select>
-       </div>
+      </div>
+      <div class="form-group">
+        <label for="transformation-value">Niveau lanceur de sort :</label>
+        <input type="number" id="transformation-spell-level"/>
+      </div>
     </form>
   `;
 var createTransformationOptions = () => {
@@ -287,25 +301,43 @@ var rollbackToPrePolymorphData = async (tokens) => {
 
 // src/macro/pf1-metamorph/index.ts
 var logger5 = getLoggerInstance();
-var triggerMetamorph = async (htm, controlledTokens) => {
-  const metamorphTransformKey = getSelectElementValue(
-    htm,
-    "#metamorph-transformation"
+var getTransformSpellLevel = (htm) => {
+  const metamorphTransformSpellLevelValue = parseInt(
+    getInputElement(htm, "#transformation-spell-level").value
   );
-  const metamorphTransform = config.transformations[metamorphTransformKey];
-  if (metamorphTransform === void 0) {
-    throw new Error(`Unknown transform ${metamorphTransformKey} key`);
+  if (!isNaN(metamorphTransformSpellLevelValue)) {
+    return metamorphTransformSpellLevelValue;
   }
-  const { buff, tokenTexture } = metamorphTransform;
-  checkTokens(controlledTokens);
-  await savePolymorphData(controlledTokens, buff.name);
-  await applyMetamorph(
-    controlledTokens,
-    buff.compendium,
-    buff.name,
-    15,
-    tokenTexture
-  );
+  return void 0;
+};
+var triggerMetamorph = async (htm, controlledTokens) => {
+  try {
+    const metamorphTransformKey = getSelectElementValue(
+      htm,
+      "#metamorph-transformation"
+    );
+    const metamorphTransformSpellLevel = getTransformSpellLevel(htm);
+    const metamorphTransform = config.transformations[metamorphTransformKey];
+    if (metamorphTransform === void 0) {
+      ui.notifications.error("Cette transformation est inconnue");
+      return;
+    }
+    const { buff, tokenTexture } = metamorphTransform;
+    checkTokens(controlledTokens);
+    await savePolymorphData(controlledTokens, buff.name);
+    await applyMetamorph(
+      controlledTokens,
+      buff.compendium,
+      buff.name,
+      metamorphTransformSpellLevel,
+      tokenTexture
+    );
+  } catch (error) {
+    ui.notifications.error(
+      "L'ex\xE9cution du script \xE0 \xE9chou\xE9, voir la console pour plus d'information"
+    );
+    logger5.error(error);
+  }
 };
 var cancelMetamorph = async (controlledTokens) => {
   await rollbackToPrePolymorphData(controlledTokens);

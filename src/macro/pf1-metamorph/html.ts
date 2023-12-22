@@ -5,7 +5,11 @@ export const createForm = () => `
       <div class="form-group">
         <label>Transformation :</label>
         <select id="metamorph-transformation" style="text-transform: capitalize">${createTransformationOptions()}</select>
-       </div>
+      </div>
+      <div class="form-group">
+        <label for="transformation-value">Niveau lanceur de sort :</label>
+        <input type="number" id="transformation-spell-level"/>
+      </div>
     </form>
   `
 

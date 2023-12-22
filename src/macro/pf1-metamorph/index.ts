@@ -1,5 +1,8 @@
 import { LogLevel, getLoggerInstance } from '../../common/log/logger'
-import { getSelectElementValue } from '../../common/util/jquery'
+import {
+  getInputElement,
+  getSelectElementValue,
+} from '../../common/util/jquery'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import { config } from './config'
 import { createForm } from './html'
@@ -12,31 +15,54 @@ import {
 
 const logger = getLoggerInstance()
 
+const getTransformSpellLevel = (htm: JQuery): number | undefined => {
+  const metamorphTransformSpellLevelValue = parseInt(
+    getInputElement(htm, '#transformation-spell-level').value,
+  )
+
+  if (!isNaN(metamorphTransformSpellLevelValue)) {
+    return metamorphTransformSpellLevelValue
+  }
+
+  return undefined
+}
+
 const triggerMetamorph = async (
   htm: JQuery,
   controlledTokens: TokenPF[],
 ): Promise<void> => {
-  const metamorphTransformKey = getSelectElementValue(
-    htm,
-    '#metamorph-transformation',
-  )
-  const metamorphTransform = config.transformations[metamorphTransformKey]
-  if (metamorphTransform === undefined) {
-    throw new Error(`Unknown transform ${metamorphTransformKey} key`)
+  try {
+    const metamorphTransformKey = getSelectElementValue(
+      htm,
+      '#metamorph-transformation',
+    )
+
+    const metamorphTransformSpellLevel = getTransformSpellLevel(htm)
+
+    const metamorphTransform = config.transformations[metamorphTransformKey]
+    if (metamorphTransform === undefined) {
+      ui.notifications.error('Cette transformation est inconnue')
+      return
+    }
+
+    const { buff, tokenTexture } = metamorphTransform
+
+    checkTokens(controlledTokens)
+
+    await savePolymorphData(controlledTokens, buff.name)
+    await applyMetamorph(
+      controlledTokens,
+      buff.compendium,
+      buff.name,
+      metamorphTransformSpellLevel,
+      tokenTexture,
+    )
+  } catch (error) {
+    ui.notifications.error(
+      "L'exécution du script à échoué, voir la console pour plus d'information",
+    )
+    logger.error(error)
   }
-
-  const { buff, tokenTexture } = metamorphTransform
-
-  checkTokens(controlledTokens)
-
-  await savePolymorphData(controlledTokens, buff.name)
-  await applyMetamorph(
-    controlledTokens,
-    buff.compendium,
-    buff.name,
-    15,
-    tokenTexture,
-  )
 }
 
 const cancelMetamorph = async (controlledTokens: TokenPF[]): Promise<void> => {
