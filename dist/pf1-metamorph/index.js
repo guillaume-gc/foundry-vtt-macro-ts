@@ -102,31 +102,42 @@ var UserWarning = class extends Error {
 };
 
 // src/macro/pf1-metamorph/buff.ts
+var logger2 = getLoggerInstance();
 var findBuffInActor = (actor, buffName) => actor.items.find(
   ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
 );
-var findBuffInCompendium = (compendiumName, buffName) => game.packs.get(compendiumName).index.find(
-  ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
-);
-var applyBuffToActor = async (actor, compendiumName, buffName) => {
-  const buff = findBuffInCompendium(compendiumName, buffName);
-  if (buff === void 0) {
-    throw new Error(
-      `Could not find buff ${buffName} in compendium ${compendiumName}`
-    );
+var findBuffInCompendium = async (compendiumName, buffName) => {
+  const compendiumCollection = game.packs.get(compendiumName);
+  const buffDescriptor = compendiumCollection.index.find(
+    ({ name, type }) => name.toLowerCase() === buffName.toLowerCase() && type === "buff"
+  );
+  if (buffDescriptor === void 0) {
+    return void 0;
   }
+  const buff = await compendiumCollection.getDocument(
+    buffDescriptor._id
+  );
+  if (buff === void 0) {
+    logger2.warn(
+      "Could not find buff in compendium even though its descriptor was found"
+    );
+    return void 0;
+  }
+  return buff;
+};
+var createBuffInActor = async (actor, buff) => {
   const documents = await actor.createEmbeddedDocuments("Item", [buff]);
   const createdBuff = documents[0];
   if (createdBuff === void 0) {
-    throw new Error(`Could not create buff ${buffName} in actor`);
+    throw new Error(`Could not create buff ${buff.name} in actor`);
   }
   return createdBuff;
 };
 
 // src/macro/pf1-metamorph/save.ts
-var logger2 = getLoggerInstance();
+var logger3 = getLoggerInstance();
 var transformToMetamorphSaveIfValid = (value) => {
-  logger2.debug("Transform flags to metamorph if they are valid", value);
+  logger3.debug("Transform flags to metamorph if they are valid", value);
   if (value === void 0) {
     return void 0;
   }
@@ -139,7 +150,7 @@ var transformToMetamorphSaveIfValid = (value) => {
     } = {},
     buffData: { name: buffName = void 0 } = {}
   } = value;
-  logger2.debug("Extracted values in flags", {
+  logger3.debug("Extracted values in flags", {
     actorSize,
     tokenTextureSrc,
     buffName
@@ -151,20 +162,33 @@ var transformToMetamorphSaveIfValid = (value) => {
 };
 
 // src/macro/pf1-metamorph/polymorph.ts
-var logger3 = getLoggerInstance();
+var logger4 = getLoggerInstance();
 var applyMetamorph = async (tokens, compendiumName, buffName, buffLevel, tokenTexture) => {
-  logger3.info("Apply metamorph");
+  logger4.info("Apply metamorph");
   const buffActions = tokens.map(async ({ actor }) => {
-    logger3.debug("Create metamorph buff in actor", actor);
-    const buff = await applyBuffToActor(actor, compendiumName, buffName);
-    const updateQuery = {
+    logger4.debug("Create metamorph buff in actor", actor);
+    const compendiumBuff = await findBuffInCompendium(compendiumName, buffName);
+    if (compendiumBuff === void 0) {
+      throw new Error(
+        `Could not find buff ${buffName} in compendium ${compendiumName}`
+      );
+    }
+    logger4.debug("Found buff in compendium", {
+      compendiumBuff,
+      compendiumName,
+      buffName
+    });
+    const actorBuff = await createBuffInActor(actor, compendiumBuff);
+    logger4.debug("Created buff in actor", {
+      actorBuff
+    });
+    return actorBuff.update({
       "system.level": buffLevel,
       "system.active": true
-    };
-    return buff.update(updateQuery);
+    });
   });
   const actorsActions = tokens.map(async ({ actor }) => {
-    logger3.debug("Apply metamorph to actor", actor);
+    logger4.debug("Apply metamorph to actor", actor);
     return actor.update({
       "system.traits.size": "sm",
       "flags.metamorph": {
@@ -174,7 +198,7 @@ var applyMetamorph = async (tokens, compendiumName, buffName, buffLevel, tokenTe
     });
   });
   const tokensActions = tokens.map(async (token) => {
-    logger3.debug("Apply metamorph to token", token);
+    logger4.debug("Apply metamorph to token", token);
     return token.document.update({
       "texture.src": tokenTexture
     });
@@ -190,9 +214,9 @@ var checkTokens = (tokens) => {
   }
 };
 var savePolymorphData = async (tokens, buffName) => {
-  logger3.info("Save data to actor flags to ensure rolling back is possible");
+  logger4.info("Save data to actor flags to ensure rolling back is possible");
   const operations = tokens.map(async (token) => {
-    logger3.debug("Save data related to a token", token);
+    logger4.debug("Save data related to a token", token);
     const actorData = {
       system: {
         traits: {
@@ -224,13 +248,13 @@ var savePolymorphData = async (tokens, buffName) => {
   await Promise.all(operations);
 };
 var rollbackToPrePolymorphData = async (tokens) => {
-  logger3.info("Prepare to roll back to data before polymorph was triggered");
+  logger4.info("Prepare to roll back to data before polymorph was triggered");
   const rollbackActions = tokens.map((token) => {
-    logger3.debug("Rolling back token", token);
+    logger4.debug("Rolling back token", token);
     const save = transformToMetamorphSaveIfValid(
       token.actor.flags?.metamorph?.save
     );
-    logger3.debug("Save obtained from token actor", save);
+    logger4.debug("Save obtained from token actor", save);
     if (save === void 0) {
       throw new Error("Save is not valid");
     }
@@ -252,17 +276,17 @@ var rollbackToPrePolymorphData = async (tokens) => {
         token.actor.deleteEmbeddedDocuments("Item", [buff.id])
       );
     } else {
-      logger3.warn(`Could not find ${save.buffData.name} buff in actor`);
+      logger4.warn(`Could not find ${save.buffData.name} buff in actor`);
     }
     return currentRollBackActions;
   }).flat();
-  logger3.info("Trigger rollback");
+  logger4.info("Trigger rollback");
   await Promise.all(rollbackActions);
-  logger3.info("Rollback complete");
+  logger4.info("Rollback complete");
 };
 
 // src/macro/pf1-metamorph/index.ts
-var logger4 = getLoggerInstance();
+var logger5 = getLoggerInstance();
 var triggerMetamorph = async (htm, controlledTokens) => {
   const metamorphTransformKey = getSelectElementValue(
     htm,
@@ -306,7 +330,7 @@ var openDialog = (controlledTokens) => {
   }).render(true);
 };
 try {
-  logger4.level = 0 /* DEBUG */;
+  logger5.level = 0 /* DEBUG */;
   const {
     tokens: { controlled: controlledTokens }
   } = canvas;
@@ -319,5 +343,5 @@ try {
   ui.notifications.error(
     "L'ex\xE9cution du script \xE0 \xE9chou\xE9, voir la console pour plus d'information"
   );
-  logger4.error(error);
+  logger5.error(error);
 }

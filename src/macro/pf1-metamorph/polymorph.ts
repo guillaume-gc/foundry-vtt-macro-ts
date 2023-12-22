@@ -2,7 +2,11 @@ import { UserWarning } from '../../common/error/user-warning'
 import { getLoggerInstance } from '../../common/log/logger'
 import { Document } from '../../type/foundry/abstract/document'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
-import { applyBuffToActor, findBuffInActor } from './buff'
+import {
+  createBuffInActor,
+  findBuffInActor,
+  findBuffInCompendium,
+} from './buff'
 import {
   MetamorphActorData,
   MetamorphBuffData,
@@ -25,14 +29,29 @@ export const applyMetamorph = async (
   const buffActions = tokens.map(async ({ actor }) => {
     logger.debug('Create metamorph buff in actor', actor)
 
-    const buff = await applyBuffToActor(actor, compendiumName, buffName)
-
-    const updateQuery = {
-      'system.level': buffLevel,
-      'system.active': true,
+    const compendiumBuff = await findBuffInCompendium(compendiumName, buffName)
+    if (compendiumBuff === undefined) {
+      throw new Error(
+        `Could not find buff ${buffName} in compendium ${compendiumName}`,
+      )
     }
 
-    return buff.update(updateQuery)
+    logger.debug('Found buff in compendium', {
+      compendiumBuff,
+      compendiumName,
+      buffName,
+    })
+
+    const actorBuff = await createBuffInActor(actor, compendiumBuff)
+
+    logger.debug('Created buff in actor', {
+      actorBuff,
+    })
+
+    return actorBuff.update({
+      'system.level': buffLevel,
+      'system.active': true,
+    })
   })
 
   const actorsActions = tokens.map(async ({ actor }) => {

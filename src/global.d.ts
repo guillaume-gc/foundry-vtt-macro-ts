@@ -8,11 +8,15 @@ import {
   RollModeOptions,
   UserInterface,
 } from './type/foundry/foundry'
+import { PF1Utils } from './type/foundry/system/pf1/utils'
 
 declare global {
   const canvas: Canvas<'PF1'>
   const ui: UserInterface
   const game: Game<'PF1'>
+  const pf1: {
+    utils: PF1Utils
+  }
 
   class Dialog {
     constructor(options: DialogOptions)

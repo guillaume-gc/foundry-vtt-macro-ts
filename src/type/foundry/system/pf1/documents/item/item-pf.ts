@@ -1,4 +1,4 @@
-import { ActorPF } from '../../pf1'
+import { ActorPF } from '../actor/actor-pf'
 import { ItemBasePF } from './item-base-pf'
 
 export type ItemPFType = 'buff'

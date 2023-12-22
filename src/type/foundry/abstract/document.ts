@@ -81,7 +81,14 @@ interface DocumentModificationContext {
   deleteAll?: boolean
 }
 
-export type EmbeddedDocumentName = 'Item'
+export type DocumentType =
+  | 'Actor'
+  | 'Item'
+  | 'Scene'
+  | 'JournalEntry'
+  | 'Macro'
+  | 'RollTable'
+  | 'Playlist'
 
 export declare class Document extends DataModel {
   constructor()
@@ -92,13 +99,13 @@ export declare class Document extends DataModel {
   ): Promise<Document>
 
   deleteEmbeddedDocuments(
-    embeddedName: EmbeddedDocumentName,
+    embeddedName: DocumentType,
     ids: string[],
     context?: DocumentModificationContext,
   ): Promise<Document[]>
 
   createEmbeddedDocuments(
-    embeddedName: EmbeddedDocumentName,
+    embeddedName: DocumentType,
     data?: any[],
     context?: DocumentModificationContext,
   ): Promise<Document[]>
