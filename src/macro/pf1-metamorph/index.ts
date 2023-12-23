@@ -46,11 +46,9 @@ const triggerMetamorph = async (
       return
     }
 
-    const { buff } = metamorphTransform
-
     checkTokens(controlledTokens)
 
-    await savePolymorphData(controlledTokens, buff.name)
+    await savePolymorphData(controlledTokens, metamorphTransform)
     await applyMetamorph(
       controlledTokens,
       metamorphTransform,
@@ -60,7 +58,7 @@ const triggerMetamorph = async (
     ui.notifications.error(
       "L'exécution du script à échoué, voir la console pour plus d'information",
     )
-    logger.error(error)
+    console.error(error)
   }
 }
 
@@ -105,5 +103,5 @@ try {
   ui.notifications.error(
     "L'exécution du script à échoué, voir la console pour plus d'information",
   )
-  logger.error(error)
+  console.error(error)
 }

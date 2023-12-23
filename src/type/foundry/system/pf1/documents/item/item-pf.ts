@@ -1,7 +1,8 @@
 import { ActorPF } from '../actor/actor-pf'
 import { ItemBasePF } from './item-base-pf'
 
-export type ItemPFType = 'buff'
+export const itemPFTypeValues = ['buff', 'attack'] as const
+export type ItemPFType = (typeof itemPFTypeValues)[number]
 
 export declare class ItemPF extends ItemBasePF {
   constructor(...args: any[])

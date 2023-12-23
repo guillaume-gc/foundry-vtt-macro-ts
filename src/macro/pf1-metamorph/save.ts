@@ -1,4 +1,6 @@
 import { getLoggerInstance } from '../../common/log/logger'
+import { itemPFTypeValues } from '../../type/foundry/system/pf1/documents/item/item-pf'
+import { MetamorphTransformationItem } from './config'
 
 export interface MetamorphActorData {
   system: {
@@ -14,25 +16,21 @@ export interface MetamorphTokenDocumentData {
   }
 }
 
-export interface MetamorphBuffData {
-  name: string
-}
-
 export interface MetamorphSave {
   actorData: MetamorphActorData
   tokenDocumentData: MetamorphTokenDocumentData
-  buffData: MetamorphBuffData
+  transformItemsData: MetamorphTransformationItem[]
 }
 
 const logger = getLoggerInstance()
 
-export const transformToMetamorphSaveIfValid = (
+export const transformToMetamorphSave = (
   value: Record<string, any> | undefined,
-): MetamorphSave | undefined => {
+): MetamorphSave => {
   logger.debug('Transform flags to metamorph if they are valid', value)
 
   if (value === undefined) {
-    return undefined
+    throw new Error('Flag values are undefined')
   }
 
   const {
@@ -42,21 +40,35 @@ export const transformToMetamorphSaveIfValid = (
     tokenDocumentData: {
       texture: { src: tokenTextureSrc = undefined } = {},
     } = {},
-    buffData: { name: buffName = undefined } = {},
+    transformItemsData,
   } = value
 
   logger.debug('Extracted values in flags', {
     actorSize,
     tokenTextureSrc,
-    buffName,
+    transformItemsData,
   })
 
   if (
     actorSize === undefined ||
     tokenTextureSrc === undefined ||
-    buffName === undefined
+    transformItemsData === undefined
   ) {
-    return undefined
+    throw new Error('Flag values are invalid')
+  }
+
+  for (const { name, compendiumName, type } of transformItemsData) {
+    if (
+      name === undefined ||
+      compendiumName === undefined ||
+      type === undefined
+    ) {
+      throw new Error('Flag transformItemsData is invalid')
+    }
+
+    if (!itemPFTypeValues.includes(type)) {
+      throw new Error('Type in transformItemsData flag is invalid')
+    }
   }
 
   return value as MetamorphSave
