@@ -105,7 +105,18 @@ var config = {
         }
       ],
       size: "lg",
-      tokenTexture: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp"
+      tokenTexture: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
+      senses: {
+        dv: 60,
+        ll: {
+          enabled: true,
+          multiplier: {
+            bright: 2,
+            dim: 2
+          }
+        },
+        sc: 30
+      }
     }
   }
 };
@@ -253,7 +264,8 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
     return actor.update({
       system: {
         traits: {
-          size: metamorphTransform.size
+          size: metamorphTransform.size,
+          senses: metamorphTransform.senses
         }
       },
       flags: {
@@ -294,7 +306,8 @@ var savePolymorphData = async (tokens, metamorphTransform) => {
     const actorData = {
       system: {
         traits: {
-          size: token.actor.system.traits.size
+          size: token.actor.system.traits.size,
+          senses: token.actor.system.traits.senses
         }
       },
       prototypeToken: {
@@ -341,6 +354,7 @@ var rollbackToPrePolymorphData = async (tokens) => {
         }
       })
     ];
+    logger4.debug("Delete all metamorph related items", save);
     const itemsToDelete = save.transformItemsData.reduce(
       (previousItems, currentItem) => {
         const actorItem = findItemInActor(
@@ -434,6 +448,7 @@ var openDialog = (controlledTokens) => {
 };
 try {
   logger5.level = 0 /* DEBUG */;
+  logger5.macroName = "pf1-metamorph";
   const {
     tokens: { controlled: controlledTokens }
   } = canvas;

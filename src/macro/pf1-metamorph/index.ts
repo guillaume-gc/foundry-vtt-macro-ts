@@ -89,6 +89,7 @@ const openDialog = (controlledTokens: TokenPF[]) => {
 
 try {
   logger.level = LogLevel.DEBUG
+  logger.macroName = 'pf1-metamorph'
 
   const {
     tokens: { controlled: controlledTokens },

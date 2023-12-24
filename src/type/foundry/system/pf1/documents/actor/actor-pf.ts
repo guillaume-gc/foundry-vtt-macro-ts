@@ -15,6 +15,43 @@ export type ActorSize =
   | 'grg'
   | 'col'
 
+export interface PFActorSenses {
+  // Blindsight (in feet)
+  bs: number
+
+  // Blindsense (in feet).
+  bse: number
+
+  custom: string
+
+  // Light low vision.
+  ll: {
+    enabled: boolean
+    multiplier: {
+      bright: number
+      dim: number
+    }
+  }
+
+  // Dark vision (in feet).
+  dv: number
+
+  // Scent (in feet).
+  sc: number
+
+  // See invisibility.
+  si: boolean
+
+  // See in darkness.
+  sid: boolean
+
+  // True Seeing.
+  tr: boolean
+
+  // Tremorsense.
+  ts: number
+}
+
 export interface PFActorRollData {
   abilities: {
     str: PFRollDataAbility
@@ -69,6 +106,7 @@ export interface PFActorRollData {
       value: string[]
       custom: string
     }
+    senses: PFActorSenses
   }
 }
 

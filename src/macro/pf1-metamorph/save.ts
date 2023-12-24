@@ -1,4 +1,5 @@
 import { getLoggerInstance } from '../../common/log/logger'
+import { PFActorSenses } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { itemPFTypeValues } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { MetamorphTransformationItem } from './config'
 
@@ -6,6 +7,7 @@ export interface MetamorphActorData {
   system: {
     traits: {
       size: string
+      senses: PFActorSenses
     }
   }
   prototypeToken: MetamorphTokenDocumentData

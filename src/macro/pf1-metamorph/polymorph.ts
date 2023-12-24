@@ -100,6 +100,7 @@ export const applyMetamorph = async (
       system: {
         traits: {
           size: metamorphTransform.size,
+          senses: metamorphTransform.senses,
         },
       },
       flags: {
@@ -158,6 +159,7 @@ export const savePolymorphData = async (
       system: {
         traits: {
           size: token.actor.system.traits.size,
+          senses: token.actor.system.traits.senses,
         },
       },
       prototypeToken: {
@@ -219,6 +221,8 @@ export const rollbackToPrePolymorphData = async (tokens: TokenPF[]) => {
           },
         }),
       ]
+
+      logger.debug('Delete all metamorph related items', save)
 
       const itemsToDelete = save.transformItemsData.reduce<ItemPF[]>(
         (previousItems, currentItem) => {

@@ -1,4 +1,7 @@
-import { ActorSize } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
+import {
+  ActorSize,
+  PFActorSenses,
+} from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemPFType } from '../../type/foundry/system/pf1/documents/item/item-pf'
 
 export interface MetamorphTransformationItem {
@@ -12,6 +15,7 @@ export interface MetamorphTransformation {
   items: MetamorphTransformationItem[]
   size?: ActorSize
   tokenTexture?: string
+  senses?: Partial<PFActorSenses>
 }
 
 export interface MetamorphConfig {
@@ -47,6 +51,17 @@ export const config: MetamorphConfig = {
       ],
       size: 'lg',
       tokenTexture: '/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp',
+      senses: {
+        dv: 60,
+        ll: {
+          enabled: true,
+          multiplier: {
+            bright: 2,
+            dim: 2,
+          },
+        },
+        sc: 30,
+      },
     },
   },
 }
