@@ -230,8 +230,10 @@ var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLe
 var updateAddedTransformationItem = async (item, metamorphTransformSpellLevel) => {
   if (item.type === "buff") {
     return item.update({
-      "system.level": metamorphTransformSpellLevel,
-      "system.active": true
+      system: {
+        level: metamorphTransformSpellLevel,
+        active: true
+      }
     });
   }
   return item;
@@ -249,17 +251,30 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
   const actorsActions = tokens.map(async ({ actor }) => {
     logger4.debug("Apply metamorph to actor", actor);
     return actor.update({
-      "system.traits.size": metamorphTransform.size,
-      "flags.metamorph": {
-        ...actor.flags?.metamorph,
-        active: true
+      system: {
+        traits: {
+          size: metamorphTransform.size
+        }
+      },
+      flags: {
+        metamorph: {
+          ...actor.flags?.metamorph,
+          active: true
+        }
+      },
+      prototypeToken: {
+        texture: {
+          src: tokenTexture
+        }
       }
     });
   });
   const tokensActions = tokens.map(async (token) => {
     logger4.debug("Apply metamorph to token", token);
     return token.document.update({
-      "texture.src": tokenTexture
+      texture: {
+        src: tokenTexture
+      }
     });
   });
   const applyActions = [...itemActions, ...actorsActions, ...tokensActions];
@@ -280,6 +295,11 @@ var savePolymorphData = async (tokens, metamorphTransform) => {
       system: {
         traits: {
           size: token.actor.system.traits.size
+        }
+      },
+      prototypeToken: {
+        texture: {
+          src: token.document.texture.src
         }
       }
     };
@@ -385,7 +405,7 @@ var triggerMetamorph = async (htm, controlledTokens) => {
     );
   } catch (error) {
     ui.notifications.error(
-      "L'ex\xE9cution du script \xE0 \xE9chou\xE9, voir la console pour plus d'information"
+      "L'ex\xE9cution du script a \xE9chou\xE9, voir la console pour plus d'information"
     );
     console.error(error);
   }
@@ -424,7 +444,7 @@ try {
   }
 } catch (error) {
   ui.notifications.error(
-    "L'ex\xE9cution du script \xE0 \xE9chou\xE9, voir la console pour plus d'information"
+    "L'ex\xE9cution du script a \xE9chou\xE9, voir la console pour plus d'information"
   );
   console.error(error);
 }

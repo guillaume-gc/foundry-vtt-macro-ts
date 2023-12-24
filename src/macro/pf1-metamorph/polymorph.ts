@@ -20,7 +20,7 @@ import {
 const logger = getLoggerInstance()
 
 /*
- * Add to the actor all necessary items for its transformation
+ * Add to the actor all necessary items for its transformation.
  */
 const addTransformationItemToActor = async (
   actor: ActorPF,
@@ -61,8 +61,10 @@ const updateAddedTransformationItem = async (
 ): Promise<Document> => {
   if (item.type === 'buff') {
     return item.update({
-      'system.level': metamorphTransformSpellLevel,
-      'system.active': true,
+      system: {
+        level: metamorphTransformSpellLevel,
+        active: true,
+      },
     })
   }
 
@@ -70,7 +72,7 @@ const updateAddedTransformationItem = async (
 }
 
 /*
- * Transform an actor
+ * Apply polymorph to an actor and its token.
  */
 export const applyMetamorph = async (
   tokens: TokenPF[],
@@ -95,10 +97,21 @@ export const applyMetamorph = async (
     logger.debug('Apply metamorph to actor', actor)
 
     return actor.update({
-      'system.traits.size': metamorphTransform.size,
-      'flags.metamorph': {
-        ...actor.flags?.metamorph,
-        active: true,
+      system: {
+        traits: {
+          size: metamorphTransform.size,
+        },
+      },
+      flags: {
+        metamorph: {
+          ...actor.flags?.metamorph,
+          active: true,
+        },
+      },
+      prototypeToken: {
+        texture: {
+          src: tokenTexture,
+        },
       },
     })
   })
@@ -107,7 +120,9 @@ export const applyMetamorph = async (
     logger.debug('Apply metamorph to token', token)
 
     return token.document.update({
-      'texture.src': tokenTexture,
+      texture: {
+        src: tokenTexture,
+      },
     })
   })
 
@@ -116,6 +131,9 @@ export const applyMetamorph = async (
   await Promise.all(applyActions)
 }
 
+/*
+ * Check if those tokens are valid for applying metamorph.
+ */
 export const checkTokens = (tokens: TokenPF[]) => {
   for (const token of tokens) {
     if (token.actor.flags?.metamorph?.active === true) {
@@ -124,6 +142,9 @@ export const checkTokens = (tokens: TokenPF[]) => {
   }
 }
 
+/*
+ * Save polymorph data to actor flags.
+ */
 export const savePolymorphData = async (
   tokens: TokenPF[],
   metamorphTransform: MetamorphTransformation,
@@ -137,6 +158,11 @@ export const savePolymorphData = async (
       system: {
         traits: {
           size: token.actor.system.traits.size,
+        },
+      },
+      prototypeToken: {
+        texture: {
+          src: token.document.texture.src,
         },
       },
     }
@@ -164,6 +190,9 @@ export const savePolymorphData = async (
   await Promise.all(operations)
 }
 
+/*
+ * Rollback to pre-polymorph data using actor flags.
+ */
 export const rollbackToPrePolymorphData = async (tokens: TokenPF[]) => {
   logger.info('Prepare to roll back to data before polymorph was triggered')
 

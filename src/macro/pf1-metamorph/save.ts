@@ -8,6 +8,7 @@ export interface MetamorphActorData {
       size: string
     }
   }
+  prototypeToken: MetamorphTokenDocumentData
 }
 
 export interface MetamorphTokenDocumentData {

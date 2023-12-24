@@ -56,7 +56,7 @@ const triggerMetamorph = async (
     )
   } catch (error) {
     ui.notifications.error(
-      "L'exécution du script à échoué, voir la console pour plus d'information",
+      "L'exécution du script a échoué, voir la console pour plus d'information",
     )
     console.error(error)
   }
@@ -101,7 +101,7 @@ try {
   }
 } catch (error) {
   ui.notifications.error(
-    "L'exécution du script à échoué, voir la console pour plus d'information",
+    "L'exécution du script a échoué, voir la console pour plus d'information",
   )
   console.error(error)
 }
