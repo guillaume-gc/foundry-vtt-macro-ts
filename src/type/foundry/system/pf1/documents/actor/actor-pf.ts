@@ -15,7 +15,7 @@ export type ActorSize =
   | 'grg'
   | 'col'
 
-export interface PFActorSenses {
+export interface ActorPFSenses {
   // Blindsight (in feet)
   bs: number
 
@@ -52,7 +52,42 @@ export interface PFActorSenses {
   ts: number
 }
 
-export interface PFActorRollData {
+export type ResistedEnergyType =
+  | ''
+  | 'fire'
+  | 'cold'
+  | 'electric'
+  | 'acid'
+  | 'sonic'
+  | 'force'
+  | 'negative'
+  | 'positive'
+export type ResistedDamageType = '' | 'slashing' | 'piercing' | 'bludgeoning'
+
+export interface ActorPFReduction<
+  ReductionType extends [string, string] = [string, string],
+> {
+  amount: number
+  operator: boolean
+  types: ReductionType
+}
+
+export interface ActorPFCustomizableValue<
+  ExpectedValueType,
+  CustomValueType = string,
+> {
+  value: ExpectedValueType
+  custom: CustomValueType
+}
+
+export type ActorPFEnergyResistance = ActorPFCustomizableValue<
+  ActorPFReduction<[ResistedEnergyType, ResistedEnergyType]>[]
+>
+export type ActorPFDamageReduction = ActorPFCustomizableValue<
+  ActorPFReduction<[ResistedDamageType, ResistedDamageType]>[]
+>
+
+export interface ActorPFRollData {
   abilities: {
     str: PFRollDataAbility
     dex: PFRollDataAbility
@@ -91,22 +126,14 @@ export interface PFActorRollData {
     sen: PFRollDataSkill
   }
   traits: {
-    eres: string
+    eres: ActorPFEnergyResistance
     size: ActorSize
-    di: {
-      value: string[]
-      custom: string
-    }
+    di: ActorPFCustomizableValue<string[]>
     cres: string
-    ci: {
-      value: string[]
-      custom: string
-    }
-    dv: {
-      value: string[]
-      custom: string
-    }
-    senses: PFActorSenses
+    ci: ActorPFCustomizableValue<string[]>
+    dv: ActorPFCustomizableValue<string[]>
+    dr: ActorPFDamageReduction
+    senses: ActorPFSenses
   }
 }
 
@@ -115,9 +142,9 @@ export interface ActorPFDetails {}
 export declare class ActorPF extends ActorBasePf {
   name: string
 
-  getRollData: (options: GetRollDataOptions) => PFActorRollData
+  getRollData: (options: GetRollDataOptions) => ActorPFRollData
 
-  system: PFActorRollData
+  system: ActorPFRollData
 
   details: ActorPFDetails
 

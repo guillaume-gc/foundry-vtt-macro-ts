@@ -1,6 +1,8 @@
 import {
+  ActorPFDamageReduction,
+  ActorPFEnergyResistance,
+  ActorPFSenses,
   ActorSize,
-  PFActorSenses,
 } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemPFType } from '../../type/foundry/system/pf1/documents/item/item-pf'
 
@@ -15,7 +17,9 @@ export interface MetamorphTransformation {
   items: MetamorphTransformationItem[]
   size?: ActorSize
   tokenTexture?: string
-  senses?: Partial<PFActorSenses>
+  senses?: Partial<ActorPFSenses>
+  damageReduction?: ActorPFDamageReduction
+  energyResistance?: ActorPFEnergyResistance
 }
 
 export interface MetamorphConfig {

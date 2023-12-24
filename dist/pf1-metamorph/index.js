@@ -116,6 +116,16 @@ var config = {
           }
         },
         sc: 30
+      },
+      damageReduction: {
+        value: [
+          {
+            amount: 10,
+            operator: false,
+            types: ["bludgeoning", ""]
+          }
+        ],
+        custom: ""
       }
     }
   }
@@ -178,9 +188,6 @@ var createItemInActor = async (actor, item) => {
   return createdItem;
 };
 
-// src/type/foundry/system/pf1/documents/item/item-pf.ts
-var itemPFTypeValues = ["buff", "attack"];
-
 // src/macro/pf1-metamorph/save.ts
 var logger3 = getLoggerInstance();
 var transformToMetamorphSave = (value) => {
@@ -204,14 +211,6 @@ var transformToMetamorphSave = (value) => {
   });
   if (actorSize === void 0 || tokenTextureSrc === void 0 || transformItemsData === void 0) {
     throw new Error("Flag values are invalid");
-  }
-  for (const { name, compendiumName, type } of transformItemsData) {
-    if (name === void 0 || compendiumName === void 0 || type === void 0) {
-      throw new Error("Flag transformItemsData is invalid");
-    }
-    if (!itemPFTypeValues.includes(type)) {
-      throw new Error("Type in transformItemsData flag is invalid");
-    }
   }
   return value;
 };
@@ -249,6 +248,10 @@ var updateAddedTransformationItem = async (item, metamorphTransformSpellLevel) =
   }
   return item;
 };
+var mixReduction = (actorReduction, polymorphReduction) => polymorphReduction !== void 0 ? {
+  custom: [actorReduction.custom, polymorphReduction.custom].filter((value) => value).join(";"),
+  value: [...actorReduction.value, ...polymorphReduction.value]
+} : actorReduction;
 var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellLevel) => {
   logger4.info("Apply metamorph");
   const { tokenTexture, items } = metamorphTransform;
@@ -265,7 +268,18 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
       system: {
         traits: {
           size: metamorphTransform.size,
-          senses: metamorphTransform.senses
+          senses: {
+            ...actor.system.traits.senses,
+            ...metamorphTransform.senses
+          },
+          dr: mixReduction(
+            actor.system.traits.dr,
+            metamorphTransform.damageReduction
+          ),
+          eres: mixReduction(
+            actor.system.traits.eres,
+            metamorphTransform.energyResistance
+          )
         }
       },
       flags: {
@@ -307,7 +321,9 @@ var savePolymorphData = async (tokens, metamorphTransform) => {
       system: {
         traits: {
           size: token.actor.system.traits.size,
-          senses: token.actor.system.traits.senses
+          senses: token.actor.system.traits.senses,
+          dr: token.actor.system.traits.dr,
+          eres: token.actor.system.traits.eres
         }
       },
       prototypeToken: {

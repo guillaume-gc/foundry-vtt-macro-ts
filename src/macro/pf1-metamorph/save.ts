@@ -1,13 +1,18 @@
 import { getLoggerInstance } from '../../common/log/logger'
-import { PFActorSenses } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
-import { itemPFTypeValues } from '../../type/foundry/system/pf1/documents/item/item-pf'
+import {
+  ActorPFDamageReduction,
+  ActorPFEnergyResistance,
+  ActorPFSenses,
+} from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { MetamorphTransformationItem } from './config'
 
 export interface MetamorphActorData {
   system: {
     traits: {
       size: string
-      senses: PFActorSenses
+      senses?: ActorPFSenses
+      dr?: ActorPFDamageReduction
+      eres?: ActorPFEnergyResistance
     }
   }
   prototypeToken: MetamorphTokenDocumentData
@@ -27,6 +32,11 @@ export interface MetamorphSave {
 
 const logger = getLoggerInstance()
 
+/*
+ * Transform the value to MetamorphSave, if valid.
+ *
+ * To keep the function simple, it's just checking root attributes.
+ */
 export const transformToMetamorphSave = (
   value: Record<string, any> | undefined,
 ): MetamorphSave => {
@@ -58,20 +68,6 @@ export const transformToMetamorphSave = (
     transformItemsData === undefined
   ) {
     throw new Error('Flag values are invalid')
-  }
-
-  for (const { name, compendiumName, type } of transformItemsData) {
-    if (
-      name === undefined ||
-      compendiumName === undefined ||
-      type === undefined
-    ) {
-      throw new Error('Flag transformItemsData is invalid')
-    }
-
-    if (!itemPFTypeValues.includes(type)) {
-      throw new Error('Type in transformItemsData flag is invalid')
-    }
   }
 
   return value as MetamorphSave

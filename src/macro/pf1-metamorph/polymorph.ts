@@ -2,7 +2,11 @@ import { UserWarning } from '../../common/error/user-warning'
 import { getLoggerInstance } from '../../common/log/logger'
 import { Document } from '../../type/foundry/abstract/document'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
-import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
+import {
+  ActorPF,
+  ActorPFCustomizableValue,
+  ActorPFReduction,
+} from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemPF } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { MetamorphTransformation, MetamorphTransformationItem } from './config'
 import {
@@ -71,6 +75,20 @@ const updateAddedTransformationItem = async (
   return item
 }
 
+const mixReduction = (
+  actorReduction: ActorPFCustomizableValue<ActorPFReduction[]>,
+  polymorphReduction?: ActorPFCustomizableValue<ActorPFReduction[]>,
+): ActorPFCustomizableValue<ActorPFReduction[]> =>
+  polymorphReduction !== undefined
+    ? {
+        custom: [actorReduction.custom, polymorphReduction.custom]
+          // Remove empty strings
+          .filter((value) => value)
+          .join(';'),
+        value: [...actorReduction.value, ...polymorphReduction.value],
+      }
+    : actorReduction
+
 /*
  * Apply polymorph to an actor and its token.
  */
@@ -100,7 +118,18 @@ export const applyMetamorph = async (
       system: {
         traits: {
           size: metamorphTransform.size,
-          senses: metamorphTransform.senses,
+          senses: {
+            ...actor.system.traits.senses,
+            ...metamorphTransform.senses,
+          },
+          dr: mixReduction(
+            actor.system.traits.dr,
+            metamorphTransform.damageReduction,
+          ),
+          eres: mixReduction(
+            actor.system.traits.eres,
+            metamorphTransform.energyResistance,
+          ),
         },
       },
       flags: {
@@ -160,6 +189,8 @@ export const savePolymorphData = async (
         traits: {
           size: token.actor.system.traits.size,
           senses: token.actor.system.traits.senses,
+          dr: token.actor.system.traits.dr,
+          eres: token.actor.system.traits.eres,
         },
       },
       prototypeToken: {
