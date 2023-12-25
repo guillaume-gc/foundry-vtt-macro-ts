@@ -6,6 +6,8 @@ import {
   ActorPF,
   ActorPFCustomizableValue,
   ActorPFReduction,
+  ResistedDamageType,
+  ResistedEnergyType,
 } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemPF } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { MetamorphTransformation, MetamorphTransformationItem } from './config'
@@ -75,10 +77,14 @@ const updateAddedTransformationItem = async (
   return item
 }
 
-const mixReduction = (
-  actorReduction: ActorPFCustomizableValue<ActorPFReduction[]>,
-  polymorphReduction?: ActorPFCustomizableValue<ActorPFReduction[]>,
-): ActorPFCustomizableValue<ActorPFReduction[]> =>
+const mixReduction = <
+  ReductionType extends [string, string] = [string, string],
+>(
+  actorReduction: ActorPFCustomizableValue<ActorPFReduction<ReductionType>[]>,
+  polymorphReduction?: ActorPFCustomizableValue<
+    ActorPFReduction<ReductionType>[]
+  >,
+): ActorPFCustomizableValue<ActorPFReduction<ReductionType>[]> =>
   polymorphReduction !== undefined
     ? {
         custom: [actorReduction.custom, polymorphReduction.custom]
@@ -116,17 +122,21 @@ export const applyMetamorph = async (
 
     return actor.update({
       system: {
+        attributes: {
+          speed: metamorphTransform.speed,
+        },
         traits: {
           size: metamorphTransform.size,
+          stature: metamorphTransform.stature,
           senses: {
             ...actor.system.traits.senses,
             ...metamorphTransform.senses,
           },
-          dr: mixReduction(
+          dr: mixReduction<[ResistedDamageType, ResistedDamageType]>(
             actor.system.traits.dr,
             metamorphTransform.damageReduction,
           ),
-          eres: mixReduction(
+          eres: mixReduction<[ResistedEnergyType, ResistedEnergyType]>(
             actor.system.traits.eres,
             metamorphTransform.energyResistance,
           ),
@@ -186,8 +196,12 @@ export const savePolymorphData = async (
 
     const actorData: MetamorphActorData = {
       system: {
+        attributes: {
+          speed: token.actor.system.attributes.speed,
+        },
         traits: {
           size: token.actor.system.traits.size,
+          stature: token.actor.system.traits.stature,
           senses: token.actor.system.traits.senses,
           dr: token.actor.system.traits.dr,
           eres: token.actor.system.traits.eres,

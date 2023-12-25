@@ -3,16 +3,23 @@ import {
   ActorPFDamageReduction,
   ActorPFEnergyResistance,
   ActorPFSenses,
+  ActorPFSize,
+  ActorPFSpeed,
+  ActorPFStature,
 } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { MetamorphTransformationItem } from './config'
 
 export interface MetamorphActorData {
   system: {
+    attributes: {
+      speed: ActorPFSpeed
+    }
     traits: {
-      size: string
-      senses?: ActorPFSenses
-      dr?: ActorPFDamageReduction
-      eres?: ActorPFEnergyResistance
+      size: ActorPFSize
+      stature: ActorPFStature
+      senses: ActorPFSenses
+      dr: ActorPFDamageReduction
+      eres: ActorPFEnergyResistance
     }
   }
   prototypeToken: MetamorphTokenDocumentData

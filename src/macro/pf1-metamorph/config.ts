@@ -2,9 +2,12 @@ import {
   ActorPFDamageReduction,
   ActorPFEnergyResistance,
   ActorPFSenses,
-  ActorSize,
+  ActorPFSize,
+  ActorPFSpeed,
+  ActorPFStature,
 } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemPFType } from '../../type/foundry/system/pf1/documents/item/item-pf'
+import { RecursivePartial } from '../../type/foundry/utils/partial'
 
 export interface MetamorphTransformationItem {
   name: string
@@ -15,7 +18,9 @@ export interface MetamorphTransformationItem {
 export interface MetamorphTransformation {
   label: string
   items: MetamorphTransformationItem[]
-  size?: ActorSize
+  size?: ActorPFSize
+  stature?: ActorPFStature
+  speed?: RecursivePartial<ActorPFSpeed>
   tokenTexture?: string
   senses?: Partial<ActorPFSenses>
   damageReduction?: ActorPFDamageReduction
@@ -54,7 +59,25 @@ export const config: MetamorphConfig = {
         },
       ],
       size: 'lg',
+      stature: 'long',
       tokenTexture: '/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp',
+      speed: {
+        burrow: {
+          base: 0,
+        },
+        climb: {
+          base: 0,
+        },
+        fly: {
+          base: 0,
+        },
+        land: {
+          base: 30,
+        },
+        swim: {
+          base: 0,
+        },
+      },
       senses: {
         dv: 60,
         ll: {

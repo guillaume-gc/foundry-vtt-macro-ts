@@ -1,10 +1,15 @@
 import { EmbeddedCollection } from '../../../../abstract/embedded-collection'
-import { GetRollDataOptions } from '../../../../foundry'
+import { ActorAttributes } from '../../../../client/actor'
+import {
+  DocumentModificationContext,
+  GetRollDataOptions,
+} from '../../../../foundry'
+import { RecursivePartial } from '../../../../utils/partial'
 import { PFRollDataAbility, PFRollDataSkill } from '../../pf1'
 import { ItemPF } from '../item/item-pf'
 import { ActorBasePf } from './actor-base-pf'
 
-export type ActorSize =
+export type ActorPFSize =
   | 'fine'
   | 'dim'
   | 'tiny'
@@ -14,6 +19,8 @@ export type ActorSize =
   | 'huge'
   | 'grg'
   | 'col'
+
+export type ActorPFStature = 'tall' | 'long'
 
 export interface ActorPFSenses {
   // Blindsight (in feet)
@@ -50,6 +57,40 @@ export interface ActorPFSenses {
 
   // Tremorsense.
   ts: number
+}
+
+export type ActorPFFlyManeuverability =
+  | 'clumsy'
+  | 'poor'
+  | 'average'
+  | 'good'
+  | 'perfect'
+
+export interface ActorPFSpeed {
+  burrow: {
+    base: number
+    total: number
+  }
+  climb: {
+    base: number
+    total: number
+  }
+  fly: {
+    base: number
+
+    // Default is "average"
+    maneuverability: ActorPFFlyManeuverability
+
+    total: number
+  }
+  land: {
+    base: number
+    total: number
+  }
+  swim: {
+    base: number
+    total: number
+  }
 }
 
 export type ResistedEnergyType =
@@ -121,13 +162,15 @@ export interface ActorPFRollData {
     sr: {
       total: number
     }
+    speed: ActorPFSpeed
   }
   skills: {
     sen: PFRollDataSkill
   }
   traits: {
     eres: ActorPFEnergyResistance
-    size: ActorSize
+    size: ActorPFSize
+    stature: ActorPFStature
     di: ActorPFCustomizableValue<string[]>
     cres: string
     ci: ActorPFCustomizableValue<string[]>
@@ -139,14 +182,23 @@ export interface ActorPFRollData {
 
 export interface ActorPFDetails {}
 
-export declare class ActorPF extends ActorBasePf {
+interface ActorPFAttributes extends ActorAttributes {
   name: string
+  system: ActorPFRollData
+  details: ActorPFDetails
+  items: EmbeddedCollection<ItemPF>
+}
+
+export declare class ActorPF extends ActorBasePf implements ActorPFAttributes {
+  name: string
+  system: ActorPFRollData
+  details: ActorPFDetails
+  items: EmbeddedCollection<ItemPF>
 
   getRollData: (options: GetRollDataOptions) => ActorPFRollData
 
-  system: ActorPFRollData
-
-  details: ActorPFDetails
-
-  items: EmbeddedCollection<ItemPF>
+  update(
+    data?: RecursivePartial<ActorPFAttributes>,
+    context?: DocumentModificationContext,
+  ): Promise<ActorPF>
 }

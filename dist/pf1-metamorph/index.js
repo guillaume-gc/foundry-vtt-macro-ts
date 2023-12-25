@@ -105,7 +105,25 @@ var config = {
         }
       ],
       size: "lg",
+      stature: "long",
       tokenTexture: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
+      speed: {
+        burrow: {
+          base: 0
+        },
+        climb: {
+          base: 0
+        },
+        fly: {
+          base: 0
+        },
+        land: {
+          base: 30
+        },
+        swim: {
+          base: 0
+        }
+      },
       senses: {
         dv: 60,
         ll: {
@@ -116,16 +134,6 @@ var config = {
           }
         },
         sc: 30
-      },
-      damageReduction: {
-        value: [
-          {
-            amount: 10,
-            operator: false,
-            types: ["bludgeoning", ""]
-          }
-        ],
-        custom: ""
       }
     }
   }
@@ -266,8 +274,12 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
     logger4.debug("Apply metamorph to actor", actor);
     return actor.update({
       system: {
+        attributes: {
+          speed: metamorphTransform.speed
+        },
         traits: {
           size: metamorphTransform.size,
+          stature: metamorphTransform.stature,
           senses: {
             ...actor.system.traits.senses,
             ...metamorphTransform.senses
@@ -319,8 +331,12 @@ var savePolymorphData = async (tokens, metamorphTransform) => {
     logger4.debug("Save data related to a token", token);
     const actorData = {
       system: {
+        attributes: {
+          speed: token.actor.system.attributes.speed
+        },
         traits: {
           size: token.actor.system.traits.size,
+          stature: token.actor.system.traits.stature,
           senses: token.actor.system.traits.senses,
           dr: token.actor.system.traits.dr,
           eres: token.actor.system.traits.eres
