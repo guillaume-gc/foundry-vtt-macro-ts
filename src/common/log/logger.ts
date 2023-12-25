@@ -25,7 +25,7 @@ const createLogger = (): Logger => {
   return {
     debug: (message: unknown, context?: Record<string, any>) => {
       if (level >= LogLevel.DEBUG) {
-        console.log(`${createMacroNameFlag()}[DEBUG] `, message, context)
+        console.log(`${createMacroNameFlag()}[DEBUG]`, message, context)
       }
     },
     info: (message: unknown, context?: Record<string, any>) => {

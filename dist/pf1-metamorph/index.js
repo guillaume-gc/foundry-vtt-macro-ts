@@ -9,7 +9,7 @@ var createLogger = () => {
   return {
     debug: (message, context) => {
       if (level >= 0 /* DEBUG */) {
-        console.log(`${createMacroNameFlag()}[DEBUG] `, message, context);
+        console.log(`${createMacroNameFlag()}[DEBUG]`, message, context);
       }
     },
     info: (message, context) => {
@@ -103,6 +103,11 @@ var config = {
         {
           name: "Pi\xE9tinement",
           compendiumName: "world.aptitudes-de-classe-personnalisees",
+          type: "feat"
+        },
+        {
+          name: "Souffle de Gorgone (gorgone - metamorph)",
+          compendiumName: "world.effets-metamorph",
           type: "feat"
         }
       ],

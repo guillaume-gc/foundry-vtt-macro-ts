@@ -67,6 +67,11 @@ export const config: MetamorphConfig = {
           compendiumName: 'world.aptitudes-de-classe-personnalisees',
           type: 'feat',
         },
+        {
+          name: 'Souffle de Gorgone (gorgone - metamorph)',
+          compendiumName: 'world.effets-metamorph',
+          type: 'feat',
+        },
       ],
       size: 'lg',
       stature: 'long',
