@@ -15,16 +15,17 @@ import {
 
 const logger = getLoggerInstance()
 
-const getTransformSpellLevel = (htm: JQuery): number | undefined => {
-  const metamorphTransformSpellLevelValue = parseInt(
-    getInputElement(htm, '#transformation-spell-level').value,
-  )
+const getNumberFromInputIfSpecified = (
+  htm: JQuery,
+  selector: string,
+): number | undefined => {
+  const value = parseInt(getInputElement(htm, selector).value)
 
-  if (!isNaN(metamorphTransformSpellLevelValue)) {
-    return metamorphTransformSpellLevelValue
+  if (!isNaN(value)) {
+    return value
   }
 
-  return undefined
+  return value
 }
 
 const triggerMetamorph = async (
@@ -37,7 +38,15 @@ const triggerMetamorph = async (
       '#metamorph-transformation',
     )
 
-    const metamorphTransformSpellLevel = getTransformSpellLevel(htm)
+    const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
+      htm,
+      '#transformation-spell-level',
+    )
+
+    const metamorphSpellDifficultyCheck = getNumberFromInputIfSpecified(
+      htm,
+      '#transformation-spell-difficulty-check',
+    )
 
     const metamorphTransform: MetamorphTransformation | undefined =
       config.transformations[metamorphTransformKey]
@@ -53,6 +62,7 @@ const triggerMetamorph = async (
       controlledTokens,
       metamorphTransform,
       metamorphTransformSpellLevel,
+      metamorphSpellDifficultyCheck,
     )
   } catch (error) {
     ui.notifications.error(
@@ -88,8 +98,8 @@ const openDialog = (controlledTokens: TokenPF[]) => {
 }
 
 try {
-  logger.level = LogLevel.DEBUG
-  logger.macroName = 'pf1-metamorph'
+  logger.setLevel(LogLevel.DEBUG)
+  logger.setMacroName('pf1-metamorph')
 
   const {
     tokens: { controlled: controlledTokens },

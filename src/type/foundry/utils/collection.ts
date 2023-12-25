@@ -44,7 +44,7 @@ export declare class Collection<T> extends Map<string, T> {
   getName(name: string, options?: { strict: boolean } | undefined): T
 
   map(
-    transformer: (value: T[], index: number, collection: Collection<T>) => any,
+    transformer: (value: T, index: number, collection: Collection<T>) => any,
   ): T[]
 
   reduce(

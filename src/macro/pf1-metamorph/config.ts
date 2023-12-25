@@ -37,7 +37,7 @@ export const config: MetamorphConfig = {
       label: 'Rapetissement',
       items: [
         {
-          name: 'Rapetissement (métamorphe)',
+          name: 'Rapetissement (metamorph)',
           compendiumName: 'world.effets-metamorph',
           type: 'buff',
         },
@@ -48,14 +48,24 @@ export const config: MetamorphConfig = {
       label: 'Gorgone (Forme Bestiale IV)',
       items: [
         {
-          name: 'Forme bestiale IV (créature magique G - métamorphe)',
+          name: 'Forme bestiale IV (créature magique G - metamorph)',
           compendiumName: 'world.effets-metamorph',
           type: 'buff',
         },
         {
-          name: 'Corne (gorgone - métamorphe)',
+          name: 'Corne (gorgone - metamorph)',
           compendiumName: 'world.effets-metamorph',
           type: 'attack',
+        },
+        {
+          name: '2 sabots (gorgone - metamorph)',
+          compendiumName: 'world.effets-metamorph',
+          type: 'attack',
+        },
+        {
+          name: 'Piétinement',
+          compendiumName: 'world.aptitudes-de-classe-personnalisees',
+          type: 'feat',
         },
       ],
       size: 'lg',

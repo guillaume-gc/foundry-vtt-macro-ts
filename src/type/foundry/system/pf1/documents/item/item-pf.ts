@@ -1,7 +1,9 @@
+import { Collection } from '../../../../utils/collection'
+import { ItemAction } from '../../components/item-action'
 import { ActorPF } from '../actor/actor-pf'
 import { ItemBasePF } from './item-base-pf'
 
-export const itemPFTypeValues = ['buff', 'attack'] as const
+export const itemPFTypeValues = ['buff', 'attack', 'feat'] as const
 export type ItemPFType = (typeof itemPFTypeValues)[number]
 
 export declare class ItemPF extends ItemBasePF {
@@ -10,6 +12,8 @@ export declare class ItemPF extends ItemBasePF {
   type: ItemPFType
 
   name: string
+
+  actions: Collection<ItemAction>
 
   uuid: string
 

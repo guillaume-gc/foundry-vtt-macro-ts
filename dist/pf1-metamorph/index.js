@@ -3,44 +3,36 @@
 // src/common/log/logger.ts
 var logger = void 0;
 var createLogger = () => {
-  const macroName = void 0;
-  const level = 1 /* INFO */;
-  const createMacroNameFlag = (macroName2) => macroName2 ? `[${macroName2}]` : "";
+  let level = 1 /* INFO */;
+  let macroName = void 0;
+  const createMacroNameFlag = () => macroName ? `[${macroName}]` : "";
   return {
     debug: (message, context) => {
       if (level >= 0 /* DEBUG */) {
-        console.log(
-          `${createMacroNameFlag(macroName)}[DEBUG] `,
-          message,
-          context
-        );
+        console.log(`${createMacroNameFlag()}[DEBUG] `, message, context);
       }
     },
     info: (message, context) => {
       if (level >= 1 /* INFO */) {
-        console.log(`${createMacroNameFlag(macroName)}[INFO]`, message, context);
+        console.log(`${createMacroNameFlag()}[INFO]`, message, context);
       }
     },
     warn: (message, context) => {
       if (level >= 2 /* WARN */) {
-        console.warn(
-          `${createMacroNameFlag(macroName)}[WARN]`,
-          message,
-          context
-        );
+        console.warn(`${createMacroNameFlag()}[WARN]`, message, context);
       }
     },
     error: (message, context) => {
       if (level >= 3 /* ERROR */) {
-        console.error(
-          `${createMacroNameFlag(macroName)}[ERROR]`,
-          message,
-          context
-        );
+        console.error(`${createMacroNameFlag()}[ERROR]`, message, context);
       }
     },
-    level,
-    macroName
+    setLevel: (newLevel) => {
+      level = newLevel;
+    },
+    setMacroName: (newMacroName) => {
+      macroName = newMacroName;
+    }
   };
 };
 var getLoggerInstance = () => {
@@ -83,7 +75,7 @@ var config = {
       label: "Rapetissement",
       items: [
         {
-          name: "Rapetissement (m\xE9tamorphe)",
+          name: "Rapetissement (metamorph)",
           compendiumName: "world.effets-metamorph",
           type: "buff"
         }
@@ -94,14 +86,24 @@ var config = {
       label: "Gorgone (Forme Bestiale IV)",
       items: [
         {
-          name: "Forme bestiale IV (cr\xE9ature magique G - m\xE9tamorphe)",
+          name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
           compendiumName: "world.effets-metamorph",
           type: "buff"
         },
         {
-          name: "Corne (gorgone - m\xE9tamorphe)",
+          name: "Corne (gorgone - metamorph)",
           compendiumName: "world.effets-metamorph",
           type: "attack"
+        },
+        {
+          name: "2 sabots (gorgone - metamorph)",
+          compendiumName: "world.effets-metamorph",
+          type: "attack"
+        },
+        {
+          name: "Pi\xE9tinement",
+          compendiumName: "world.aptitudes-de-classe-personnalisees",
+          type: "feat"
         }
       ],
       size: "lg",
@@ -149,6 +151,10 @@ var createForm = () => `
       <div class="form-group">
         <label for="transformation-value">Niveau lanceur de sort :</label>
         <input type="number" id="transformation-spell-level"/>
+      </div>
+      <div class="form-group">
+        <label for="transformation-value">DD Sort :</label>
+        <input type="number" id="transformation-spell-difficulty-check"/>
       </div>
     </form>
   `;
@@ -225,7 +231,7 @@ var transformToMetamorphSave = (value) => {
 
 // src/macro/pf1-metamorph/polymorph.ts
 var logger4 = getLoggerInstance();
-var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLevel) => {
+var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
   logger4.debug("Prepare to add item to actor", item);
   const compendiumItem = await findItemInCompendium(
     item.compendiumName,
@@ -243,30 +249,61 @@ var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLe
     itemName: item.name
   });
   const actorItem = await createItemInActor(actor, compendiumItem);
-  return updateAddedTransformationItem(actorItem, metamorphTransformSpellLevel);
+  return updateAddedTransformationItem(
+    actorItem,
+    metamorphTransformSpellLevel,
+    metamorphSpellDifficultyCheck
+  );
 };
-var updateAddedTransformationItem = async (item, metamorphTransformSpellLevel) => {
+var updateAddedTransformationItem = async (item, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
+  const updates = [];
   if (item.type === "buff") {
-    return item.update({
-      system: {
-        level: metamorphTransformSpellLevel,
-        active: true
-      }
-    });
+    updates.push(
+      item.update({
+        system: {
+          level: metamorphTransformSpellLevel,
+          active: true
+        }
+      })
+    );
+  }
+  if (item.hasAction) {
+    updates.push(
+      updateAddedTransformationItemActions(
+        item.actions,
+        metamorphSpellDifficultyCheck
+      )
+    );
+  }
+  if (updates.length > 0) {
+    return Promise.all(updates);
   }
   return item;
 };
+var updateAddedTransformationItemActions = async (actions, metamorphSpellDifficultyCheck) => actions.map(
+  (action) => action.update({
+    save: {
+      // Abilities DC must be using spell DC, if specified.
+      dc: metamorphSpellDifficultyCheck?.toString()
+    }
+  })
+);
 var mixReduction = (actorReduction, polymorphReduction) => polymorphReduction !== void 0 ? {
   custom: [actorReduction.custom, polymorphReduction.custom].filter((value) => value).join(";"),
   value: [...actorReduction.value, ...polymorphReduction.value]
 } : actorReduction;
-var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellLevel) => {
+var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
   logger4.info("Apply metamorph");
   const { tokenTexture, items } = metamorphTransform;
   const itemActions = tokens.map(async ({ actor }) => {
     logger4.debug("Create metamorph items in actor", actor);
     const individualItemActions = items.map(
-      (item) => addTransformationItemToActor(actor, item, metamorphTransformSpellLevel)
+      (item) => addTransformationItemToActor(
+        actor,
+        item,
+        metamorphTransformSpellLevel,
+        metamorphSpellDifficultyCheck
+      )
     );
     return Promise.all(individualItemActions);
   });
@@ -421,14 +458,12 @@ var rollbackToPrePolymorphData = async (tokens) => {
 
 // src/macro/pf1-metamorph/index.ts
 var logger5 = getLoggerInstance();
-var getTransformSpellLevel = (htm) => {
-  const metamorphTransformSpellLevelValue = parseInt(
-    getInputElement(htm, "#transformation-spell-level").value
-  );
-  if (!isNaN(metamorphTransformSpellLevelValue)) {
-    return metamorphTransformSpellLevelValue;
+var getNumberFromInputIfSpecified = (htm, selector) => {
+  const value = parseInt(getInputElement(htm, selector).value);
+  if (!isNaN(value)) {
+    return value;
   }
-  return void 0;
+  return value;
 };
 var triggerMetamorph = async (htm, controlledTokens) => {
   try {
@@ -436,7 +471,14 @@ var triggerMetamorph = async (htm, controlledTokens) => {
       htm,
       "#metamorph-transformation"
     );
-    const metamorphTransformSpellLevel = getTransformSpellLevel(htm);
+    const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
+      htm,
+      "#transformation-spell-level"
+    );
+    const metamorphSpellDifficultyCheck = getNumberFromInputIfSpecified(
+      htm,
+      "#transformation-spell-difficulty-check"
+    );
     const metamorphTransform = config.transformations[metamorphTransformKey];
     if (metamorphTransform === void 0) {
       ui.notifications.error("Cette transformation est inconnue");
@@ -447,7 +489,8 @@ var triggerMetamorph = async (htm, controlledTokens) => {
     await applyMetamorph(
       controlledTokens,
       metamorphTransform,
-      metamorphTransformSpellLevel
+      metamorphTransformSpellLevel,
+      metamorphSpellDifficultyCheck
     );
   } catch (error) {
     ui.notifications.error(
@@ -479,8 +522,8 @@ var openDialog = (controlledTokens) => {
   }).render(true);
 };
 try {
-  logger5.level = 0 /* DEBUG */;
-  logger5.macroName = "pf1-metamorph";
+  logger5.setLevel(0 /* DEBUG */);
+  logger5.setMacroName("pf1-metamorph");
   const {
     tokens: { controlled: controlledTokens }
   } = canvas;

@@ -10,6 +10,10 @@ export const createForm = () => `
         <label for="transformation-value">Niveau lanceur de sort :</label>
         <input type="number" id="transformation-spell-level"/>
       </div>
+      <div class="form-group">
+        <label for="transformation-value">DD Sort :</label>
+        <input type="number" id="transformation-spell-difficulty-check"/>
+      </div>
     </form>
   `
 

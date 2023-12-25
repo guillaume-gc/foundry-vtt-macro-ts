@@ -2,6 +2,7 @@ import { UserWarning } from '../../common/error/user-warning'
 import { getLoggerInstance } from '../../common/log/logger'
 import { Document } from '../../type/foundry/abstract/document'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
+import { ItemAction } from '../../type/foundry/system/pf1/components/item-action'
 import {
   ActorPF,
   ActorPFCustomizableValue,
@@ -10,6 +11,7 @@ import {
   ResistedEnergyType,
 } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemPF } from '../../type/foundry/system/pf1/documents/item/item-pf'
+import { Collection } from '../../type/foundry/utils/collection'
 import { MetamorphTransformation, MetamorphTransformationItem } from './config'
 import {
   createItemInActor,
@@ -32,6 +34,7 @@ const addTransformationItemToActor = async (
   actor: ActorPF,
   item: MetamorphTransformationItem,
   metamorphTransformSpellLevel?: number,
+  metamorphSpellDifficultyCheck?: number,
 ) => {
   logger.debug('Prepare to add item to actor', item)
 
@@ -55,7 +58,11 @@ const addTransformationItemToActor = async (
 
   const actorItem = await createItemInActor(actor, compendiumItem)
 
-  return updateAddedTransformationItem(actorItem, metamorphTransformSpellLevel)
+  return updateAddedTransformationItem(
+    actorItem,
+    metamorphTransformSpellLevel,
+    metamorphSpellDifficultyCheck,
+  )
 }
 
 /*
@@ -64,18 +71,50 @@ const addTransformationItemToActor = async (
 const updateAddedTransformationItem = async (
   item: ItemPF,
   metamorphTransformSpellLevel?: number,
-): Promise<Document> => {
+  metamorphSpellDifficultyCheck?: number,
+): Promise<(Document | ItemAction[])[] | Document> => {
+  const updates: (Promise<Document> | Promise<ItemAction[]>)[] = []
+
   if (item.type === 'buff') {
-    return item.update({
-      system: {
-        level: metamorphTransformSpellLevel,
-        active: true,
-      },
-    })
+    updates.push(
+      item.update({
+        system: {
+          level: metamorphTransformSpellLevel,
+          active: true,
+        },
+      }),
+    )
+  }
+
+  // Update actions, if present within the item.
+  if (item.hasAction) {
+    updates.push(
+      updateAddedTransformationItemActions(
+        item.actions,
+        metamorphSpellDifficultyCheck,
+      ),
+    )
+  }
+
+  if (updates.length > 0) {
+    return Promise.all(updates)
   }
 
   return item
 }
+
+const updateAddedTransformationItemActions = async (
+  actions: Collection<ItemAction>,
+  metamorphSpellDifficultyCheck?: number,
+) =>
+  actions.map((action) =>
+    action.update({
+      save: {
+        // Abilities DC must be using spell DC, if specified.
+        dc: metamorphSpellDifficultyCheck?.toString(),
+      },
+    }),
+  )
 
 const mixReduction = <
   ReductionType extends [string, string] = [string, string],
@@ -102,6 +141,7 @@ export const applyMetamorph = async (
   tokens: TokenPF[],
   metamorphTransform: MetamorphTransformation,
   metamorphTransformSpellLevel?: number,
+  metamorphSpellDifficultyCheck?: number,
 ) => {
   logger.info('Apply metamorph')
 
@@ -111,7 +151,12 @@ export const applyMetamorph = async (
     logger.debug('Create metamorph items in actor', actor)
 
     const individualItemActions = items.map((item) =>
-      addTransformationItemToActor(actor, item, metamorphTransformSpellLevel),
+      addTransformationItemToActor(
+        actor,
+        item,
+        metamorphTransformSpellLevel,
+        metamorphSpellDifficultyCheck,
+      ),
     )
 
     return Promise.all(individualItemActions)
