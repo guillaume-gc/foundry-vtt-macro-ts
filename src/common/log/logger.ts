@@ -1,63 +1,54 @@
 export enum LogLevel {
-  'DEBUG' = 0,
-  'INFO' = 1,
-  'WARN' = 2,
-  'ERROR' = 3,
+  'DEBUG',
+  'INFO',
+  'WARN',
+  'ERROR',
 }
 
 export interface Logger {
-  debug: (message: any, context?: Record<string, any>) => void
-  info: (message: any, context?: Record<string, any>) => void
-  warn: (message: any, context?: Record<string, any>) => void
-  error: (message: any, context?: Record<string, any>) => void
-  level: LogLevel
-  macroName: string | undefined
+  debug: (message: unknown, context?: Record<string, any>) => void
+  info: (message: unknown, context?: Record<string, any>) => void
+  warn: (message: unknown, context?: Record<string, any>) => void
+  error: (message: unknown, context?: Record<string, any>) => void
+  setLevel: (newLevel: LogLevel) => void
+  setMacroName: (newMacroName?: string) => void
 }
 
 let logger: Logger | undefined = undefined
 
 const createLogger = (): Logger => {
-  const macroName: string | undefined = undefined
-  const level: LogLevel = LogLevel.INFO
+  let level: LogLevel = LogLevel.INFO
+  let macroName: string | undefined = undefined
 
-  const createMacroNameFlag = (macroName: string | undefined) =>
-    macroName ? `[${macroName}]` : ''
+  const createMacroNameFlag = () => (macroName ? `[${macroName}]` : '')
 
   return {
-    debug: (message: any, context?: Record<string, any>) => {
+    debug: (message: unknown, context?: Record<string, any>) => {
       if (level >= LogLevel.DEBUG) {
-        console.log(
-          `${createMacroNameFlag(macroName)}[DEBUG] `,
-          message,
-          context,
-        )
+        console.log(`${createMacroNameFlag()}[DEBUG] `, message, context)
       }
     },
-    info: (message: any, context?: Record<string, any>) => {
+    info: (message: unknown, context?: Record<string, any>) => {
       if (level >= LogLevel.INFO) {
-        console.log(`${createMacroNameFlag(macroName)}[INFO]`, message, context)
+        console.log(`${createMacroNameFlag()}[INFO]`, message, context)
       }
     },
-    warn: (message: any, context?: Record<string, any>) => {
+    warn: (message: unknown, context?: Record<string, any>) => {
       if (level >= LogLevel.WARN) {
-        console.warn(
-          `${createMacroNameFlag(macroName)}[WARN]`,
-          message,
-          context,
-        )
+        console.warn(`${createMacroNameFlag()}[WARN]`, message, context)
       }
     },
-    error: (message: any, context?: Record<string, any>) => {
+    error: (message: unknown, context?: Record<string, any>) => {
       if (level >= LogLevel.ERROR) {
-        console.error(
-          `${createMacroNameFlag(macroName)}[ERROR]`,
-          message,
-          context,
-        )
+        console.error(`${createMacroNameFlag()}[ERROR]`, message, context)
       }
     },
-    level,
-    macroName,
+    setLevel: (newLevel: LogLevel) => {
+      level = newLevel
+    },
+    setMacroName: (newMacroName?: string) => {
+      macroName = newMacroName
+    },
   }
 }
 
