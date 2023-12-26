@@ -6,12 +6,8 @@ import {
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import { MetamorphTransformation, config } from './config'
 import { createForm } from './html'
-import {
-  applyMetamorph,
-  checkTokens,
-  rollbackToPrePolymorphData,
-  savePolymorphData,
-} from './polymorph'
+import { applyMetamorph, checkTokens } from './polymorph'
+import { rollbackToPrePolymorphData, savePolymorphData } from './save'
 
 const logger = getLoggerInstance()
 

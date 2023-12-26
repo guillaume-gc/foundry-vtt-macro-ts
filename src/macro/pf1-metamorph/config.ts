@@ -9,15 +9,24 @@ import {
 import { ItemPFType } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { RecursivePartial } from '../../type/foundry/utils/partial'
 
-export interface MetamorphTransformationItem {
+export interface MetamorphTransformationCompendiumItem {
   name: string
   compendiumName: string
   type: ItemPFType
 }
 
+export type MetamorphItemTransformationAction = 'disable'
+
+export interface MetamorphTransformationActorItem {
+  name: string
+  type: ItemPFType
+  action: MetamorphItemTransformationAction
+}
+
 export interface MetamorphTransformation {
   label: string
-  items: MetamorphTransformationItem[]
+  itemsToAdd: MetamorphTransformationCompendiumItem[]
+  itemsToModify?: MetamorphTransformationActorItem[]
   size?: ActorPFSize
   stature?: ActorPFStature
   speed?: RecursivePartial<ActorPFSpeed>
@@ -36,7 +45,7 @@ export const config: MetamorphConfig = {
   transformations: {
     reducePerson: {
       label: 'Rapetissement',
-      items: [
+      itemsToAdd: [
         {
           name: 'Rapetissement (metamorph)',
           compendiumName: 'world.effets-metamorph',
@@ -47,7 +56,14 @@ export const config: MetamorphConfig = {
     },
     gorgonBeastShapeIV: {
       label: 'Gorgone (Forme Bestiale IV)',
-      items: [
+      itemsToModify: [
+        {
+          name: 'New Effet',
+          type: 'buff',
+          action: 'disable',
+        },
+      ],
+      itemsToAdd: [
         {
           name: 'Forme bestiale IV (créature magique G - metamorph)',
           compendiumName: 'world.effets-metamorph',

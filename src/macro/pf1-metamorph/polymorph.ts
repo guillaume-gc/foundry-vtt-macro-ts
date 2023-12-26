@@ -10,20 +10,17 @@ import {
   ResistedDamageType,
   ResistedEnergyType,
 } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
+import { ItemBuffPF } from '../../type/foundry/system/pf1/documents/item/item-buff-pf'
+import { ItemFeatPF } from '../../type/foundry/system/pf1/documents/item/item-feat-pf'
 import { ItemPF } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { Collection } from '../../type/foundry/utils/collection'
-import { MetamorphTransformation, MetamorphTransformationItem } from './config'
 import {
-  createItemInActor,
-  findItemInActor,
-  findItemInCompendium,
-} from './item'
-import {
-  MetamorphActorData,
-  MetamorphSave,
-  MetamorphTokenDocumentData,
-  transformToMetamorphSave,
-} from './save'
+  MetamorphItemTransformationAction,
+  MetamorphTransformation,
+  MetamorphTransformationActorItem,
+  MetamorphTransformationCompendiumItem,
+} from './config'
+import { createItemInActor, findItemInCompendium } from './item'
 
 const logger = getLoggerInstance()
 
@@ -32,7 +29,7 @@ const logger = getLoggerInstance()
  */
 const addTransformationItemToActor = async (
   actor: ActorPF,
-  item: MetamorphTransformationItem,
+  item: MetamorphTransformationCompendiumItem,
   metamorphTransformSpellLevel?: number,
   metamorphSpellDifficultyCheck?: number,
 ) => {
@@ -77,7 +74,7 @@ const updateAddedTransformationItem = async (
 
   if (item.type === 'buff') {
     updates.push(
-      item.update({
+      (item as ItemBuffPF).update({
         system: {
           level: metamorphTransformSpellLevel,
           active: true,
@@ -103,6 +100,9 @@ const updateAddedTransformationItem = async (
   return item
 }
 
+/*
+ * Update added items action.
+ */
 const updateAddedTransformationItemActions = async (
   actions: Collection<ItemAction>,
   metamorphSpellDifficultyCheck?: number,
@@ -116,6 +116,9 @@ const updateAddedTransformationItemActions = async (
     }),
   )
 
+/*
+ * Mix actor existing reduction (damage reduction and energy resistance) with those added by metamorph.
+ */
 const mixReduction = <
   ReductionType extends [string, string] = [string, string],
 >(
@@ -145,76 +148,142 @@ export const applyMetamorph = async (
 ) => {
   logger.info('Apply metamorph')
 
-  const { tokenTextureSrc, items } = metamorphTransform
+  const { tokenTextureSrc, itemsToAdd, itemsToModify } = metamorphTransform
 
-  const itemActions = tokens.map(async ({ actor }) => {
-    logger.debug('Create metamorph items in actor', actor)
+  const updates: Promise<unknown>[][] = []
 
-    const individualItemActions = items.map((item) =>
-      addTransformationItemToActor(
-        actor,
-        item,
-        metamorphTransformSpellLevel,
-        metamorphSpellDifficultyCheck,
-      ),
-    )
+  updates.push(
+    tokens.map(({ actor }) => {
+      logger.debug('Create metamorph items in actor', actor)
 
-    return Promise.all(individualItemActions)
-  })
+      const individualItemUpdate: Promise<unknown>[] = itemsToAdd.map((item) =>
+        addTransformationItemToActor(
+          actor,
+          item,
+          metamorphTransformSpellLevel,
+          metamorphSpellDifficultyCheck,
+        ),
+      )
 
-  const actorsActions = tokens.map(async ({ actor }) => {
-    logger.debug('Apply metamorph to actor', actor)
+      return Promise.all(individualItemUpdate)
+    }),
+  )
 
-    return actor.update({
-      system: {
-        attributes: {
-          speed: metamorphTransform.speed,
-        },
-        traits: {
-          size: metamorphTransform.size,
-          stature: metamorphTransform.stature,
-          senses: {
-            ...actor.system.traits.senses,
-            ...metamorphTransform.senses,
+  updates.push(
+    tokens.map(({ actor }) => {
+      logger.debug('Apply metamorph to actor', actor)
+
+      return actor.update({
+        system: {
+          attributes: {
+            speed: metamorphTransform.speed,
           },
-          dr: mixReduction<[ResistedDamageType, ResistedDamageType]>(
-            actor.system.traits.dr,
-            metamorphTransform.damageReduction,
-          ),
-          eres: mixReduction<[ResistedEnergyType, ResistedEnergyType]>(
-            actor.system.traits.eres,
-            metamorphTransform.energyResistance,
-          ),
+          traits: {
+            size: metamorphTransform.size,
+            stature: metamorphTransform.stature,
+            senses: {
+              ...actor.system.traits.senses,
+              ...metamorphTransform.senses,
+            },
+            dr: mixReduction<[ResistedDamageType, ResistedDamageType]>(
+              actor.system.traits.dr,
+              metamorphTransform.damageReduction,
+            ),
+            eres: mixReduction<[ResistedEnergyType, ResistedEnergyType]>(
+              actor.system.traits.eres,
+              metamorphTransform.energyResistance,
+            ),
+          },
         },
-      },
-      flags: {
-        metamorph: {
-          ...actor.flags?.metamorph,
-          active: true,
+        flags: {
+          metamorph: {
+            ...actor.flags?.metamorph,
+            active: true,
+          },
         },
-      },
-      prototypeToken: {
+        prototypeToken: {
+          texture: {
+            src: tokenTextureSrc,
+          },
+        },
+        img: metamorphTransform.actorImg,
+      })
+    }),
+  )
+
+  updates.push(
+    tokens.map((token) => {
+      logger.debug('Apply metamorph to token', token)
+
+      return token.document.update({
         texture: {
           src: tokenTextureSrc,
         },
+      })
+    }),
+  )
+
+  if (itemsToModify !== undefined) {
+    updates.push(getItemToModifyUpdate(tokens, itemsToModify))
+  }
+
+  await Promise.all(updates.flat())
+}
+
+export const getItemToModifyUpdate = (
+  tokens: TokenPF[],
+  itemsToModify: MetamorphTransformationActorItem[],
+) =>
+  tokens
+    .map(({ actor }) =>
+      actor.items.reduce<Promise<unknown>[]>((accumulator, currentItem) => {
+        const modification = itemsToModify.find(
+          (item) =>
+            item.name === currentItem.name && item.type === currentItem.type,
+        )
+
+        if (modification === undefined) {
+          return accumulator
+        }
+
+        accumulator.push(
+          getTransformActionUpdate(modification.action, currentItem),
+        )
+
+        return accumulator
+      }, []),
+    )
+    .flat()
+
+export const getTransformActionUpdate = (
+  action: MetamorphItemTransformationAction,
+  item: ItemPF,
+): Promise<ItemPF> => {
+  switch (action) {
+    case 'disable':
+      return getDisableActionUpdate(item)
+  }
+}
+
+export const getDisableActionUpdate = (item: ItemPF): Promise<ItemPF> => {
+  if (item.type === 'buff') {
+    return (item as ItemBuffPF).update({
+      system: {
+        active: false,
       },
-      img: metamorphTransform.actorImg,
     })
-  })
-
-  const tokensActions = tokens.map(async (token) => {
-    logger.debug('Apply metamorph to token', token)
-
-    return token.document.update({
-      texture: {
-        src: tokenTextureSrc,
+  }
+  if (item.type === 'feat') {
+    return (item as ItemFeatPF).update({
+      system: {
+        disabled: true,
       },
     })
-  })
+  }
 
-  const applyActions = [...itemActions, ...actorsActions, ...tokensActions]
-
-  await Promise.all(applyActions)
+  throw new Error(
+    `Unexpected item type ${item.type}, cannot create disable action update`,
+  )
 }
 
 /*
@@ -226,133 +295,4 @@ export const checkTokens = (tokens: TokenPF[]) => {
       throw new UserWarning('Au moins un token a déjà un effet')
     }
   }
-}
-
-/*
- * Save polymorph data to actor flags.
- */
-export const savePolymorphData = async (
-  tokens: TokenPF[],
-  metamorphTransform: MetamorphTransformation,
-) => {
-  logger.info('Save data to actor flags to ensure rolling back is possible')
-
-  const operations = tokens.map(async (token) => {
-    logger.debug('Save data related to a token', token)
-
-    const actorData: MetamorphActorData = {
-      system: {
-        attributes: {
-          speed: token.actor.system.attributes.speed,
-        },
-        traits: {
-          size: token.actor.system.traits.size,
-          stature: token.actor.system.traits.stature,
-          senses: token.actor.system.traits.senses,
-          dr: token.actor.system.traits.dr,
-          eres: token.actor.system.traits.eres,
-        },
-      },
-      prototypeToken: {
-        texture: {
-          src: token.document.texture.src,
-        },
-      },
-      img: token.actor.img,
-    }
-    const tokenDocumentData: MetamorphTokenDocumentData = {
-      texture: {
-        src: token.document.texture.src,
-      },
-    }
-
-    const save: MetamorphSave = {
-      actorData,
-      tokenDocumentData,
-      transformItemsData: metamorphTransform.items,
-    }
-
-    await token.actor.update({
-      flags: {
-        metamorph: {
-          save,
-        },
-      },
-    })
-  })
-
-  await Promise.all(operations)
-}
-
-/*
- * Rollback to pre-polymorph data using actor flags.
- */
-export const rollbackToPrePolymorphData = async (tokens: TokenPF[]) => {
-  logger.info('Prepare to roll back to data before polymorph was triggered')
-
-  const rollbackActions: (Promise<Document> | Promise<Document[]>)[] = tokens
-    .map((token) => {
-      logger.debug('Rolling back token', token)
-
-      const save = transformToMetamorphSave(token.actor.flags?.metamorph?.save)
-
-      logger.debug('Save obtained from token actor', save)
-
-      const currentRollBackActions: (
-        | Promise<Document>
-        | Promise<Document[]>
-      )[] = [
-        token.document.update(save.tokenDocumentData),
-        token.actor.update({
-          ...save.actorData,
-          flags: {
-            metamorph: {
-              ...token.actor.flags?.metamorph,
-              active: false,
-            },
-          },
-        }),
-      ]
-
-      logger.debug('Delete all metamorph related items', save)
-
-      const itemsToDelete = save.transformItemsData.reduce<ItemPF[]>(
-        (previousItems, currentItem) => {
-          const actorItem = findItemInActor(
-            token.actor,
-            currentItem.name,
-            currentItem.type,
-          )
-
-          if (actorItem !== undefined) {
-            previousItems.push(actorItem)
-          } else {
-            logger.warn(`Could not find ${currentItem.name} item in actor`)
-          }
-
-          return previousItems
-        },
-        [],
-      )
-
-      logger.debug(`Ready to delete ${itemsToDelete.length} items`, {
-        itemsToDelete,
-      })
-
-      currentRollBackActions.push(
-        token.actor.deleteEmbeddedDocuments(
-          'Item',
-          itemsToDelete.map(({ id }) => id),
-        ),
-      )
-
-      return currentRollBackActions
-    })
-    .flat()
-
-  logger.info('Trigger rollback')
-
-  await Promise.all(rollbackActions)
-
-  logger.info('Rollback complete')
 }

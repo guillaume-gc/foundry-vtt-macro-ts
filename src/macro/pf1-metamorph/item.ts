@@ -8,16 +8,22 @@ import {
 
 const logger = getLoggerInstance()
 
-export const findItemInActor = <T extends ItemPF = ItemPF>(
+/*
+ * Find all items in an actor of a given name and type.
+ */
+export const findItemsInActor = <T extends ItemPF[] = ItemPF[]>(
   actor: ActorPF,
   itemName: string,
   itemType: ItemPFType,
-): T | undefined =>
-  actor.items.find(
+): T =>
+  actor.items.filter(
     ({ name, type }) =>
       name.toLowerCase() === itemName.toLowerCase() && type === itemType,
   ) as T
 
+/*
+ * Find the first item in a compendium of a given name and type.
+ */
 export const findItemInCompendium = async <T extends ItemPF = ItemPF>(
   compendiumName: string,
   itemName: string,
@@ -33,9 +39,7 @@ export const findItemInCompendium = async <T extends ItemPF = ItemPF>(
     return undefined
   }
 
-  const item = await compendiumCollection.getDocument<ItemBuffPF>(
-    itemDescriptor._id,
-  )
+  const item = await compendiumCollection.getDocument<T>(itemDescriptor._id)
   if (item === undefined) {
     logger.warn(
       'Could not find item in compendium even though its descriptor was found',
@@ -43,9 +47,12 @@ export const findItemInCompendium = async <T extends ItemPF = ItemPF>(
     return undefined
   }
 
-  return item as T
+  return item
 }
 
+/*
+ * Create a specific item in an actor.
+ */
 export const createItemInActor = async <T extends ItemPF = ItemPF>(
   actor: ActorPF,
   item: ItemPF,

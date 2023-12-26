@@ -47,15 +47,15 @@ export declare class Collection<T> extends Map<string, T> {
     transformer: (value: T, index: number, collection: Collection<T>) => any,
   ): T[]
 
-  reduce(
+  reduce<AccumulatorType>(
     reducer: (
-      accumulator: T,
+      accumulator: AccumulatorType,
       currentValue: T,
-      index: number,
+      currentIndex: number,
       collection: Collection<T>,
-    ) => any,
-    initial: T,
-  ): T
+    ) => AccumulatorType,
+    initial: AccumulatorType,
+  ): AccumulatorType
 
   some(
     condition: (value: T, index: number, collection: Collection<T>) => boolean,
