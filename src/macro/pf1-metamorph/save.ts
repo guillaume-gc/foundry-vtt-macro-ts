@@ -23,6 +23,7 @@ export interface MetamorphActorData {
     }
   }
   prototypeToken: MetamorphTokenDocumentData
+  img: string
 }
 
 export interface MetamorphTokenDocumentData {

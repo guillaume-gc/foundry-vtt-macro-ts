@@ -187,6 +187,7 @@ interface ActorPFAttributes extends ActorAttributes {
   system: ActorPFRollData
   details: ActorPFDetails
   items: EmbeddedCollection<ItemPF>
+  img: string
 }
 
 export declare class ActorPF extends ActorBasePf implements ActorPFAttributes {
@@ -194,6 +195,7 @@ export declare class ActorPF extends ActorBasePf implements ActorPFAttributes {
   system: ActorPFRollData
   details: ActorPFDetails
   items: EmbeddedCollection<ItemPF>
+  img: string
 
   getRollData: (options: GetRollDataOptions) => ActorPFRollData
 

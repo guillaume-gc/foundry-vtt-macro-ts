@@ -145,7 +145,7 @@ export const applyMetamorph = async (
 ) => {
   logger.info('Apply metamorph')
 
-  const { tokenTexture, items } = metamorphTransform
+  const { tokenTextureSrc, items } = metamorphTransform
 
   const itemActions = tokens.map(async ({ actor }) => {
     logger.debug('Create metamorph items in actor', actor)
@@ -195,9 +195,10 @@ export const applyMetamorph = async (
       },
       prototypeToken: {
         texture: {
-          src: tokenTexture,
+          src: tokenTextureSrc,
         },
       },
+      img: metamorphTransform.actorImg,
     })
   })
 
@@ -206,7 +207,7 @@ export const applyMetamorph = async (
 
     return token.document.update({
       texture: {
-        src: tokenTexture,
+        src: tokenTextureSrc,
       },
     })
   })
@@ -257,6 +258,7 @@ export const savePolymorphData = async (
           src: token.document.texture.src,
         },
       },
+      img: token.actor.img,
     }
     const tokenDocumentData: MetamorphTokenDocumentData = {
       texture: {

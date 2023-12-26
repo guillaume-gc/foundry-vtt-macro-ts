@@ -21,7 +21,8 @@ export interface MetamorphTransformation {
   size?: ActorPFSize
   stature?: ActorPFStature
   speed?: RecursivePartial<ActorPFSpeed>
-  tokenTexture?: string
+  tokenTextureSrc?: string
+  actorImg?: string
   senses?: Partial<ActorPFSenses>
   damageReduction?: ActorPFDamageReduction
   energyResistance?: ActorPFEnergyResistance
@@ -75,7 +76,8 @@ export const config: MetamorphConfig = {
       ],
       size: 'lg',
       stature: 'long',
-      tokenTexture: '/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp',
+      tokenTextureSrc: '/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp',
+      actorImg: '/characters/monsters/magicalBeasts/gorgone.webp',
       speed: {
         burrow: {
           base: 0,

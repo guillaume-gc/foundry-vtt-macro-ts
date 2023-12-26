@@ -113,7 +113,8 @@ var config = {
       ],
       size: "lg",
       stature: "long",
-      tokenTexture: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
+      tokenTextureSrc: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
+      actorImg: "/characters/monsters/magicalBeasts/gorgone.webp",
       speed: {
         burrow: {
           base: 0
@@ -299,7 +300,7 @@ var mixReduction = (actorReduction, polymorphReduction) => polymorphReduction !=
 } : actorReduction;
 var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
   logger4.info("Apply metamorph");
-  const { tokenTexture, items } = metamorphTransform;
+  const { tokenTextureSrc, items } = metamorphTransform;
   const itemActions = tokens.map(async ({ actor }) => {
     logger4.debug("Create metamorph items in actor", actor);
     const individualItemActions = items.map(
@@ -344,16 +345,17 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
       },
       prototypeToken: {
         texture: {
-          src: tokenTexture
+          src: tokenTextureSrc
         }
-      }
+      },
+      img: metamorphTransform.actorImg
     });
   });
   const tokensActions = tokens.map(async (token) => {
     logger4.debug("Apply metamorph to token", token);
     return token.document.update({
       texture: {
-        src: tokenTexture
+        src: tokenTextureSrc
       }
     });
   });
@@ -388,7 +390,8 @@ var savePolymorphData = async (tokens, metamorphTransform) => {
         texture: {
           src: token.document.texture.src
         }
-      }
+      },
+      img: token.actor.img
     };
     const tokenDocumentData = {
       texture: {
