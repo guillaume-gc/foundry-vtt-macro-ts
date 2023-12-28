@@ -1,6 +1,5 @@
 import { getLoggerInstance } from '../../common/log/logger'
 import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
-import { ItemBuffPF } from '../../type/foundry/system/pf1/documents/item/item-buff-pf'
 import {
   ItemPF,
   ItemPFType,

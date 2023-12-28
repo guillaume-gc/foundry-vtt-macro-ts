@@ -1,11 +1,16 @@
 import { LogLevel, getLoggerInstance } from '../../common/log/logger'
 import {
+  editInnerHtml,
   getInputElement,
   getSelectElementValue,
 } from '../../common/util/jquery'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import { MetamorphTransformation, config } from './config'
-import { createForm } from './html'
+import {
+  createForm,
+  createTransformationEffectDescription,
+  createTransformationGroupValues,
+} from './html'
 import { applyMetamorph, checkTokens } from './polymorph'
 import { rollbackToPrePolymorphData, savePolymorphData } from './save'
 
@@ -29,7 +34,12 @@ const triggerMetamorph = async (
   controlledTokens: TokenPF[],
 ): Promise<void> => {
   try {
-    const metamorphTransformKey = getSelectElementValue(
+    const metamorphTransformGroupKey = getSelectElementValue(
+      htm,
+      '#metamorph-transformation-group',
+    )
+
+    const metamorphTransformEffectKey = getSelectElementValue(
       htm,
       '#metamorph-transformation',
     )
@@ -44,19 +54,21 @@ const triggerMetamorph = async (
       '#transformation-spell-difficulty-check',
     )
 
-    const metamorphTransform: MetamorphTransformation | undefined =
-      config.transformations[metamorphTransformKey]
-    if (metamorphTransform === undefined) {
+    const metamorphTransformEffect: MetamorphTransformation | undefined =
+      config.groups[metamorphTransformGroupKey].transformation[
+        metamorphTransformEffectKey
+      ]
+    if (metamorphTransformEffect === undefined) {
       ui.notifications.error('Cette transformation est inconnue')
       return
     }
 
     checkTokens(controlledTokens)
 
-    await savePolymorphData(controlledTokens, metamorphTransform)
+    await savePolymorphData(controlledTokens, metamorphTransformEffect)
     await applyMetamorph(
       controlledTokens,
-      metamorphTransform,
+      metamorphTransformEffect,
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck,
     )
@@ -90,7 +102,54 @@ const openDialog = (controlledTokens: TokenPF[]) => {
         callback: (htm) => triggerMetamorph(htm, controlledTokens),
       },
     },
+    render: (htm) => {
+      const $transformGroupElement = htm.find('#metamorph-transformation-group')
+      const $transformElement = htm.find('#metamorph-transformation')
+      if (
+        $transformGroupElement.length === 0 ||
+        $transformElement.length === 0
+      ) {
+        throw new Error('Could not find relevant JQuery elements')
+      }
+
+      $transformGroupElement.on('change', () => {
+        refreshTransformationEffectOptions(htm)
+        refreshTransformationEffectDescription(htm)
+      })
+
+      $transformElement.on('change', () => {
+        refreshTransformationEffectDescription(htm)
+      })
+
+      refreshTransformationEffectOptions(htm)
+      refreshTransformationEffectDescription(htm)
+    },
   }).render(true)
+}
+
+const refreshTransformationEffectOptions = (htm: JQuery<HTMLElement>) => {
+  const transformationEffectValues = createTransformationGroupValues(htm)
+
+  editInnerHtml(
+    htm,
+    '#metamorph-transformation',
+    transformationEffectValues.optionValue,
+  )
+  editInnerHtml(
+    htm,
+    '#metamorph-transformation-group-description',
+    transformationEffectValues.description ?? '',
+  )
+}
+
+const refreshTransformationEffectDescription = (htm: JQuery<HTMLElement>) => {
+  const transformEffectDescription = createTransformationEffectDescription(htm)
+
+  editInnerHtml(
+    htm,
+    '#metamorph-transformation-description',
+    transformEffectDescription ?? '',
+  )
 }
 
 try {

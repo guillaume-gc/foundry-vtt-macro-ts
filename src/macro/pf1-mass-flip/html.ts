@@ -16,21 +16,23 @@ export const createForm = (actorGroupNames: Set<string>) => `
     </form>
   `
 
-const createActorGroupOptions = (actorGroupNames: Set<string>) => {
+const createActorGroupOptions = (actorGroupNames: Set<string>): string => {
   if (actorGroupNames.size === 0) {
     return '<option>Aucun acteur compatible</option>'
   }
 
-  return [...actorGroupNames].map(
-    (actorGroup) =>
-      `<option value='${actorGroup}'>${decodeURI(actorGroup)}</option>`,
-  )
+  return [...actorGroupNames]
+    .map(
+      (actorGroup) =>
+        `<option value='${actorGroup}'>${decodeURI(actorGroup)}</option>`,
+    )
+    .join('')
 }
 
-export const createImageOptions = (htm: JQuery) => {
+export const createImageOptions = (htm: JQuery): string => {
   const currentActorGroupsLabel = getSelectElementValue(
     htm,
-    '#pf1-mass-flip-current-actor-groups',
+    '#mass-flip-current-actor-groups',
   )
 
   const actorGroup = knownActorGroups[currentActorGroupsLabel]

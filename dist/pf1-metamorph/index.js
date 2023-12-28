@@ -43,6 +43,14 @@ var getLoggerInstance = () => {
 };
 
 // src/common/util/jquery.ts
+var editInnerHtml = (htm, selector, value) => {
+  const element = htm.find(selector)?.[0];
+  if (element == null) {
+    console.error(`Could not find element "${selector}"`);
+    throw new Error();
+  }
+  element.innerHTML = value;
+};
 var getSelectElement = (htm, selector) => {
   const element = htm.find(selector)?.[0];
   if (element == null) {
@@ -70,96 +78,111 @@ var getInputElement = (htm, selector) => {
 
 // src/macro/pf1-metamorph/config.ts
 var config = {
-  transformations: {
-    reducePerson: {
-      label: "Rapetissement",
-      itemsToAdd: [
-        {
-          name: "Rapetissement (metamorph)",
-          compendiumName: "world.effets-metamorph",
-          type: "buff"
-        }
-      ],
-      size: "sm"
-    },
-    gorgonBeastShapeIV: {
-      label: "Gorgone (Forme Bestiale IV)",
-      itemsToModify: [
-        {
-          name: "New Effet",
-          type: "buff",
-          action: "disable"
-        }
-      ],
-      itemsToAdd: [
-        {
-          name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
-          compendiumName: "world.effets-metamorph",
-          type: "buff"
-        },
-        {
-          name: "Corne (gorgone - metamorph)",
-          compendiumName: "world.effets-metamorph",
-          type: "attack"
-        },
-        {
-          name: "2 sabots (gorgone - metamorph)",
-          compendiumName: "world.effets-metamorph",
-          type: "attack"
-        },
-        {
-          name: "Pi\xE9tinement",
-          compendiumName: "world.aptitudes-de-classe-personnalisees",
-          type: "feat"
-        },
-        {
-          name: "Souffle de Gorgone (gorgone - metamorph)",
-          compendiumName: "world.effets-metamorph",
-          type: "feat"
-        }
-      ],
-      size: "lg",
-      stature: "long",
-      tokenTextureSrc: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
-      actorImg: "/characters/monsters/magicalBeasts/gorgone.webp",
-      speed: {
-        burrow: {
-          base: 0
-        },
-        climb: {
-          base: 0
-        },
-        fly: {
-          base: 0
-        },
-        land: {
-          base: 30
-        },
-        swim: {
-          base: 0
-        }
-      },
-      senses: {
-        dv: 60,
-        ll: {
-          enabled: true,
-          multiplier: {
-            bright: 2,
-            dim: 2
+  groups: {
+    beastShape: {
+      label: "Forme Bestiale (cr\xE9ature magique de taille G)",
+      description: "Disponible \xE0 partir de Forme Bestiale IV",
+      transformation: {
+        gorgonBeastShapeIV: {
+          label: "Gorgone",
+          description: "Taureau de pierre qui peut p\xE9trifier ses victimes",
+          itemsToAdd: [
+            {
+              name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "buff"
+            },
+            {
+              name: "Corne (gorgone - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "attack"
+            },
+            {
+              name: "2 sabots (gorgone - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "attack"
+            },
+            {
+              name: "Pi\xE9tinement",
+              compendiumName: "world.aptitudes-de-classe-personnalisees",
+              type: "feat"
+            },
+            {
+              name: "Souffle de Gorgone (gorgone - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "feat"
+            }
+          ],
+          size: "lg",
+          stature: "long",
+          tokenTextureSrc: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
+          actorImg: "/characters/monsters/magicalBeasts/gorgone.webp",
+          speed: {
+            burrow: {
+              base: 0
+            },
+            climb: {
+              base: 0
+            },
+            fly: {
+              base: 0
+            },
+            land: {
+              base: 30
+            },
+            swim: {
+              base: 0
+            }
+          },
+          senses: {
+            dv: 60,
+            ll: {
+              enabled: true,
+              multiplier: {
+                bright: 2,
+                dim: 2
+              }
+            },
+            sc: 30
           }
-        },
-        sc: 30
+        }
+      }
+    },
+    simpleSpell: {
+      label: "Sort simple",
+      transformation: {
+        reducePerson: {
+          label: "Rapetissement",
+          description: "Effectif uniquement sur les humanoids",
+          itemsToAdd: [
+            {
+              name: "Rapetissement (metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "buff"
+            }
+          ],
+          size: "sm"
+        }
       }
     }
   }
 };
 
 // src/macro/pf1-metamorph/html.ts
+var descriptionIconStyle = "padding-right: 5px;";
 var createForm = () => `
     <form class="flexcol">
       <div class="form-group">
+        <label>Groupe :</label>
+        <select id="metamorph-transformation-group">${createTransformationGroupOptions()}</select>
+      </div>
+      <div id="metamorph-transformation-group-description"> class="form-group">
+      </div>
+      <div class="form-group">
         <label>Transformation :</label>
-        <select id="metamorph-transformation" style="text-transform: capitalize">${createTransformationOptions()}</select>
+        <select id="metamorph-transformation"></select>
+      </div>
+      <div id="metamorph-transformation-description" class="form-group">
       </div>
       <div class="form-group">
         <label for="transformation-value">Niveau lanceur de sort :</label>
@@ -169,13 +192,50 @@ var createForm = () => `
         <label for="transformation-value">DD Sort :</label>
         <input type="number" id="transformation-spell-difficulty-check"/>
       </div>
+      <div class="form-group">
+         <p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha </p>
+      </div>
     </form>
   `;
-var createTransformationOptions = () => {
-  const { transformations } = config;
-  return Object.keys(transformations).map(
-    (key) => `<option value='${key}'>${transformations[key].label}</option>`
+var createTransformationGroupOptions = () => {
+  const { groups } = config;
+  return Object.keys(groups).map((key) => `<option value='${key}'>${groups[key].label}</option>`).join("");
+};
+var createTransformationGroupValues = (htm) => {
+  const { groups } = config;
+  const currentGroupValue = getSelectElementValue(
+    htm,
+    "#metamorph-transformation-group"
   );
+  const group = groups[currentGroupValue];
+  if (group === void 0) {
+    return { optionValue: "<option>Aucune option disponible</option>" };
+  }
+  const { transformation, description } = group;
+  return {
+    optionValue: Object.keys(transformation).map(
+      (key) => `<option value='${key}'>${transformation[key].label}</option>`
+    ).join(""),
+    description: description ? `<p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>${description}</p>` : void 0
+  };
+};
+var createTransformationEffectDescription = (htm) => {
+  const { groups } = config;
+  const currentGroupValue = getSelectElementValue(
+    htm,
+    "#metamorph-transformation-group"
+  );
+  const group = groups[currentGroupValue];
+  if (group === void 0) {
+    return void 0;
+  }
+  const { transformation } = group;
+  const currentTransformationValue = getSelectElementValue(
+    htm,
+    "#metamorph-transformation"
+  );
+  const { description } = transformation[currentTransformationValue];
+  return description ? `<p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>${description}</p>` : void 0;
 };
 
 // src/common/error/user-warning.ts
@@ -282,20 +342,6 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
   const updates = [];
   updates.push(
     tokens.map(({ actor }) => {
-      logger3.debug("Create metamorph items in actor", actor);
-      const individualItemUpdate = itemsToAdd.map(
-        (item) => addTransformationItemToActor(
-          actor,
-          item,
-          metamorphTransformSpellLevel,
-          metamorphSpellDifficultyCheck
-        )
-      );
-      return Promise.all(individualItemUpdate);
-    })
-  );
-  updates.push(
-    tokens.map(({ actor }) => {
       logger3.debug("Apply metamorph to actor", actor);
       return actor.update({
         system: {
@@ -344,11 +390,33 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
       });
     })
   );
+  if (itemsToAdd !== void 0) {
+    updates.push(
+      createItemToAddUpdates(
+        tokens,
+        itemsToAdd,
+        metamorphTransformSpellLevel,
+        metamorphSpellDifficultyCheck
+      )
+    );
+  }
   if (itemsToModify !== void 0) {
     updates.push(getItemToModifyUpdate(tokens, itemsToModify));
   }
   await Promise.all(updates.flat());
 };
+var createItemToAddUpdates = (tokens, itemsToAdd, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => tokens.map(({ actor }) => {
+  logger3.debug("Create metamorph items in actor", actor);
+  const individualItemUpdate = itemsToAdd.map(
+    (item) => addTransformationItemToActor(
+      actor,
+      item,
+      metamorphTransformSpellLevel,
+      metamorphSpellDifficultyCheck
+    )
+  );
+  return Promise.all(individualItemUpdate);
+});
 var getItemToModifyUpdate = (tokens, itemsToModify) => tokens.map(
   ({ actor }) => actor.items.reduce((accumulator, currentItem) => {
     const modification = itemsToModify.find(
@@ -409,20 +477,18 @@ var transformToMetamorphSave = (value) => {
     } = {},
     tokenDocumentData: {
       texture: { src: tokenTextureSrc = void 0 } = {}
-    } = {},
-    transformItemsData
+    } = {}
   } = value;
   logger4.debug("Extracted values in flags", {
     actorSize,
-    tokenTextureSrc,
-    transformItemsData
+    tokenTextureSrc
   });
-  if (actorSize === void 0 || tokenTextureSrc === void 0 || transformItemsData === void 0) {
-    throw new Error("Flag values are invalid");
+  if (actorSize === void 0 || tokenTextureSrc === void 0) {
+    throw new Error("Flag root values are invalid");
   }
   return value;
 };
-var savePolymorphData = async (tokens, metamorphTransform) => {
+var savePolymorphData = async (tokens, metamorphTransformEffect) => {
   logger4.info("Save data to actor flags to ensure rolling back is possible");
   const operations = tokens.map(async (token) => {
     logger4.debug("Save data related to a token", token);
@@ -454,10 +520,10 @@ var savePolymorphData = async (tokens, metamorphTransform) => {
     const save = {
       actorData,
       tokenDocumentData,
-      transformAddedItemsData: metamorphTransform.itemsToAdd,
+      transformAddedItemsData: metamorphTransformEffect.itemsToAdd,
       transformModifiedItem: getTransformModifiedBuff(
         token.actor.items,
-        metamorphTransform.itemsToModify
+        metamorphTransformEffect.itemsToModify
       )
     };
     await token.actor.update({
@@ -511,47 +577,51 @@ var rollbackToPrePolymorphData = async (tokens) => {
       })
     ];
     if (save.transformModifiedItem !== void 0) {
+      logger4.debug("Get items to rollback", save);
       currentRollBackActions.push(
         Promise.all(
-          updateModifiedItem(save.transformModifiedItem, token.actor.items)
+          rollbackModifiedItem(save.transformModifiedItem, token.actor.items)
         )
       );
     }
-    logger4.debug("Delete all metamorph related items", save);
-    const itemsToDelete = save.transformAddedItemsData.reduce(
-      (previousItems, currentItem) => {
-        const actorItems = findItemsInActor(
-          token.actor,
-          currentItem.name,
-          currentItem.type
-        );
-        if (actorItems.length > 0) {
-          previousItems.push(...actorItems);
-        } else {
-          logger4.warn(`Could not find ${currentItem.name} item(s) in actor`);
-        }
-        return previousItems;
-      },
-      []
-    );
-    logger4.debug(`Ready to delete ${itemsToDelete.length} items`, {
-      itemsToDelete
-    });
-    currentRollBackActions.push(
-      token.actor.deleteEmbeddedDocuments(
-        "Item",
-        itemsToDelete.map(({ id }) => id)
-      )
-    );
+    if (save.transformAddedItemsData !== void 0) {
+      logger4.debug("Get items to delete", save);
+      const itemsToDelete = getItemsToDelete(
+        token,
+        save.transformAddedItemsData
+      );
+      logger4.debug(`Got ${itemsToDelete.length} items to delete`, {
+        itemsToDelete
+      });
+      currentRollBackActions.push(
+        token.actor.deleteEmbeddedDocuments(
+          "Item",
+          itemsToDelete.map(({ id }) => id)
+        )
+      );
+    }
     return currentRollBackActions;
   }).flat();
   logger4.info("Trigger rollback");
   await Promise.all(rollbackActions);
   logger4.info("Rollback complete");
 };
-var updateModifiedItem = (saveTransformModifiedItems, actorItems) => actorItems.reduce((accumulator, currentItem) => {
+var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsData.reduce((previousItems, currentItem) => {
+  const actorItems = findItemsInActor(
+    token.actor,
+    currentItem.name,
+    currentItem.type
+  );
+  if (actorItems.length > 0) {
+    previousItems.push(...actorItems);
+  } else {
+    logger4.warn(`Could not find ${currentItem.name} item(s) in actor`);
+  }
+  return previousItems;
+}, []);
+var rollbackModifiedItem = (saveTransformModifiedItems, actorItems) => actorItems.reduce((accumulator, currentItem) => {
   const save = saveTransformModifiedItems.find(
-    (value) => value.name == currentItem.name && value.type === currentItem.type
+    (value) => value.name === currentItem.name && value.type === currentItem.type
   );
   if (save === void 0) {
     return accumulator;
@@ -589,7 +659,11 @@ var getNumberFromInputIfSpecified = (htm, selector) => {
 };
 var triggerMetamorph = async (htm, controlledTokens) => {
   try {
-    const metamorphTransformKey = getSelectElementValue(
+    const metamorphTransformGroupKey = getSelectElementValue(
+      htm,
+      "#metamorph-transformation-group"
+    );
+    const metamorphTransformEffectKey = getSelectElementValue(
       htm,
       "#metamorph-transformation"
     );
@@ -601,16 +675,16 @@ var triggerMetamorph = async (htm, controlledTokens) => {
       htm,
       "#transformation-spell-difficulty-check"
     );
-    const metamorphTransform = config.transformations[metamorphTransformKey];
-    if (metamorphTransform === void 0) {
+    const metamorphTransformEffect = config.groups[metamorphTransformGroupKey].transformation[metamorphTransformEffectKey];
+    if (metamorphTransformEffect === void 0) {
       ui.notifications.error("Cette transformation est inconnue");
       return;
     }
     checkTokens(controlledTokens);
-    await savePolymorphData(controlledTokens, metamorphTransform);
+    await savePolymorphData(controlledTokens, metamorphTransformEffect);
     await applyMetamorph(
       controlledTokens,
-      metamorphTransform,
+      metamorphTransformEffect,
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck
     );
@@ -640,8 +714,45 @@ var openDialog = (controlledTokens) => {
         label: "Confirmer la transformation",
         callback: (htm) => triggerMetamorph(htm, controlledTokens)
       }
+    },
+    render: (htm) => {
+      const $transformGroupElement = htm.find("#metamorph-transformation-group");
+      const $transformElement = htm.find("#metamorph-transformation");
+      if ($transformGroupElement.length === 0 || $transformElement.length === 0) {
+        throw new Error("Could not find relevant JQuery elements");
+      }
+      $transformGroupElement.on("change", () => {
+        refreshTransformationEffectOptions(htm);
+        refreshTransformationEffectDescription(htm);
+      });
+      $transformElement.on("change", () => {
+        refreshTransformationEffectDescription(htm);
+      });
+      refreshTransformationEffectOptions(htm);
+      refreshTransformationEffectDescription(htm);
     }
   }).render(true);
+};
+var refreshTransformationEffectOptions = (htm) => {
+  const transformationEffectValues = createTransformationGroupValues(htm);
+  editInnerHtml(
+    htm,
+    "#metamorph-transformation",
+    transformationEffectValues.optionValue
+  );
+  editInnerHtml(
+    htm,
+    "#metamorph-transformation-group-description",
+    transformationEffectValues.description ?? ""
+  );
+};
+var refreshTransformationEffectDescription = (htm) => {
+  const transformEffectDescription = createTransformationEffectDescription(htm);
+  editInnerHtml(
+    htm,
+    "#metamorph-transformation-description",
+    transformEffectDescription ?? ""
+  );
 };
 try {
   logger5.setLevel(0 /* DEBUG */);

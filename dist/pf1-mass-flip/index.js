@@ -271,12 +271,12 @@ var createActorGroupOptions = (actorGroupNames) => {
   }
   return [...actorGroupNames].map(
     (actorGroup) => `<option value='${actorGroup}'>${decodeURI(actorGroup)}</option>`
-  );
+  ).join("");
 };
 var createImageOptions = (htm) => {
   const currentActorGroupsLabel = getSelectElementValue(
     htm,
-    "#pf1-mass-flip-current-actor-groups"
+    "#mass-flip-current-actor-groups"
   );
   const actorGroup = knownActorGroups[currentActorGroupsLabel];
   if (actorGroup === void 0) {
@@ -300,7 +300,7 @@ var openDialog = (currentActorGroups, ownedTokens) => {
       }
     },
     render: (htm) => {
-      htm.find("#actorGroup").change(() => refreshImageOptions(htm));
+      htm.find("#actorGroup").on("change", () => refreshImageOptions(htm));
       refreshImageOptions(htm);
     }
   }).render(true);

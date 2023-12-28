@@ -154,23 +154,6 @@ export const applyMetamorph = async (
 
   updates.push(
     tokens.map(({ actor }) => {
-      logger.debug('Create metamorph items in actor', actor)
-
-      const individualItemUpdate: Promise<unknown>[] = itemsToAdd.map((item) =>
-        addTransformationItemToActor(
-          actor,
-          item,
-          metamorphTransformSpellLevel,
-          metamorphSpellDifficultyCheck,
-        ),
-      )
-
-      return Promise.all(individualItemUpdate)
-    }),
-  )
-
-  updates.push(
-    tokens.map(({ actor }) => {
       logger.debug('Apply metamorph to actor', actor)
 
       return actor.update({
@@ -223,12 +206,44 @@ export const applyMetamorph = async (
     }),
   )
 
+  if (itemsToAdd !== undefined) {
+    updates.push(
+      createItemToAddUpdates(
+        tokens,
+        itemsToAdd,
+        metamorphTransformSpellLevel,
+        metamorphSpellDifficultyCheck,
+      ),
+    )
+  }
+
   if (itemsToModify !== undefined) {
     updates.push(getItemToModifyUpdate(tokens, itemsToModify))
   }
 
   await Promise.all(updates.flat())
 }
+
+export const createItemToAddUpdates = (
+  tokens: TokenPF[],
+  itemsToAdd: MetamorphTransformationCompendiumItem[],
+  metamorphTransformSpellLevel: number | undefined,
+  metamorphSpellDifficultyCheck: number | undefined,
+) =>
+  tokens.map(({ actor }) => {
+    logger.debug('Create metamorph items in actor', actor)
+
+    const individualItemUpdate: Promise<unknown>[] = itemsToAdd.map((item) =>
+      addTransformationItemToActor(
+        actor,
+        item,
+        metamorphTransformSpellLevel,
+        metamorphSpellDifficultyCheck,
+      ),
+    )
+
+    return Promise.all(individualItemUpdate)
+  })
 
 export const getItemToModifyUpdate = (
   tokens: TokenPF[],

@@ -21,7 +21,7 @@ const openDialog = (
       },
     },
     render: (htm) => {
-      htm.find('#actorGroup').change(() => refreshImageOptions(htm))
+      htm.find('#actorGroup').on('change', () => refreshImageOptions(htm))
 
       refreshImageOptions(htm)
     },

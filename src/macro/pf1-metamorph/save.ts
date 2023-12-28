@@ -47,7 +47,7 @@ export interface MetamorphTokenDocumentData {
   }
 }
 
-export interface TransformModifiedBuff {
+export interface TransformModifiedItem {
   name: string
   type: ItemPFType
   data: {
@@ -58,8 +58,8 @@ export interface TransformModifiedBuff {
 export interface MetamorphSave {
   actorData: MetamorphActorData
   tokenDocumentData: MetamorphTokenDocumentData
-  transformAddedItemsData: MetamorphTransformationCompendiumItem[]
-  transformModifiedItem?: TransformModifiedBuff[]
+  transformAddedItemsData?: MetamorphTransformationCompendiumItem[]
+  transformModifiedItem?: TransformModifiedItem[]
 }
 
 const logger = getLoggerInstance()
@@ -85,21 +85,15 @@ export const transformToMetamorphSave = (
     tokenDocumentData: {
       texture: { src: tokenTextureSrc = undefined } = {},
     } = {},
-    transformItemsData,
   } = value
 
   logger.debug('Extracted values in flags', {
     actorSize,
     tokenTextureSrc,
-    transformItemsData,
   })
 
-  if (
-    actorSize === undefined ||
-    tokenTextureSrc === undefined ||
-    transformItemsData === undefined
-  ) {
-    throw new Error('Flag values are invalid')
+  if (actorSize === undefined || tokenTextureSrc === undefined) {
+    throw new Error('Flag root values are invalid')
   }
 
   return value as MetamorphSave
@@ -110,7 +104,7 @@ export const transformToMetamorphSave = (
  */
 export const savePolymorphData = async (
   tokens: TokenPF[],
-  metamorphTransform: MetamorphTransformation,
+  metamorphTransformEffect: MetamorphTransformation,
 ) => {
   logger.info('Save data to actor flags to ensure rolling back is possible')
 
@@ -146,10 +140,10 @@ export const savePolymorphData = async (
     const save: MetamorphSave = {
       actorData,
       tokenDocumentData,
-      transformAddedItemsData: metamorphTransform.itemsToAdd,
+      transformAddedItemsData: metamorphTransformEffect.itemsToAdd,
       transformModifiedItem: getTransformModifiedBuff(
         token.actor.items,
-        metamorphTransform.itemsToModify,
+        metamorphTransformEffect.itemsToModify,
       ),
     }
 
@@ -168,12 +162,12 @@ export const savePolymorphData = async (
 const getTransformModifiedBuff = (
   actorItems: EmbeddedCollection<ItemPF>,
   itemsToModify: MetamorphTransformationActorItem[] | undefined,
-): TransformModifiedBuff[] | undefined => {
+): TransformModifiedItem[] | undefined => {
   if (itemsToModify === undefined) {
     return undefined
   }
 
-  return actorItems.reduce<TransformModifiedBuff[]>(
+  return actorItems.reduce<TransformModifiedItem[]>(
     (accumulator, currentItem) => {
       if (
         itemsToModify.some(
@@ -227,44 +221,34 @@ export const rollbackToPrePolymorphData = async (tokens: TokenPF[]) => {
       ]
 
       if (save.transformModifiedItem !== undefined) {
+        logger.debug('Get items to rollback', save)
+
         currentRollBackActions.push(
           Promise.all(
-            updateModifiedItem(save.transformModifiedItem, token.actor.items),
+            rollbackModifiedItem(save.transformModifiedItem, token.actor.items),
           ),
         )
       }
 
-      logger.debug('Delete all metamorph related items', save)
+      if (save.transformAddedItemsData !== undefined) {
+        logger.debug('Get items to delete', save)
 
-      const itemsToDelete = save.transformAddedItemsData.reduce<ItemPF[]>(
-        (previousItems, currentItem) => {
-          const actorItems = findItemsInActor(
-            token.actor,
-            currentItem.name,
-            currentItem.type,
-          )
+        const itemsToDelete = getItemsToDelete(
+          token,
+          save.transformAddedItemsData,
+        )
 
-          if (actorItems.length > 0) {
-            previousItems.push(...actorItems)
-          } else {
-            logger.warn(`Could not find ${currentItem.name} item(s) in actor`)
-          }
+        logger.debug(`Got ${itemsToDelete.length} items to delete`, {
+          itemsToDelete,
+        })
 
-          return previousItems
-        },
-        [],
-      )
-
-      logger.debug(`Ready to delete ${itemsToDelete.length} items`, {
-        itemsToDelete,
-      })
-
-      currentRollBackActions.push(
-        token.actor.deleteEmbeddedDocuments(
-          'Item',
-          itemsToDelete.map(({ id }) => id),
-        ),
-      )
+        currentRollBackActions.push(
+          token.actor.deleteEmbeddedDocuments(
+            'Item',
+            itemsToDelete.map(({ id }) => id),
+          ),
+        )
+      }
 
       return currentRollBackActions
     })
@@ -277,14 +261,34 @@ export const rollbackToPrePolymorphData = async (tokens: TokenPF[]) => {
   logger.info('Rollback complete')
 }
 
-const updateModifiedItem = (
-  saveTransformModifiedItems: TransformModifiedBuff[],
+const getItemsToDelete = (
+  token: TokenPF,
+  transformAddedItemsData: MetamorphTransformationCompendiumItem[],
+): ItemPF[] =>
+  transformAddedItemsData.reduce<ItemPF[]>((previousItems, currentItem) => {
+    const actorItems = findItemsInActor(
+      token.actor,
+      currentItem.name,
+      currentItem.type,
+    )
+
+    if (actorItems.length > 0) {
+      previousItems.push(...actorItems)
+    } else {
+      logger.warn(`Could not find ${currentItem.name} item(s) in actor`)
+    }
+
+    return previousItems
+  }, [])
+
+const rollbackModifiedItem = (
+  saveTransformModifiedItems: TransformModifiedItem[],
   actorItems: Collection<ItemPF>,
 ) =>
   actorItems.reduce<Promise<Document>[]>((accumulator, currentItem) => {
     const save = saveTransformModifiedItems.find(
       (value) =>
-        value.name == currentItem.name && value.type === currentItem.type,
+        value.name === currentItem.name && value.type === currentItem.type,
     )
     if (save === undefined) {
       return accumulator

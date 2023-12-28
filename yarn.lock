@@ -562,12 +562,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jquery@npm:^3.5.25":
-  version: 3.5.25
-  resolution: "@types/jquery@npm:3.5.25"
+"@types/jquery@npm:^3.5.29":
+  version: 3.5.29
+  resolution: "@types/jquery@npm:3.5.29"
   dependencies:
     "@types/sizzle": "npm:*"
-  checksum: 9d222da5db49968a2d2bb48cd7705e872de16db0c5b2197627a910cf14e591f7065a5f7a37c626763eccdbd63ca4652b3475541e0cfdcebd4677bce51f16ed36
+  checksum: 17409b551956c54d641264895790b9e63a2179bacdabe2a87d5f8f2baebe2f16625d111b17b1441cdffbf9e059e683bb25bf04ba6ea56b36e39ea50cc77f5b8c
   languageName: node
   linkType: hard
 
@@ -1385,7 +1385,7 @@ __metadata:
   resolution: "foundry-vtt-macros-ts@workspace:."
   dependencies:
     "@trivago/prettier-plugin-sort-imports": "npm:^4.2.1"
-    "@types/jquery": "npm:^3.5.25"
+    "@types/jquery": "npm:^3.5.29"
     "@types/node": "npm:^20.8.10"
     "@typescript-eslint/eslint-plugin": "npm:^6.9.1"
     "@typescript-eslint/parser": "npm:^6.9.1"
