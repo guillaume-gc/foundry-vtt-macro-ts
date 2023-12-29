@@ -78,11 +78,84 @@ var getInputElement = (htm, selector) => {
 
 // src/macro/pf1-metamorph/config.ts
 var config = {
-  groups: {
+  style: {
+    descriptionIcon: "padding-right: 5px;",
+    description: ""
+  },
+  transformationGroups: {
     beastShape: {
       label: "Forme Bestiale (cr\xE9ature magique de taille G)",
       description: "Disponible \xE0 partir de Forme Bestiale IV",
       transformation: {
+        chimeraBestShapeIV: {
+          label: "Chim\xE8re",
+          description: "Ce monstre ail\xE9 a le corps d\u2019un lion et trois t\xEAtes : une de dragon et une de ch\xE8vre cornue. Pour connaitre la couleur de la t\xEAte, lancez [[/r 1d10 #Couleur de la t\xEAte de chim\xE8re]]. Si 1 ou 2 alors t\xEAte blanche, si 4 ou 4 alors t\xEAte bleue, si 5 ou 6 alors t\xEAte noire, si 7 ou 8 alors t\xEAte rouge, sinon t\xEAte verte.",
+          itemsToAdd: [
+            {
+              name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "buff"
+            },
+            {
+              name: "Morsure (dragon) (chim\xE8re - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "attack"
+            },
+            {
+              name: "Morsure (lion) (chim\xE8re - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "attack"
+            },
+            {
+              name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "attack"
+            },
+            {
+              name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "attack"
+            },
+            {
+              name: "Souffle de Chim\xE8re (chim\xE8re - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "feat"
+            }
+          ],
+          size: "lg",
+          stature: "long",
+          tokenTextureSrc: "/tokens/monsters/magicalBeasts/chimera.webp",
+          actorImg: "/characters/monsters/magicalBeasts/chimera.webp",
+          speed: {
+            burrow: {
+              base: 0
+            },
+            climb: {
+              base: 0
+            },
+            fly: {
+              base: 50,
+              maneuverability: "poor"
+            },
+            land: {
+              base: 30
+            },
+            swim: {
+              base: 0
+            }
+          },
+          senses: {
+            dv: 60,
+            ll: {
+              enabled: true,
+              multiplier: {
+                bright: 2,
+                dim: 2
+              }
+            },
+            sc: 30
+          }
+        },
         gorgonBeastShapeIV: {
           label: "Gorgone",
           description: "Taureau de pierre qui peut p\xE9trifier ses victimes",
@@ -169,7 +242,7 @@ var config = {
 };
 
 // src/macro/pf1-metamorph/html.ts
-var descriptionIconStyle = "padding-right: 5px;";
+var { style } = config;
 var createForm = () => `
     <form class="flexcol">
       <div class="form-group">
@@ -193,21 +266,23 @@ var createForm = () => `
         <input type="number" id="transformation-spell-difficulty-check"/>
       </div>
       <div class="form-group">
-         <p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha </p>
+         <p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha</p>
       </div>
     </form>
   `;
 var createTransformationGroupOptions = () => {
-  const { groups } = config;
-  return Object.keys(groups).map((key) => `<option value='${key}'>${groups[key].label}</option>`).join("");
+  const { transformationGroups } = config;
+  return Object.keys(transformationGroups).map(
+    (key) => `<option value='${key}'>${transformationGroups[key].label}</option>`
+  ).join("");
 };
 var createTransformationGroupValues = (htm) => {
-  const { groups } = config;
+  const { transformationGroups } = config;
   const currentGroupValue = getSelectElementValue(
     htm,
     "#metamorph-transformation-group"
   );
-  const group = groups[currentGroupValue];
+  const group = transformationGroups[currentGroupValue];
   if (group === void 0) {
     return { optionValue: "<option>Aucune option disponible</option>" };
   }
@@ -216,16 +291,19 @@ var createTransformationGroupValues = (htm) => {
     optionValue: Object.keys(transformation).map(
       (key) => `<option value='${key}'>${transformation[key].label}</option>`
     ).join(""),
-    description: description ? `<p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>${description}</p>` : void 0
+    description: description ? `<p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>${TextEditor.enrichHTML(
+      description,
+      { async: false }
+    )}</p>` : void 0
   };
 };
 var createTransformationEffectDescription = (htm) => {
-  const { groups } = config;
+  const { transformationGroups } = config;
   const currentGroupValue = getSelectElementValue(
     htm,
     "#metamorph-transformation-group"
   );
-  const group = groups[currentGroupValue];
+  const group = transformationGroups[currentGroupValue];
   if (group === void 0) {
     return void 0;
   }
@@ -235,7 +313,10 @@ var createTransformationEffectDescription = (htm) => {
     "#metamorph-transformation"
   );
   const { description } = transformation[currentTransformationValue];
-  return description ? `<p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>${description}</p>` : void 0;
+  return description ? `<p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>${TextEditor.enrichHTML(
+    description,
+    { async: false }
+  )}</p>` : void 0;
 };
 
 // src/common/error/user-warning.ts
@@ -675,7 +756,7 @@ var triggerMetamorph = async (htm, controlledTokens) => {
       htm,
       "#transformation-spell-difficulty-check"
     );
-    const metamorphTransformEffect = config.groups[metamorphTransformGroupKey].transformation[metamorphTransformEffectKey];
+    const metamorphTransformEffect = config.transformationGroups[metamorphTransformGroupKey].transformation[metamorphTransformEffectKey];
     if (metamorphTransformEffect === void 0) {
       ui.notifications.error("Cette transformation est inconnue");
       return;

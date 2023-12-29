@@ -1,7 +1,7 @@
 import { getSelectElementValue } from '../../common/util/jquery'
 import { config } from './config'
 
-const descriptionIconStyle = 'padding-right: 5px;'
+const { style } = config
 
 export const createForm = () => `
     <form class="flexcol">
@@ -26,15 +26,20 @@ export const createForm = () => `
         <input type="number" id="transformation-spell-difficulty-check"/>
       </div>
       <div class="form-group">
-         <p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha </p>
+         <p style="${style.description}"><i style="${
+           style.descriptionIcon
+         }" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha</p>
       </div>
     </form>
   `
 
 const createTransformationGroupOptions = (): string => {
-  const { groups } = config
-  return Object.keys(groups)
-    .map((key) => `<option value='${key}'>${groups[key].label}</option>`)
+  const { transformationGroups } = config
+  return Object.keys(transformationGroups)
+    .map(
+      (key) =>
+        `<option value='${key}'>${transformationGroups[key].label}</option>`,
+    )
     .join('')
 }
 
@@ -44,14 +49,14 @@ export const createTransformationGroupValues = (
   optionValue: string
   description?: string
 } => {
-  const { groups } = config
+  const { transformationGroups } = config
 
   const currentGroupValue = getSelectElementValue(
     htm,
     '#metamorph-transformation-group',
   )
 
-  const group = groups[currentGroupValue]
+  const group = transformationGroups[currentGroupValue]
   if (group === undefined) {
     return { optionValue: '<option>Aucune option disponible</option>' }
   }
@@ -65,7 +70,12 @@ export const createTransformationGroupValues = (
       )
       .join(''),
     description: description
-      ? `<p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>${description}</p>`
+      ? `<p style="${style.description}"><i style="${
+          style.descriptionIcon
+        }" class="fa-solid fa-circle-info"></i>${TextEditor.enrichHTML(
+          description,
+          { async: false },
+        )}</p>`
       : undefined,
   }
 }
@@ -73,14 +83,14 @@ export const createTransformationGroupValues = (
 export const createTransformationEffectDescription = (
   htm: JQuery<HTMLElement>,
 ): string | undefined => {
-  const { groups } = config
+  const { transformationGroups } = config
 
   const currentGroupValue = getSelectElementValue(
     htm,
     '#metamorph-transformation-group',
   )
 
-  const group = groups[currentGroupValue]
+  const group = transformationGroups[currentGroupValue]
   if (group === undefined) {
     return undefined
   }
@@ -95,6 +105,11 @@ export const createTransformationEffectDescription = (
   const { description } = transformation[currentTransformationValue]
 
   return description
-    ? `<p style="font-style: italic;"><i style="${descriptionIconStyle}" class="fa-solid fa-circle-info"></i>${description}</p>`
+    ? `<p style="${style.description}"><i style="${
+        style.descriptionIcon
+      }" class="fa-solid fa-circle-info"></i>${TextEditor.enrichHTML(
+        description,
+        { async: false },
+      )}</p>`
     : undefined
 }

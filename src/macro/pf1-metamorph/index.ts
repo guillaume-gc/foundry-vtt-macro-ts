@@ -55,7 +55,7 @@ const triggerMetamorph = async (
     )
 
     const metamorphTransformEffect: MetamorphTransformation | undefined =
-      config.groups[metamorphTransformGroupKey].transformation[
+      config.transformationGroups[metamorphTransformGroupKey].transformation[
         metamorphTransformEffectKey
       ]
     if (metamorphTransformEffect === undefined) {
