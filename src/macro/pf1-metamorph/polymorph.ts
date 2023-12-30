@@ -15,8 +15,8 @@ import { ItemFeatPF } from '../../type/foundry/system/pf1/documents/item/item-fe
 import { ItemPF } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { Collection } from '../../type/foundry/utils/collection'
 import {
+  MetamorphElementTransformation,
   MetamorphItemTransformationAction,
-  MetamorphTransformation,
   MetamorphTransformationActorItem,
   MetamorphTransformationCompendiumItem,
 } from './config'
@@ -142,13 +142,14 @@ const mixReduction = <
  */
 export const applyMetamorph = async (
   tokens: TokenPF[],
-  metamorphTransform: MetamorphTransformation,
+  metamorphElementTransformation: MetamorphElementTransformation,
   metamorphTransformSpellLevel?: number,
   metamorphSpellDifficultyCheck?: number,
 ) => {
   logger.info('Apply metamorph')
 
-  const { tokenTextureSrc, itemsToAdd, itemsToModify } = metamorphTransform
+  const { tokenTextureSrc, itemsToAdd, itemsToModify } =
+    metamorphElementTransformation
 
   const updates: Promise<unknown>[][] = []
 
@@ -159,22 +160,22 @@ export const applyMetamorph = async (
       return actor.update({
         system: {
           attributes: {
-            speed: metamorphTransform.speed,
+            speed: metamorphElementTransformation.speed,
           },
           traits: {
-            size: metamorphTransform.size,
-            stature: metamorphTransform.stature,
+            size: metamorphElementTransformation.size,
+            stature: metamorphElementTransformation.stature,
             senses: {
               ...actor.system.traits.senses,
-              ...metamorphTransform.senses,
+              ...metamorphElementTransformation.senses,
             },
             dr: mixReduction<[ResistedDamageType, ResistedDamageType]>(
               actor.system.traits.dr,
-              metamorphTransform.damageReduction,
+              metamorphElementTransformation.damageReduction,
             ),
             eres: mixReduction<[ResistedEnergyType, ResistedEnergyType]>(
               actor.system.traits.eres,
-              metamorphTransform.energyResistance,
+              metamorphElementTransformation.energyResistance,
             ),
           },
         },
@@ -189,7 +190,7 @@ export const applyMetamorph = async (
             src: tokenTextureSrc,
           },
         },
-        img: metamorphTransform.actorImg,
+        img: metamorphElementTransformation.actorImg,
       })
     }),
   )

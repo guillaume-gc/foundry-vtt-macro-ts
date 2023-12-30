@@ -18,7 +18,7 @@ import {
 } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { Collection } from '../../type/foundry/utils/collection'
 import {
-  MetamorphTransformation,
+  MetamorphElementTransformation,
   MetamorphTransformationActorItem,
   MetamorphTransformationCompendiumItem,
 } from './config'
@@ -104,7 +104,7 @@ export const transformToMetamorphSave = (
  */
 export const savePolymorphData = async (
   tokens: TokenPF[],
-  metamorphTransformEffect: MetamorphTransformation,
+  metamorphElementTransformEffect: MetamorphElementTransformation,
 ) => {
   logger.info('Save data to actor flags to ensure rolling back is possible')
 
@@ -140,10 +140,10 @@ export const savePolymorphData = async (
     const save: MetamorphSave = {
       actorData,
       tokenDocumentData,
-      transformAddedItemsData: metamorphTransformEffect.itemsToAdd,
+      transformAddedItemsData: metamorphElementTransformEffect.itemsToAdd,
       transformModifiedItem: getTransformModifiedBuff(
         token.actor.items,
-        metamorphTransformEffect.itemsToModify,
+        metamorphElementTransformEffect.itemsToModify,
       ),
     }
 

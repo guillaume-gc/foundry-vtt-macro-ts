@@ -51,20 +51,6 @@ var editInnerHtml = (htm, selector, value) => {
   }
   element.innerHTML = value;
 };
-var getSelectElement = (htm, selector) => {
-  const element = htm.find(selector)?.[0];
-  if (element == null) {
-    throw new Error(`Could not find element "${selector}"`);
-  }
-  if (!(element instanceof HTMLSelectElement)) {
-    throw new Error(`Element ${selector} is not a HTML select element`);
-  }
-  return element;
-};
-var getSelectElementValue = (htm, selector) => {
-  const element = getSelectElement(htm, selector);
-  return element.value;
-};
 var getInputElement = (htm, selector) => {
   const element = htm.find(selector)?.[0];
   if (element == null) {
@@ -82,241 +68,355 @@ var config = {
     descriptionIcon: "padding-right: 5px;",
     description: ""
   },
-  transformationGroups: {
-    beastShape: {
-      label: "Forme Bestiale (cr\xE9ature magique de taille G)",
-      description: "Disponible \xE0 partir de Forme Bestiale IV",
-      transformation: {
-        chimeraBestShapeIV: {
-          label: "Chim\xE8re",
-          description: "Ce monstre ail\xE9 a le corps d\u2019un lion et trois t\xEAtes : une de dragon et une de ch\xE8vre cornue. Pour connaitre la couleur de la t\xEAte, lancez [[/r 1d10 #Couleur de la t\xEAte de chim\xE8re]]. Si 1 ou 2 alors t\xEAte blanche, si 4 ou 4 alors t\xEAte bleue, si 5 ou 6 alors t\xEAte noire, si 7 ou 8 alors t\xEAte rouge, sinon t\xEAte verte.",
-          itemsToAdd: [
-            {
-              name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "buff"
-            },
-            {
-              name: "Morsure (dragon) (chim\xE8re - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            },
-            {
-              name: "Morsure (lion) (chim\xE8re - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            },
-            {
-              name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            },
-            {
-              name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            },
-            {
-              name: "Souffle de Chim\xE8re (chim\xE8re - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "feat"
-            }
-          ],
-          size: "lg",
-          stature: "long",
-          tokenTextureSrc: "/tokens/monsters/magicalBeasts/chimera.webp",
-          actorImg: "/characters/monsters/magicalBeasts/chimera.webp",
-          speed: {
-            burrow: {
-              base: 0
-            },
-            climb: {
-              base: 0
-            },
-            fly: {
-              base: 50,
-              maneuverability: "poor"
-            },
-            land: {
-              base: 30
-            },
-            swim: {
-              base: 0
-            }
-          },
-          senses: {
-            dv: 60,
-            ll: {
-              enabled: true,
-              multiplier: {
-                bright: 2,
-                dim: 2
+  rootElements: {
+    beastShapeIV: {
+      label: "Forme Bestiale IV",
+      type: "group",
+      elementChildren: {
+        magicalBeastLarge: {
+          label: "Cr\xE9ature magique de taille G",
+          type: "group",
+          elementChildren: {
+            chimeraBestShapeIV: {
+              label: "Chim\xE8re",
+              description: "Ce monstre ail\xE9 a le corps d\u2019un lion et trois t\xEAtes : une de dragon et une de ch\xE8vre cornue. Pour connaitre la couleur de la t\xEAte, lancez [[/r 1d10 #Couleur de la t\xEAte de chim\xE8re]]. Si 1 ou 2 alors t\xEAte blanche, si 4 ou 4 alors t\xEAte bleue, si 5 ou 6 alors t\xEAte noire, si 7 ou 8 alors t\xEAte rouge, sinon t\xEAte verte.",
+              type: "transformation",
+              itemsToAdd: [
+                {
+                  name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "buff"
+                },
+                {
+                  name: "Morsure (dragon) (chim\xE8re - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "attack"
+                },
+                {
+                  name: "Morsure (lion) (chim\xE8re - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "attack"
+                },
+                {
+                  name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "attack"
+                },
+                {
+                  name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "attack"
+                },
+                {
+                  name: "Souffle de Chim\xE8re (chim\xE8re - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "feat"
+                }
+              ],
+              size: "lg",
+              stature: "long",
+              tokenTextureSrc: "/tokens/monsters/magicalBeasts/chimera.webp",
+              actorImg: "/characters/monsters/magicalBeasts/chimera.webp",
+              speed: {
+                burrow: {
+                  base: 0
+                },
+                climb: {
+                  base: 0
+                },
+                fly: {
+                  base: 50,
+                  maneuverability: "poor"
+                },
+                land: {
+                  base: 30
+                },
+                swim: {
+                  base: 0
+                }
+              },
+              senses: {
+                dv: 60,
+                ll: {
+                  enabled: true,
+                  multiplier: {
+                    bright: 2,
+                    dim: 2
+                  }
+                },
+                sc: 30
               }
             },
-            sc: 30
-          }
-        },
-        gorgonBeastShapeIV: {
-          label: "Gorgone",
-          description: "Taureau de pierre qui peut p\xE9trifier ses victimes",
-          itemsToAdd: [
-            {
-              name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "buff"
-            },
-            {
-              name: "Corne (gorgone - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            },
-            {
-              name: "2 sabots (gorgone - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            },
-            {
-              name: "Pi\xE9tinement",
-              compendiumName: "world.aptitudes-de-classe-personnalisees",
-              type: "feat"
-            },
-            {
-              name: "Souffle de Gorgone (gorgone - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "feat"
-            }
-          ],
-          size: "lg",
-          stature: "long",
-          tokenTextureSrc: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
-          actorImg: "/characters/monsters/magicalBeasts/gorgone.webp",
-          speed: {
-            burrow: {
-              base: 0
-            },
-            climb: {
-              base: 0
-            },
-            fly: {
-              base: 0
-            },
-            land: {
-              base: 30
-            },
-            swim: {
-              base: 0
-            }
-          },
-          senses: {
-            dv: 60,
-            ll: {
-              enabled: true,
-              multiplier: {
-                bright: 2,
-                dim: 2
+            gorgonBeastShapeIV: {
+              label: "Gorgone",
+              description: "Taureau de pierre qui peut p\xE9trifier ses victimes",
+              type: "transformation",
+              itemsToAdd: [
+                {
+                  name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "buff"
+                },
+                {
+                  name: "Corne (gorgone - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "attack"
+                },
+                {
+                  name: "2 sabots (gorgone - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "attack"
+                },
+                {
+                  name: "Pi\xE9tinement",
+                  compendiumName: "world.aptitudes-de-classe-personnalisees",
+                  type: "feat"
+                },
+                {
+                  name: "Souffle de Gorgone (gorgone - metamorph)",
+                  compendiumName: "world.effets-metamorph",
+                  type: "feat"
+                }
+              ],
+              size: "lg",
+              stature: "long",
+              tokenTextureSrc: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
+              actorImg: "/characters/monsters/magicalBeasts/gorgone.webp",
+              speed: {
+                burrow: {
+                  base: 0
+                },
+                climb: {
+                  base: 0
+                },
+                fly: {
+                  base: 0
+                },
+                land: {
+                  base: 30
+                },
+                swim: {
+                  base: 0
+                }
+              },
+              senses: {
+                dv: 60,
+                ll: {
+                  enabled: true,
+                  multiplier: {
+                    bright: 2,
+                    dim: 2
+                  }
+                },
+                sc: 30
               }
-            },
-            sc: 30
+            }
           }
         }
       }
     },
-    simpleSpell: {
-      label: "Sort simple",
-      transformation: {
-        reducePerson: {
-          label: "Rapetissement",
-          description: "Effectif uniquement sur les humanoids",
-          itemsToAdd: [
-            {
-              name: "Rapetissement (metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "buff"
-            }
-          ],
-          size: "sm"
+    reducePerson: {
+      label: "Rapetissement",
+      description: "Effectif uniquement sur les humanoids",
+      type: "transformation",
+      itemsToAdd: [
+        {
+          name: "Rapetissement (metamorph)",
+          compendiumName: "world.effets-metamorph",
+          type: "buff"
         }
-      }
+      ],
+      size: "sm"
     }
   }
 };
 
 // src/macro/pf1-metamorph/html.ts
-var { style } = config;
-var createForm = () => `
-    <form class="flexcol">
-      <div class="form-group">
-        <label>Groupe :</label>
-        <select id="metamorph-transformation-group">${createTransformationGroupOptions()}</select>
+var { style, rootElements } = config;
+var logger2 = getLoggerInstance();
+var createHtmlController = () => {
+  let selectedKeyArray = [];
+  let htm = void 0;
+  const setHtm = (value) => {
+    htm = value;
+  };
+  const getDefinedHtm = () => {
+    if (htm === void 0) {
+      throw new Error("Trying ot get Html while it's undefined");
+    }
+    return htm;
+  };
+  const createForm = () => `
+    <form class='flexcol'>
+      <div class='form-group'>
+        <label>Element :</label>
+        <select id='metamorph-transformation-element'>${createElementOptions(
+    rootElements
+  )}</select>
       </div>
-      <div id="metamorph-transformation-group-description"> class="form-group">
+      <div id='metamorph-transformation-element-description' class='form-group'>
       </div>
-      <div class="form-group">
-        <label>Transformation :</label>
-        <select id="metamorph-transformation"></select>
-      </div>
-      <div id="metamorph-transformation-description" class="form-group">
-      </div>
-      <div class="form-group">
-        <label for="transformation-value">Niveau lanceur de sort :</label>
-        <input type="number" id="transformation-spell-level"/>
-      </div>
-      <div class="form-group">
-        <label for="transformation-value">DD Sort :</label>
-        <input type="number" id="transformation-spell-difficulty-check"/>
-      </div>
-      <div class="form-group">
-         <p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha</p>
-      </div>
+      <span id='metamorph-elements'></span>
     </form>
   `;
-var createTransformationGroupOptions = () => {
-  const { transformationGroups } = config;
-  return Object.keys(transformationGroups).map(
-    (key) => `<option value='${key}'>${transformationGroups[key].label}</option>`
-  ).join("");
-};
-var createTransformationGroupValues = (htm) => {
-  const { transformationGroups } = config;
-  const currentGroupValue = getSelectElementValue(
-    htm,
-    "#metamorph-transformation-group"
-  );
-  const group = transformationGroups[currentGroupValue];
-  if (group === void 0) {
-    return { optionValue: "<option>Aucune option disponible</option>" };
-  }
-  const { transformation, description } = group;
-  return {
-    optionValue: Object.keys(transformation).map(
-      (key) => `<option value='${key}'>${transformation[key].label}</option>`
-    ).join(""),
-    description: description ? `<p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>${TextEditor.enrichHTML(
-      description,
-      { async: false }
-    )}</p>` : void 0
+  const selectOnChange = (event, index) => {
+    const htmlElement = event.target;
+    if (htmlElement === void 0) {
+      throw new Error("HTML element is invalid");
+    }
+    logger2.debug("Obtained HTML element from event", {
+      htmlElement
+    });
+    if (isNaN(index)) {
+      throw new Error("Index is not a valid number");
+    }
+    const value = htmlElement.value;
+    overrideSelectedKeyArray(index, value);
+    resetElementOptionsTree();
   };
-};
-var createTransformationEffectDescription = (htm) => {
-  const { transformationGroups } = config;
-  const currentGroupValue = getSelectElementValue(
-    htm,
-    "#metamorph-transformation-group"
-  );
-  const group = transformationGroups[currentGroupValue];
-  if (group === void 0) {
-    return void 0;
-  }
-  const { transformation } = group;
-  const currentTransformationValue = getSelectElementValue(
-    htm,
-    "#metamorph-transformation"
-  );
-  const { description } = transformation[currentTransformationValue];
-  return description ? `<p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>${TextEditor.enrichHTML(
+  const setSelectEvents = () => {
+    const metamorphSelectRootElement = getDefinedHtm().find(
+      "#metamorph-transformation-element"
+    )[0];
+    logger2.info("Found metamorph select root element", {
+      metamorphSelectRootElement
+    });
+    if (metamorphSelectRootElement === void 0) {
+      throw new Error("Could not get metamorph root select element");
+    }
+    metamorphSelectRootElement.addEventListener("change", (event) => {
+      selectOnChange(event, 0);
+    });
+    const metamorphSelectElements = getDefinedHtm().find("#metamorph-elements");
+    let index = 1;
+    for (const htmlElement of metamorphSelectElements) {
+      htmlElement.addEventListener("change", (event) => {
+        selectOnChange(event, index);
+        index++;
+      });
+    }
+  };
+  const getTransformation = () => {
+    const getTransformationIteration = (element, tempSelectedKeyArray2) => {
+      logger2.debug("Get transformation iteration", {
+        element,
+        tempSelectedKeyArray: tempSelectedKeyArray2
+      });
+      if (element === void 0) {
+        throw new Error(
+          "Could not iterate through transformation, element undefined"
+        );
+      }
+      if (element.type === "group") {
+        const currentKey = tempSelectedKeyArray2.pop();
+        if (currentKey === void 0) {
+          throw new Error(
+            "Could not iterate through transformation, selectedKeyArray is empty"
+          );
+        }
+        return getTransformationIteration(
+          element.elementChildren[currentKey],
+          tempSelectedKeyArray2
+        );
+      }
+      return element;
+    };
+    const tempSelectedKeyArray = [...selectedKeyArray];
+    const firstKey = tempSelectedKeyArray.pop();
+    if (firstKey === void 0) {
+      throw new Error(
+        "Could not iterate through transformation, selectedKeyArray is empty"
+      );
+    }
+    return getTransformationIteration(
+      rootElements[firstKey],
+      tempSelectedKeyArray
+    );
+  };
+  const setSelectedKeyArray = (value) => {
+    selectedKeyArray = value;
+  };
+  const overrideSelectedKeyArray = (index, value) => {
+    setSelectedKeyArray(
+      selectedKeyArray.slice(0, index).concat(value, selectedKeyArray.slice(index))
+    );
+  };
+  const resetElementOptionsTree = () => {
+    logger2.debug("Reset element options tree", selectedKeyArray);
+    const firstKey = selectedKeyArray[0];
+    if (firstKey === void 0) {
+      throw new Error("Could not get first key");
+    }
+    const firstElement = rootElements[firstKey];
+    if (firstElement === void 0) {
+      throw new Error("Could not get first element");
+    }
+    const optionsTree = createElementOptionsTree(
+      firstElement,
+      `metamorph-elements-${firstKey}`,
+      1,
+      selectedKeyArray.slice(1)
+    );
+    editInnerHtml(getDefinedHtm(), "#metamorph-elements", optionsTree);
+    setSelectEvents();
+  };
+  const createElementOptionsTree = (element, parentHtmlId, index, selectedKeyArray2) => {
+    logger2.debug("Creating options tree : new iteration", {
+      element,
+      selectedKeyArray: selectedKeyArray2
+    });
+    if (element.type === "group") {
+      const currentKey = selectedKeyArray2.pop();
+      if (currentKey === void 0) {
+        throw new Error("At least one key is missing");
+      }
+      const newElement = element.elementChildren[currentKey];
+      if (newElement === void 0) {
+        throw new Error("At least one key is invalid");
+      }
+      const currentHtmlId = `${parentHtmlId}:${currentKey}`;
+      return createElementFormGroup(
+        element.elementChildren,
+        currentHtmlId,
+        index,
+        element.description
+      ) + createElementOptionsTree(
+        element.elementChildren[currentKey],
+        currentHtmlId,
+        index + 1,
+        selectedKeyArray2
+      );
+    }
+    return createDescription(element.description);
+  };
+  const createElementFormGroup = (elementChildren, htmlId, index, parentDescription) => `
+  <div class="form-group">
+    <label>Element :</label>
+    <select id="${htmlId}" onclick='' index='${index}'>${createElementOptions(
+    elementChildren
+  )}</select>
+  </div>
+  <div class="metamorph-transformation-element-description form-group">
+    ${createDescription(parentDescription)}
+  </div>
+`;
+  const createDescription = (description) => `
+  <div class="form-group">
+   ${description ? `<p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>${TextEditor.enrichHTML(
     description,
     { async: false }
-  )}</p>` : void 0;
+  )}</p>` : ""}
+  </div>
+`;
+  const createElementOptions = (elements) => {
+    return Object.keys(elements).map((key) => `<option value='${key}'>${elements[key].label}</option>`).join("");
+  };
+  return {
+    createForm,
+    resetElementOptionsTree,
+    setHtm,
+    getTransformation
+  };
 };
 
 // src/common/error/user-warning.ts
@@ -324,7 +424,7 @@ var UserWarning = class extends Error {
 };
 
 // src/macro/pf1-metamorph/item.ts
-var logger2 = getLoggerInstance();
+var logger3 = getLoggerInstance();
 var findItemsInActor = (actor, itemName, itemType) => actor.items.filter(
   ({ name, type }) => name.toLowerCase() === itemName.toLowerCase() && type === itemType
 );
@@ -338,7 +438,7 @@ var findItemInCompendium = async (compendiumName, itemName, itemType) => {
   }
   const item = await compendiumCollection.getDocument(itemDescriptor._id);
   if (item === void 0) {
-    logger2.warn(
+    logger3.warn(
       "Could not find item in compendium even though its descriptor was found"
     );
     return void 0;
@@ -355,9 +455,9 @@ var createItemInActor = async (actor, item) => {
 };
 
 // src/macro/pf1-metamorph/polymorph.ts
-var logger3 = getLoggerInstance();
+var logger4 = getLoggerInstance();
 var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  logger3.debug("Prepare to add item to actor", item);
+  logger4.debug("Prepare to add item to actor", item);
   const compendiumItem = await findItemInCompendium(
     item.compendiumName,
     item.name,
@@ -368,7 +468,7 @@ var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLe
       `Could not find buff ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`
     );
   }
-  logger3.debug("Found item in compendium", {
+  logger4.debug("Found item in compendium", {
     compendiumItem,
     itemCompendiumName: item.compendiumName,
     itemName: item.name
@@ -417,32 +517,32 @@ var mixReduction = (actorReduction, polymorphReduction) => polymorphReduction !=
   custom: [actorReduction.custom, polymorphReduction.custom].filter((value) => value).join(";"),
   value: [...actorReduction.value, ...polymorphReduction.value]
 } : actorReduction;
-var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  logger3.info("Apply metamorph");
-  const { tokenTextureSrc, itemsToAdd, itemsToModify } = metamorphTransform;
+var applyMetamorph = async (tokens, metamorphElementTransformation, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
+  logger4.info("Apply metamorph");
+  const { tokenTextureSrc, itemsToAdd, itemsToModify } = metamorphElementTransformation;
   const updates = [];
   updates.push(
     tokens.map(({ actor }) => {
-      logger3.debug("Apply metamorph to actor", actor);
+      logger4.debug("Apply metamorph to actor", actor);
       return actor.update({
         system: {
           attributes: {
-            speed: metamorphTransform.speed
+            speed: metamorphElementTransformation.speed
           },
           traits: {
-            size: metamorphTransform.size,
-            stature: metamorphTransform.stature,
+            size: metamorphElementTransformation.size,
+            stature: metamorphElementTransformation.stature,
             senses: {
               ...actor.system.traits.senses,
-              ...metamorphTransform.senses
+              ...metamorphElementTransformation.senses
             },
             dr: mixReduction(
               actor.system.traits.dr,
-              metamorphTransform.damageReduction
+              metamorphElementTransformation.damageReduction
             ),
             eres: mixReduction(
               actor.system.traits.eres,
-              metamorphTransform.energyResistance
+              metamorphElementTransformation.energyResistance
             )
           }
         },
@@ -457,13 +557,13 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
             src: tokenTextureSrc
           }
         },
-        img: metamorphTransform.actorImg
+        img: metamorphElementTransformation.actorImg
       });
     })
   );
   updates.push(
     tokens.map((token) => {
-      logger3.debug("Apply metamorph to token", token);
+      logger4.debug("Apply metamorph to token", token);
       return token.document.update({
         texture: {
           src: tokenTextureSrc
@@ -487,7 +587,7 @@ var applyMetamorph = async (tokens, metamorphTransform, metamorphTransformSpellL
   await Promise.all(updates.flat());
 };
 var createItemToAddUpdates = (tokens, itemsToAdd, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => tokens.map(({ actor }) => {
-  logger3.debug("Create metamorph items in actor", actor);
+  logger4.debug("Create metamorph items in actor", actor);
   const individualItemUpdate = itemsToAdd.map(
     (item) => addTransformationItemToActor(
       actor,
@@ -546,9 +646,9 @@ var checkTokens = (tokens) => {
 };
 
 // src/macro/pf1-metamorph/save.ts
-var logger4 = getLoggerInstance();
+var logger5 = getLoggerInstance();
 var transformToMetamorphSave = (value) => {
-  logger4.debug("Transform flags to metamorph if they are valid", value);
+  logger5.debug("Transform flags to metamorph if they are valid", value);
   if (value === void 0) {
     throw new Error("Flag values are undefined");
   }
@@ -560,7 +660,7 @@ var transformToMetamorphSave = (value) => {
       texture: { src: tokenTextureSrc = void 0 } = {}
     } = {}
   } = value;
-  logger4.debug("Extracted values in flags", {
+  logger5.debug("Extracted values in flags", {
     actorSize,
     tokenTextureSrc
   });
@@ -569,10 +669,10 @@ var transformToMetamorphSave = (value) => {
   }
   return value;
 };
-var savePolymorphData = async (tokens, metamorphTransformEffect) => {
-  logger4.info("Save data to actor flags to ensure rolling back is possible");
+var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
+  logger5.info("Save data to actor flags to ensure rolling back is possible");
   const operations = tokens.map(async (token) => {
-    logger4.debug("Save data related to a token", token);
+    logger5.debug("Save data related to a token", token);
     const actorData = {
       system: {
         attributes: {
@@ -601,10 +701,10 @@ var savePolymorphData = async (tokens, metamorphTransformEffect) => {
     const save = {
       actorData,
       tokenDocumentData,
-      transformAddedItemsData: metamorphTransformEffect.itemsToAdd,
+      transformAddedItemsData: metamorphElementTransformEffect.itemsToAdd,
       transformModifiedItem: getTransformModifiedBuff(
         token.actor.items,
-        metamorphTransformEffect.itemsToModify
+        metamorphElementTransformEffect.itemsToModify
       )
     };
     await token.actor.update({
@@ -640,11 +740,11 @@ var getTransformModifiedBuff = (actorItems, itemsToModify) => {
   );
 };
 var rollbackToPrePolymorphData = async (tokens) => {
-  logger4.info("Prepare to roll back to data before polymorph was triggered");
+  logger5.info("Prepare to roll back to data before polymorph was triggered");
   const rollbackActions = tokens.map((token) => {
-    logger4.debug("Rolling back token", token);
+    logger5.debug("Rolling back token", token);
     const save = transformToMetamorphSave(token.actor.flags?.metamorph?.save);
-    logger4.debug("Save obtained from token actor", save);
+    logger5.debug("Save obtained from token actor", save);
     const currentRollBackActions = [
       token.document.update(save.tokenDocumentData),
       token.actor.update({
@@ -658,7 +758,7 @@ var rollbackToPrePolymorphData = async (tokens) => {
       })
     ];
     if (save.transformModifiedItem !== void 0) {
-      logger4.debug("Get items to rollback", save);
+      logger5.debug("Get items to rollback", save);
       currentRollBackActions.push(
         Promise.all(
           rollbackModifiedItem(save.transformModifiedItem, token.actor.items)
@@ -666,12 +766,12 @@ var rollbackToPrePolymorphData = async (tokens) => {
       );
     }
     if (save.transformAddedItemsData !== void 0) {
-      logger4.debug("Get items to delete", save);
+      logger5.debug("Get items to delete", save);
       const itemsToDelete = getItemsToDelete(
         token,
         save.transformAddedItemsData
       );
-      logger4.debug(`Got ${itemsToDelete.length} items to delete`, {
+      logger5.debug(`Got ${itemsToDelete.length} items to delete`, {
         itemsToDelete
       });
       currentRollBackActions.push(
@@ -683,9 +783,9 @@ var rollbackToPrePolymorphData = async (tokens) => {
     }
     return currentRollBackActions;
   }).flat();
-  logger4.info("Trigger rollback");
+  logger5.info("Trigger rollback");
   await Promise.all(rollbackActions);
-  logger4.info("Rollback complete");
+  logger5.info("Rollback complete");
 };
 var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsData.reduce((previousItems, currentItem) => {
   const actorItems = findItemsInActor(
@@ -696,7 +796,7 @@ var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsDa
   if (actorItems.length > 0) {
     previousItems.push(...actorItems);
   } else {
-    logger4.warn(`Could not find ${currentItem.name} item(s) in actor`);
+    logger5.warn(`Could not find ${currentItem.name} item(s) in actor`);
   }
   return previousItems;
 }, []);
@@ -724,13 +824,13 @@ var rollbackModifiedItem = (saveTransformModifiedItems, actorItems) => actorItem
       })
     );
   } else {
-    logger4.warn("A modified item has expected type", currentItem);
+    logger5.warn("A modified item has expected type", currentItem);
   }
   return accumulator;
 }, []);
 
 // src/macro/pf1-metamorph/index.ts
-var logger5 = getLoggerInstance();
+var logger6 = getLoggerInstance();
 var getNumberFromInputIfSpecified = (htm, selector) => {
   const value = parseInt(getInputElement(htm, selector).value);
   if (!isNaN(value)) {
@@ -738,16 +838,8 @@ var getNumberFromInputIfSpecified = (htm, selector) => {
   }
   return value;
 };
-var triggerMetamorph = async (htm, controlledTokens) => {
+var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
   try {
-    const metamorphTransformGroupKey = getSelectElementValue(
-      htm,
-      "#metamorph-transformation-group"
-    );
-    const metamorphTransformEffectKey = getSelectElementValue(
-      htm,
-      "#metamorph-transformation"
-    );
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       "#transformation-spell-level"
@@ -756,16 +848,12 @@ var triggerMetamorph = async (htm, controlledTokens) => {
       htm,
       "#transformation-spell-difficulty-check"
     );
-    const metamorphTransformEffect = config.transformationGroups[metamorphTransformGroupKey].transformation[metamorphTransformEffectKey];
-    if (metamorphTransformEffect === void 0) {
-      ui.notifications.error("Cette transformation est inconnue");
-      return;
-    }
     checkTokens(controlledTokens);
-    await savePolymorphData(controlledTokens, metamorphTransformEffect);
+    const elementTransformation = htmlController.getTransformation();
+    await savePolymorphData(controlledTokens, elementTransformation);
     await applyMetamorph(
       controlledTokens,
-      metamorphTransformEffect,
+      elementTransformation,
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck
     );
@@ -780,10 +868,10 @@ var cancelMetamorph = async (controlledTokens) => {
   await rollbackToPrePolymorphData(controlledTokens);
 };
 var openDialog = (controlledTokens) => {
-  const form = createForm();
+  const htmlController = createHtmlController();
   new Dialog({
     title: "Metamorph",
-    content: form,
+    content: htmlController.createForm(),
     buttons: {
       cancel: {
         icon: '<i class="fas fa-dice-d20"></i>',
@@ -793,51 +881,18 @@ var openDialog = (controlledTokens) => {
       trigger: {
         icon: '<i class="fas fa-dice-d20"></i>',
         label: "Confirmer la transformation",
-        callback: (htm) => triggerMetamorph(htm, controlledTokens)
+        callback: (htm) => triggerMetamorph(htm, controlledTokens, htmlController)
       }
     },
     render: (htm) => {
-      const $transformGroupElement = htm.find("#metamorph-transformation-group");
-      const $transformElement = htm.find("#metamorph-transformation");
-      if ($transformGroupElement.length === 0 || $transformElement.length === 0) {
-        throw new Error("Could not find relevant JQuery elements");
-      }
-      $transformGroupElement.on("change", () => {
-        refreshTransformationEffectOptions(htm);
-        refreshTransformationEffectDescription(htm);
-      });
-      $transformElement.on("change", () => {
-        refreshTransformationEffectDescription(htm);
-      });
-      refreshTransformationEffectOptions(htm);
-      refreshTransformationEffectDescription(htm);
+      htmlController.setHtm(htm);
+      htmlController.resetElementOptionsTree();
     }
   }).render(true);
 };
-var refreshTransformationEffectOptions = (htm) => {
-  const transformationEffectValues = createTransformationGroupValues(htm);
-  editInnerHtml(
-    htm,
-    "#metamorph-transformation",
-    transformationEffectValues.optionValue
-  );
-  editInnerHtml(
-    htm,
-    "#metamorph-transformation-group-description",
-    transformationEffectValues.description ?? ""
-  );
-};
-var refreshTransformationEffectDescription = (htm) => {
-  const transformEffectDescription = createTransformationEffectDescription(htm);
-  editInnerHtml(
-    htm,
-    "#metamorph-transformation-description",
-    transformEffectDescription ?? ""
-  );
-};
 try {
-  logger5.setLevel(0 /* DEBUG */);
-  logger5.setMacroName("pf1-metamorph");
+  logger6.setLevel(0 /* DEBUG */);
+  logger6.setMacroName("pf1-metamorph");
   const {
     tokens: { controlled: controlledTokens }
   } = canvas;

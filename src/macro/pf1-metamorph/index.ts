@@ -1,16 +1,7 @@
 import { LogLevel, getLoggerInstance } from '../../common/log/logger'
-import {
-  editInnerHtml,
-  getInputElement,
-  getSelectElementValue,
-} from '../../common/util/jquery'
+import { getInputElement } from '../../common/util/jquery'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
-import { MetamorphTransformation, config } from './config'
-import {
-  createForm,
-  createTransformationEffectDescription,
-  createTransformationGroupValues,
-} from './html'
+import { HTMLController, createHtmlController } from './html'
 import { applyMetamorph, checkTokens } from './polymorph'
 import { rollbackToPrePolymorphData, savePolymorphData } from './save'
 
@@ -32,18 +23,9 @@ const getNumberFromInputIfSpecified = (
 const triggerMetamorph = async (
   htm: JQuery,
   controlledTokens: TokenPF[],
+  htmlController: HTMLController,
 ): Promise<void> => {
   try {
-    const metamorphTransformGroupKey = getSelectElementValue(
-      htm,
-      '#metamorph-transformation-group',
-    )
-
-    const metamorphTransformEffectKey = getSelectElementValue(
-      htm,
-      '#metamorph-transformation',
-    )
-
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       '#transformation-spell-level',
@@ -54,21 +36,14 @@ const triggerMetamorph = async (
       '#transformation-spell-difficulty-check',
     )
 
-    const metamorphTransformEffect: MetamorphTransformation | undefined =
-      config.transformationGroups[metamorphTransformGroupKey].transformation[
-        metamorphTransformEffectKey
-      ]
-    if (metamorphTransformEffect === undefined) {
-      ui.notifications.error('Cette transformation est inconnue')
-      return
-    }
-
     checkTokens(controlledTokens)
 
-    await savePolymorphData(controlledTokens, metamorphTransformEffect)
+    const elementTransformation = htmlController.getTransformation()
+
+    await savePolymorphData(controlledTokens, elementTransformation)
     await applyMetamorph(
       controlledTokens,
-      metamorphTransformEffect,
+      elementTransformation,
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck,
     )
@@ -85,11 +60,11 @@ const cancelMetamorph = async (controlledTokens: TokenPF[]): Promise<void> => {
 }
 
 const openDialog = (controlledTokens: TokenPF[]) => {
-  const form = createForm()
+  const htmlController = createHtmlController()
 
   new Dialog({
     title: 'Metamorph',
-    content: form,
+    content: htmlController.createForm(),
     buttons: {
       cancel: {
         icon: '<i class="fas fa-dice-d20"></i>',
@@ -99,57 +74,15 @@ const openDialog = (controlledTokens: TokenPF[]) => {
       trigger: {
         icon: '<i class="fas fa-dice-d20"></i>',
         label: 'Confirmer la transformation',
-        callback: (htm) => triggerMetamorph(htm, controlledTokens),
+        callback: (htm) =>
+          triggerMetamorph(htm, controlledTokens, htmlController),
       },
     },
     render: (htm) => {
-      const $transformGroupElement = htm.find('#metamorph-transformation-group')
-      const $transformElement = htm.find('#metamorph-transformation')
-      if (
-        $transformGroupElement.length === 0 ||
-        $transformElement.length === 0
-      ) {
-        throw new Error('Could not find relevant JQuery elements')
-      }
-
-      $transformGroupElement.on('change', () => {
-        refreshTransformationEffectOptions(htm)
-        refreshTransformationEffectDescription(htm)
-      })
-
-      $transformElement.on('change', () => {
-        refreshTransformationEffectDescription(htm)
-      })
-
-      refreshTransformationEffectOptions(htm)
-      refreshTransformationEffectDescription(htm)
+      htmlController.setHtm(htm)
+      htmlController.resetElementOptionsTree()
     },
   }).render(true)
-}
-
-const refreshTransformationEffectOptions = (htm: JQuery<HTMLElement>) => {
-  const transformationEffectValues = createTransformationGroupValues(htm)
-
-  editInnerHtml(
-    htm,
-    '#metamorph-transformation',
-    transformationEffectValues.optionValue,
-  )
-  editInnerHtml(
-    htm,
-    '#metamorph-transformation-group-description',
-    transformationEffectValues.description ?? '',
-  )
-}
-
-const refreshTransformationEffectDescription = (htm: JQuery<HTMLElement>) => {
-  const transformEffectDescription = createTransformationEffectDescription(htm)
-
-  editInnerHtml(
-    htm,
-    '#metamorph-transformation-description',
-    transformEffectDescription ?? '',
-  )
 }
 
 try {
