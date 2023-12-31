@@ -6,26 +6,37 @@ var createLogger = () => {
   let level = 1 /* INFO */;
   let macroName = void 0;
   const createMacroNameFlag = () => macroName ? `[${macroName}]` : "";
+  const writeConsoleMessage = (levelString, message, context) => {
+    if (context) {
+      console.log(`${createMacroNameFlag()}[${levelString}]`, message, context);
+      return;
+    }
+    console.log(`${createMacroNameFlag()}[${levelString}]`, message);
+  };
   return {
     debug: (message, context) => {
-      if (level >= 0 /* DEBUG */) {
-        console.log(`${createMacroNameFlag()}[DEBUG]`, message, context);
+      if (level < 0 /* DEBUG */) {
+        return;
       }
+      writeConsoleMessage("DEBUG", message, context);
     },
     info: (message, context) => {
-      if (level >= 1 /* INFO */) {
-        console.log(`${createMacroNameFlag()}[INFO]`, message, context);
+      if (level < 1 /* INFO */) {
+        return;
       }
+      writeConsoleMessage("INFO", message, context);
     },
     warn: (message, context) => {
-      if (level >= 2 /* WARN */) {
-        console.warn(`${createMacroNameFlag()}[WARN]`, message, context);
+      if (level < 2 /* WARN */) {
+        return;
       }
+      writeConsoleMessage("WARN", message, context);
     },
     error: (message, context) => {
-      if (level >= 3 /* ERROR */) {
-        console.error(`${createMacroNameFlag()}[ERROR]`, message, context);
+      if (level < 3 /* ERROR */) {
+        return;
       }
+      writeConsoleMessage("ERROR", message, context);
     },
     setLevel: (newLevel) => {
       level = newLevel;
@@ -235,7 +246,7 @@ var config = {
 var { style, rootElements } = config;
 var logger2 = getLoggerInstance();
 var createHtmlController = () => {
-  let selectedKeyArray = [];
+  let masterSelectedKeyArray = [];
   let htm = void 0;
   const setHtm = (value) => {
     htm = value;
@@ -248,59 +259,94 @@ var createHtmlController = () => {
   };
   const createForm = () => `
     <form class='flexcol'>
-      <div class='form-group'>
-        <label>Element :</label>
-        <select id='metamorph-transformation-element'>${createElementOptions(
-    rootElements
-  )}</select>
+      <span id='metamorph-root-element-container'>
+        <div class='form-group'>
+          <label>Element :</label>
+          <select>${createElementOptions(rootElements)}</select>
+        </div>
+        <div id='metamorph-root-element-description' class='form-group'>
+        </div>
+      </span>
+      <span id='metamorph-children-elements-container'></span>
+      <div class="form-group">
+        <label for="transformation-value">Niveau lanceur de sort :</label>
+        <input type="number" id="transformation-spell-level"/>
       </div>
-      <div id='metamorph-transformation-element-description' class='form-group'>
+      <div class="form-group">
+        <label for="transformation-value">DD Sort :</label>
+        <input type="number" id="transformation-spell-difficulty-check"/>
       </div>
-      <span id='metamorph-elements'></span>
+      <div class="form-group">
+         <p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha</p>
+      </div>
     </form>
   `;
-  const selectOnChange = (event, index) => {
+  const selectOnChange = (event, depth) => {
     const htmlElement = event.target;
-    if (htmlElement === void 0) {
-      throw new Error("HTML element is invalid");
+    if (htmlElement === null) {
+      throw new Error("Changed HTML element is invalid");
     }
-    logger2.debug("Obtained HTML element from event", {
-      htmlElement
+    logger2.debug("Change event triggered, obtained HTML element from event", {
+      htmlElement,
+      depth
     });
-    if (isNaN(index)) {
-      throw new Error("Index is not a valid number");
-    }
     const value = htmlElement.value;
-    overrideSelectedKeyArray(index, value);
+    overrideMasterSelectedKeyArray(depth, value);
     resetElementOptionsTree();
   };
-  const setSelectEvents = () => {
-    const metamorphSelectRootElement = getDefinedHtm().find(
-      "#metamorph-transformation-element"
-    )[0];
-    logger2.info("Found metamorph select root element", {
-      metamorphSelectRootElement
-    });
-    if (metamorphSelectRootElement === void 0) {
-      throw new Error("Could not get metamorph root select element");
+  const setupRootSelectHtmlElement = () => {
+    logger2.debug("Setup Root Select HTML Element");
+    const metamorphRootSelectElement = getDefinedHtm().find("#metamorph-root-element-container").find("select")[0];
+    if (metamorphRootSelectElement === void 0) {
+      throw new Error("Could not find Root Select HTML Element");
     }
-    metamorphSelectRootElement.addEventListener("change", (event) => {
+    metamorphRootSelectElement.value = createElementKey(rootElements, 0);
+    metamorphRootSelectElement.addEventListener("change", (event) => {
       selectOnChange(event, 0);
     });
-    const metamorphSelectElements = getDefinedHtm().find("#metamorph-elements");
-    let index = 1;
-    for (const htmlElement of metamorphSelectElements) {
-      htmlElement.addEventListener("change", (event) => {
-        selectOnChange(event, index);
-        index++;
+  };
+  const setupSelectHTMLElements = () => {
+    logger2.debug("Setup Select HTML Elements");
+    const metamorphSelectElements = getDefinedHtm().find("#metamorph-children-elements-container").find("select");
+    logger2.debug("Found metamorph select elements select", {
+      metamorphSelectElements
+    });
+    const firstKey = createElementKey(rootElements, 0);
+    const firstElement = rootElements[firstKey];
+    if (firstElement.type !== "group") {
+      logger2.debug("First element is not a group, no need to continue", {
+        firstElement,
+        firstKey
       });
+      return;
+    }
+    let depth = 1;
+    let elementRecord = firstElement.elementChildren;
+    for (const htmlSelectElement of metamorphSelectElements) {
+      logger2.debug("Iterating through a metamorph HTML select element found", {
+        depth,
+        elementRecord,
+        htmlSelectElement
+      });
+      const currentDepth = depth;
+      const key = createElementKey(elementRecord, depth);
+      const newElement = elementRecord[key];
+      htmlSelectElement.value = key;
+      htmlSelectElement.addEventListener("change", (event) => {
+        selectOnChange(event, currentDepth);
+      });
+      if (newElement.type === "group") {
+        elementRecord = newElement.elementChildren;
+      }
+      depth++;
     }
   };
   const getTransformation = () => {
-    const getTransformationIteration = (element, tempSelectedKeyArray2) => {
+    const getTransformationIteration = (element, depth) => {
       logger2.debug("Get transformation iteration", {
         element,
-        tempSelectedKeyArray: tempSelectedKeyArray2
+        currentSelectedKeyArray,
+        depth
       });
       if (element === void 0) {
         throw new Error(
@@ -308,95 +354,114 @@ var createHtmlController = () => {
         );
       }
       if (element.type === "group") {
-        const currentKey = tempSelectedKeyArray2.pop();
-        if (currentKey === void 0) {
-          throw new Error(
-            "Could not iterate through transformation, selectedKeyArray is empty"
-          );
-        }
+        const currentKey = createElementKey(element.elementChildren, depth);
         return getTransformationIteration(
           element.elementChildren[currentKey],
-          tempSelectedKeyArray2
+          depth + 1
         );
       }
       return element;
     };
-    const tempSelectedKeyArray = [...selectedKeyArray];
-    const firstKey = tempSelectedKeyArray.pop();
-    if (firstKey === void 0) {
-      throw new Error(
-        "Could not iterate through transformation, selectedKeyArray is empty"
-      );
+    const currentSelectedKeyArray = [...masterSelectedKeyArray];
+    const firstKey = createElementKey(rootElements, 0);
+    return getTransformationIteration(rootElements[firstKey], 0);
+  };
+  const setMasterSelectedKeyArray = (value) => {
+    masterSelectedKeyArray = value;
+  };
+  const overrideMasterSelectedKeyArray = (depth, value) => {
+    logger2.debug("Override master selected key array", {
+      masterSelectedKeyArray,
+      depth,
+      value
+    });
+    if (masterSelectedKeyArray.length <= depth) {
+      const tempSelectedKeyArray = [...masterSelectedKeyArray];
+      while (tempSelectedKeyArray.length <= depth) {
+        tempSelectedKeyArray.push(void 0);
+      }
+      setMasterSelectedKeyArray(tempSelectedKeyArray);
     }
-    return getTransformationIteration(
-      rootElements[firstKey],
-      tempSelectedKeyArray
-    );
-  };
-  const setSelectedKeyArray = (value) => {
-    selectedKeyArray = value;
-  };
-  const overrideSelectedKeyArray = (index, value) => {
-    setSelectedKeyArray(
-      selectedKeyArray.slice(0, index).concat(value, selectedKeyArray.slice(index))
-    );
+    setMasterSelectedKeyArray([
+      ...masterSelectedKeyArray.slice(0, depth),
+      value
+    ]);
+    logger2.debug("Master selected key array override", {
+      masterSelectedKeyArray
+    });
   };
   const resetElementOptionsTree = () => {
-    logger2.debug("Reset element options tree", selectedKeyArray);
-    const firstKey = selectedKeyArray[0];
-    if (firstKey === void 0) {
-      throw new Error("Could not get first key");
-    }
+    logger2.debug("Reset element options tree");
+    const firstKey = createElementKey(rootElements, 0);
     const firstElement = rootElements[firstKey];
     if (firstElement === void 0) {
-      throw new Error("Could not get first element");
+      throw new Error(
+        "Cannot reset element options tree, could not get first element"
+      );
     }
     const optionsTree = createElementOptionsTree(
       firstElement,
-      `metamorph-elements-${firstKey}`,
-      1,
-      selectedKeyArray.slice(1)
+      `metamorph-children-elements-container-${firstKey}`,
+      1
     );
-    editInnerHtml(getDefinedHtm(), "#metamorph-elements", optionsTree);
-    setSelectEvents();
+    editInnerHtml(
+      getDefinedHtm(),
+      "#metamorph-children-elements-container",
+      optionsTree
+    );
+    setupSelectHTMLElements();
   };
-  const createElementOptionsTree = (element, parentHtmlId, index, selectedKeyArray2) => {
+  const createElementKey = (elementRecord, depth) => {
+    logger2.debug("Create element key", {
+      elementRecord,
+      masterSelectedKeyArray,
+      depth
+    });
+    if (Object.keys(elementRecord).length === 0) {
+      throw new Error("Could not create element key, elementRecord is empty");
+    }
+    const key = masterSelectedKeyArray[depth];
+    logger2.debug(`Obtained key "${key}" from selected key array`);
+    if (key === void 0) {
+      const firstElementRecordKey = Object.keys(elementRecord)[0];
+      logger2.debug(
+        `Key is undefined, use first elementRecord element ${firstElementRecordKey} instead`
+      );
+      return firstElementRecordKey;
+    }
+    return key;
+  };
+  const createElementOptionsTree = (element, parentHtmlId, depth) => {
     logger2.debug("Creating options tree : new iteration", {
-      element,
-      selectedKeyArray: selectedKeyArray2
+      element
     });
     if (element.type === "group") {
-      const currentKey = selectedKeyArray2.pop();
-      if (currentKey === void 0) {
-        throw new Error("At least one key is missing");
-      }
+      const currentKey = createElementKey(element.elementChildren, depth);
       const newElement = element.elementChildren[currentKey];
       if (newElement === void 0) {
-        throw new Error("At least one key is invalid");
+        throw new Error(
+          "Creation options tree iteration failed, at least one key is invalid"
+        );
       }
       const currentHtmlId = `${parentHtmlId}:${currentKey}`;
       return createElementFormGroup(
         element.elementChildren,
         currentHtmlId,
-        index,
         element.description
       ) + createElementOptionsTree(
         element.elementChildren[currentKey],
         currentHtmlId,
-        index + 1,
-        selectedKeyArray2
+        depth + 1
       );
     }
     return createDescription(element.description);
   };
-  const createElementFormGroup = (elementChildren, htmlId, index, parentDescription) => `
+  const createElementFormGroup = (elementChildren, htmlId, parentDescription) => `
   <div class="form-group">
     <label>Element :</label>
-    <select id="${htmlId}" onclick='' index='${index}'>${createElementOptions(
-    elementChildren
-  )}</select>
+    <select id="${htmlId}">${createElementOptions(elementChildren)}</select>
   </div>
-  <div class="metamorph-transformation-element-description form-group">
+  <div class="metamorph-root-element-container-description form-group">
     ${createDescription(parentDescription)}
   </div>
 `;
@@ -415,7 +480,8 @@ var createHtmlController = () => {
     createForm,
     resetElementOptionsTree,
     setHtm,
-    getTransformation
+    getTransformation,
+    setupRootSelectHtmlElement
   };
 };
 
@@ -886,6 +952,7 @@ var openDialog = (controlledTokens) => {
     },
     render: (htm) => {
       htmlController.setHtm(htm);
+      htmlController.setupRootSelectHtmlElement();
       htmlController.resetElementOptionsTree();
     }
   }).render(true);

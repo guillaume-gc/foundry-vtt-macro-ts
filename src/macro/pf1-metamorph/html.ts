@@ -16,10 +16,11 @@ export interface HTMLController {
   resetElementOptionsTree: () => void
   setHtm: (value: JQuery<HTMLElement> | undefined) => void
   getTransformation: () => MetamorphElementTransformation
+  setupRootSelectHtmlElement: () => void
 }
 
 export const createHtmlController = (): HTMLController => {
-  let selectedKeyArray: string[] = []
+  let masterSelectedKeyArray: Array<string | undefined> = []
   let htm: JQuery<HTMLElement> | undefined = undefined
 
   const setHtm = (value: JQuery<HTMLElement> | undefined) => {
@@ -36,74 +37,124 @@ export const createHtmlController = (): HTMLController => {
 
   const createForm = () => `
     <form class='flexcol'>
-      <div class='form-group'>
-        <label>Element :</label>
-        <select id='metamorph-transformation-element'>${createElementOptions(
-          rootElements,
-        )}</select>
+      <span id='metamorph-root-element-container'>
+        <div class='form-group'>
+          <label>Element :</label>
+          <select>${createElementOptions(rootElements)}</select>
+        </div>
+        <div id='metamorph-root-element-description' class='form-group'>
+        </div>
+      </span>
+      <span id='metamorph-children-elements-container'></span>
+      <div class="form-group">
+        <label for="transformation-value">Niveau lanceur de sort :</label>
+        <input type="number" id="transformation-spell-level"/>
       </div>
-      <div id='metamorph-transformation-element-description' class='form-group'>
+      <div class="form-group">
+        <label for="transformation-value">DD Sort :</label>
+        <input type="number" id="transformation-spell-difficulty-check"/>
       </div>
-      <span id='metamorph-elements'></span>
+      <div class="form-group">
+         <p style="${style.description}"><i style="${
+           style.descriptionIcon
+         }" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha</p>
+      </div>
     </form>
   `
 
-  const selectOnChange = (event: Event, index: number) => {
-    const htmlElement = event.target as HTMLSelectElement | undefined
-    if (htmlElement === undefined) {
-      throw new Error('HTML element is invalid')
+  const selectOnChange = (event: Event, depth: number) => {
+    const htmlElement = event.target as HTMLSelectElement | null
+    if (htmlElement === null) {
+      throw new Error('Changed HTML element is invalid')
     }
 
-    logger.debug('Obtained HTML element from event', {
+    logger.debug('Change event triggered, obtained HTML element from event', {
       htmlElement,
+      depth,
     })
-
-    if (isNaN(index)) {
-      throw new Error('Index is not a valid number')
-    }
 
     const value = htmlElement.value
 
-    overrideSelectedKeyArray(index, value)
+    overrideMasterSelectedKeyArray(depth, value)
     resetElementOptionsTree()
   }
 
-  const setSelectEvents = () => {
-    const metamorphSelectRootElement = getDefinedHtm().find(
-      '#metamorph-transformation-element',
-    )[0]
+  const setupRootSelectHtmlElement = (): void => {
+    logger.debug('Setup Root Select HTML Element')
 
-    logger.info('Found metamorph select root element', {
-      metamorphSelectRootElement,
-    })
+    const metamorphRootSelectElement = getDefinedHtm()
+      .find('#metamorph-root-element-container')
+      .find('select')[0]
 
-    if (metamorphSelectRootElement === undefined) {
-      throw new Error('Could not get metamorph root select element')
+    if (metamorphRootSelectElement === undefined) {
+      throw new Error('Could not find Root Select HTML Element')
     }
 
-    metamorphSelectRootElement.addEventListener('change', (event) => {
+    metamorphRootSelectElement.value = createElementKey(rootElements, 0)
+    metamorphRootSelectElement.addEventListener('change', (event) => {
       selectOnChange(event, 0)
     })
+  }
 
-    const metamorphSelectElements = getDefinedHtm().find('#metamorph-elements')
+  const setupSelectHTMLElements = () => {
+    logger.debug('Setup Select HTML Elements')
 
-    let index = 1
-    for (const htmlElement of metamorphSelectElements) {
-      htmlElement.addEventListener('change', (event) => {
-        selectOnChange(event, index)
-        index++
+    const metamorphSelectElements = getDefinedHtm()
+      .find('#metamorph-children-elements-container')
+      .find('select')
+
+    logger.debug('Found metamorph select elements select', {
+      metamorphSelectElements,
+    })
+
+    const firstKey = createElementKey(rootElements, 0)
+
+    const firstElement = rootElements[firstKey]
+    if (firstElement.type !== 'group') {
+      logger.debug('First element is not a group, no need to continue', {
+        firstElement,
+        firstKey,
       })
+      return
+    }
+
+    let depth = 1
+    let elementRecord = firstElement.elementChildren
+
+    for (const htmlSelectElement of metamorphSelectElements) {
+      logger.debug('Iterating through a metamorph HTML select element found', {
+        depth,
+        elementRecord,
+        htmlSelectElement,
+      })
+
+      const currentDepth = depth
+
+      const key = createElementKey(elementRecord, depth)
+      const newElement = elementRecord[key]
+
+      htmlSelectElement.value = key
+      htmlSelectElement.addEventListener('change', (event) => {
+        selectOnChange(event, currentDepth)
+      })
+
+      if (newElement.type === 'group') {
+        elementRecord = newElement.elementChildren
+      }
+
+      depth++
     }
   }
 
   const getTransformation = (): MetamorphElementTransformation => {
     const getTransformationIteration = (
       element: MetamorphElement | undefined,
-      tempSelectedKeyArray: string[],
+      depth: number,
     ): MetamorphElementTransformation => {
       logger.debug('Get transformation iteration', {
         element,
-        tempSelectedKeyArray,
+        currentSelectedKeyArray,
+        depth,
       })
 
       if (element === undefined) {
@@ -113,95 +164,132 @@ export const createHtmlController = (): HTMLController => {
       }
 
       if (element.type === 'group') {
-        const currentKey = tempSelectedKeyArray.pop()
-        if (currentKey === undefined) {
-          throw new Error(
-            'Could not iterate through transformation, selectedKeyArray is empty',
-          )
-        }
+        const currentKey = createElementKey(element.elementChildren, depth)
 
         return getTransformationIteration(
           element.elementChildren[currentKey],
-          tempSelectedKeyArray,
+          depth + 1,
         )
       }
 
       return element
     }
 
-    const tempSelectedKeyArray = [...selectedKeyArray]
-    const firstKey = tempSelectedKeyArray.pop()
+    const currentSelectedKeyArray = [...masterSelectedKeyArray]
+    const firstKey = createElementKey(rootElements, 0)
 
-    if (firstKey === undefined) {
-      throw new Error(
-        'Could not iterate through transformation, selectedKeyArray is empty',
-      )
+    return getTransformationIteration(rootElements[firstKey], 0)
+  }
+
+  const setMasterSelectedKeyArray = (value: Array<string | undefined>) => {
+    masterSelectedKeyArray = value
+  }
+
+  const overrideMasterSelectedKeyArray = (depth: number, value: string) => {
+    logger.debug('Override master selected key array', {
+      masterSelectedKeyArray,
+      depth,
+      value,
+    })
+
+    // Iteration is deeper than selected key array length, so undefined keys will be added
+    if (masterSelectedKeyArray.length <= depth) {
+      const tempSelectedKeyArray = [...masterSelectedKeyArray]
+
+      while (tempSelectedKeyArray.length <= depth) {
+        tempSelectedKeyArray.push(undefined)
+      }
+
+      setMasterSelectedKeyArray(tempSelectedKeyArray)
     }
 
-    return getTransformationIteration(
-      rootElements[firstKey],
-      tempSelectedKeyArray,
-    )
-  }
+    setMasterSelectedKeyArray([
+      ...masterSelectedKeyArray.slice(0, depth),
+      value,
+    ])
 
-  const setSelectedKeyArray = (value: string[]) => {
-    selectedKeyArray = value
-  }
-
-  const overrideSelectedKeyArray = (index: number, value: string) => {
-    setSelectedKeyArray(
-      selectedKeyArray
-        .slice(0, index)
-        .concat(value, selectedKeyArray.slice(index)),
-    )
+    logger.debug('Master selected key array override', {
+      masterSelectedKeyArray,
+    })
   }
 
   const resetElementOptionsTree = (): void => {
-    logger.debug('Reset element options tree', selectedKeyArray)
+    logger.debug('Reset element options tree')
 
-    const firstKey = selectedKeyArray[0]
-    if (firstKey === undefined) {
-      throw new Error('Could not get first key')
-    }
+    const firstKey = createElementKey(rootElements, 0)
 
     const firstElement = rootElements[firstKey]
     if (firstElement === undefined) {
-      throw new Error('Could not get first element')
+      throw new Error(
+        'Cannot reset element options tree, could not get first element',
+      )
     }
 
     const optionsTree = createElementOptionsTree(
       firstElement,
-      `metamorph-elements-${firstKey}`,
+      `metamorph-children-elements-container-${firstKey}`,
       1,
-      selectedKeyArray.slice(1),
     )
 
-    editInnerHtml(getDefinedHtm(), '#metamorph-elements', optionsTree)
-    setSelectEvents()
+    editInnerHtml(
+      getDefinedHtm(),
+      '#metamorph-children-elements-container',
+      optionsTree,
+    )
+    setupSelectHTMLElements()
+  }
+
+  /*
+   * Create an element key according to an element record and a key array.
+   * If key array is not empty, get its first element.
+   * Otherwise, get element record first key.
+   */
+  const createElementKey = (
+    elementRecord: MetamorphElementsRecord,
+    depth: number,
+  ): string => {
+    logger.debug('Create element key', {
+      elementRecord,
+      masterSelectedKeyArray,
+      depth,
+    })
+
+    if (Object.keys(elementRecord).length === 0) {
+      throw new Error('Could not create element key, elementRecord is empty')
+    }
+
+    const key = masterSelectedKeyArray[depth]
+
+    logger.debug(`Obtained key "${key}" from selected key array`)
+
+    if (key === undefined) {
+      const firstElementRecordKey = Object.keys(elementRecord)[0]
+      logger.debug(
+        `Key is undefined, use first elementRecord element ${firstElementRecordKey} instead`,
+      )
+      return firstElementRecordKey
+    }
+
+    return key
   }
 
   const createElementOptionsTree = (
     element: MetamorphElement,
     parentHtmlId: string,
-    index: number,
-    selectedKeyArray: string[],
+    depth: number,
   ): string => {
     logger.debug('Creating options tree : new iteration', {
       element,
-      selectedKeyArray,
     })
 
     if (element.type === 'group') {
-      const currentKey = selectedKeyArray.pop()
-
-      if (currentKey === undefined) {
-        throw new Error('At least one key is missing')
-      }
+      const currentKey = createElementKey(element.elementChildren, depth)
 
       const newElement = element.elementChildren[currentKey]
-
       if (newElement === undefined) {
-        throw new Error('At least one key is invalid')
+        throw new Error(
+          'Creation options tree iteration failed, at least one key is invalid',
+        )
       }
 
       const currentHtmlId = `${parentHtmlId}:${currentKey}`
@@ -210,14 +298,12 @@ export const createHtmlController = (): HTMLController => {
         createElementFormGroup(
           element.elementChildren,
           currentHtmlId,
-          index,
           element.description,
         ) +
         createElementOptionsTree(
           element.elementChildren[currentKey],
           currentHtmlId,
-          index + 1,
-          selectedKeyArray,
+          depth + 1,
         )
       )
     }
@@ -228,16 +314,13 @@ export const createHtmlController = (): HTMLController => {
   const createElementFormGroup = (
     elementChildren: MetamorphElementsRecord,
     htmlId: string,
-    index: number,
     parentDescription?: string,
   ): string => `
   <div class="form-group">
     <label>Element :</label>
-    <select id="${htmlId}" onclick='' index='${index}'>${createElementOptions(
-      elementChildren,
-    )}</select>
+    <select id="${htmlId}">${createElementOptions(elementChildren)}</select>
   </div>
-  <div class="metamorph-transformation-element-description form-group">
+  <div class="metamorph-root-element-container-description form-group">
     ${createDescription(parentDescription)}
   </div>
 `
@@ -268,5 +351,6 @@ export const createHtmlController = (): HTMLController => {
     resetElementOptionsTree,
     setHtm,
     getTransformation,
+    setupRootSelectHtmlElement,
   }
 }

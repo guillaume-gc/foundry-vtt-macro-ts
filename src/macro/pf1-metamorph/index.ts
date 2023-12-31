@@ -80,6 +80,7 @@ const openDialog = (controlledTokens: TokenPF[]) => {
     },
     render: (htm) => {
       htmlController.setHtm(htm)
+      htmlController.setupRootSelectHtmlElement()
       htmlController.resetElementOptionsTree()
     },
   }).render(true)
