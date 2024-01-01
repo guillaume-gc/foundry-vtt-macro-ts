@@ -15,25 +15,25 @@ var createLogger = () => {
   };
   return {
     debug: (message, context) => {
-      if (level < 0 /* DEBUG */) {
+      if (level > 0 /* DEBUG */) {
         return;
       }
       writeConsoleMessage("DEBUG", message, context);
     },
     info: (message, context) => {
-      if (level < 1 /* INFO */) {
+      if (level > 1 /* INFO */) {
         return;
       }
       writeConsoleMessage("INFO", message, context);
     },
     warn: (message, context) => {
-      if (level < 2 /* WARN */) {
+      if (level > 2 /* WARN */) {
         return;
       }
       writeConsoleMessage("WARN", message, context);
     },
     error: (message, context) => {
-      if (level < 3 /* ERROR */) {
+      if (level > 3 /* ERROR */) {
         return;
       }
       writeConsoleMessage("ERROR", message, context);
@@ -1138,6 +1138,7 @@ var getNumberFromInputIfSpecified = (htm, selector) => {
 };
 var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
   try {
+    logger9.info("Trigger Metamorph");
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       "#transformation-spell-level"
@@ -1147,6 +1148,7 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
       "#transformation-spell-difficulty-check"
     );
     const elementTransformation = htmlController.getTransformation();
+    logger9.info(`Transformation will be ${elementTransformation.label}`);
     checkTokens(controlledTokens, elementTransformation);
     await savePolymorphData(controlledTokens, elementTransformation);
     await applyMetamorph(
@@ -1155,6 +1157,7 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck
     );
+    logger9.info(`Transformation completed`);
   } catch (error) {
     notifyError(error);
   }
@@ -1191,7 +1194,7 @@ var openDialog = (controlledTokens) => {
   }).render(true);
 };
 try {
-  logger9.setLevel(0 /* DEBUG */);
+  logger9.setLevel(1 /* INFO */);
   logger9.setMacroName("pf1-metamorph");
   const {
     tokens: { controlled: controlledTokens }

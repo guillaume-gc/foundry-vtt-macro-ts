@@ -37,28 +37,28 @@ const createLogger = (): Logger => {
 
   return {
     debug: (message: unknown, context?: unknown) => {
-      if (level < LogLevel.DEBUG) {
+      if (level > LogLevel.DEBUG) {
         return
       }
 
       writeConsoleMessage('DEBUG', message, context)
     },
     info: (message: unknown, context?: Record<string, any>) => {
-      if (level < LogLevel.INFO) {
+      if (level > LogLevel.INFO) {
         return
       }
 
       writeConsoleMessage('INFO', message, context)
     },
     warn: (message: unknown, context?: Record<string, any>) => {
-      if (level < LogLevel.WARN) {
+      if (level > LogLevel.WARN) {
         return
       }
 
       writeConsoleMessage('WARN', message, context)
     },
     error: (message: unknown, context?: Record<string, any>) => {
-      if (level < LogLevel.ERROR) {
+      if (level > LogLevel.ERROR) {
         return
       }
 

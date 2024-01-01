@@ -27,6 +27,8 @@ const triggerMetamorph = async (
   htmlController: HTMLController,
 ): Promise<void> => {
   try {
+    logger.info('Trigger Metamorph')
+
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       '#transformation-spell-level',
@@ -39,6 +41,8 @@ const triggerMetamorph = async (
 
     const elementTransformation = htmlController.getTransformation()
 
+    logger.info(`Transformation will be ${elementTransformation.label}`)
+
     checkTokens(controlledTokens, elementTransformation)
 
     await savePolymorphData(controlledTokens, elementTransformation)
@@ -48,6 +52,8 @@ const triggerMetamorph = async (
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck,
     )
+
+    logger.info(`Transformation completed`)
   } catch (error) {
     notifyError(error)
   }
@@ -89,7 +95,7 @@ const openDialog = (controlledTokens: TokenPF[]) => {
 }
 
 try {
-  logger.setLevel(LogLevel.DEBUG)
+  logger.setLevel(LogLevel.INFO)
   logger.setMacroName('pf1-metamorph')
 
   const {
