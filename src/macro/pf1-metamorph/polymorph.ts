@@ -20,6 +20,7 @@ import {
   MetamorphTransformationActorItem,
   MetamorphTransformationCompendiumItem,
 } from './config'
+import { checkFilter } from './filter'
 import { createItemInActor, findItemInCompendium } from './item'
 
 const logger = getLoggerInstance()
@@ -305,10 +306,21 @@ export const getDisableActionUpdate = (item: ItemPF): Promise<ItemPF> => {
 /*
  * Check if those tokens are valid for applying metamorph.
  */
-export const checkTokens = (tokens: TokenPF[]) => {
+export const checkTokens = (
+  tokens: TokenPF[],
+  elementTransformation: MetamorphElementTransformation,
+) => {
   for (const token of tokens) {
+    const { filter } = elementTransformation
+
     if (token.actor.flags?.metamorph?.active === true) {
       throw new UserWarning('Au moins un token a déjà un effet')
+    }
+
+    if (filter !== undefined && !checkFilter(token.actor, filter)) {
+      throw new UserWarning(
+        "Au moins un token n'est pas compatible avec l'effet",
+      )
     }
   }
 }

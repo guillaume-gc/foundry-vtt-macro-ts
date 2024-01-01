@@ -1,5 +1,6 @@
 import { LogLevel, getLoggerInstance } from '../../common/log/logger'
 import { getInputElement } from '../../common/util/jquery'
+import { notifyError } from '../../common/util/notifications'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import { HTMLController, createHtmlController } from './html'
 import { applyMetamorph, checkTokens } from './polymorph'
@@ -26,8 +27,6 @@ const triggerMetamorph = async (
   htmlController: HTMLController,
 ): Promise<void> => {
   try {
-    checkTokens(controlledTokens)
-
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       '#transformation-spell-level',
@@ -40,6 +39,8 @@ const triggerMetamorph = async (
 
     const elementTransformation = htmlController.getTransformation()
 
+    checkTokens(controlledTokens, elementTransformation)
+
     await savePolymorphData(controlledTokens, elementTransformation)
     await applyMetamorph(
       controlledTokens,
@@ -48,15 +49,16 @@ const triggerMetamorph = async (
       metamorphSpellDifficultyCheck,
     )
   } catch (error) {
-    ui.notifications.error(
-      "L'exécution du script a échoué, voir la console pour plus d'information",
-    )
-    console.error(error)
+    notifyError(error)
   }
 }
 
 const cancelMetamorph = async (controlledTokens: TokenPF[]): Promise<void> => {
-  await rollbackToPrePolymorphData(controlledTokens)
+  try {
+    await rollbackToPrePolymorphData(controlledTokens)
+  } catch (error) {
+    notifyError(error)
+  }
 }
 
 const openDialog = (controlledTokens: TokenPF[]) => {
@@ -97,11 +99,8 @@ try {
   if (controlledTokens.length > 0) {
     openDialog(controlledTokens)
   } else {
-    ui.notifications.info("Aucun token n'est sélectionné")
+    ui.notifications.warn("Aucun token n'est sélectionné")
   }
 } catch (error) {
-  ui.notifications.error(
-    "L'exécution du script a échoué, voir la console pour plus d'information",
-  )
-  console.error(error)
+  notifyError(error)
 }

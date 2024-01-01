@@ -177,6 +177,9 @@ export interface ActorPFRollData {
     dv: ActorPFCustomizableValue<string[]>
     dr: ActorPFDamageReduction
     senses: ActorPFSenses
+    humanoid: boolean
+    fastHealing: string
+    regen: string
   }
 }
 

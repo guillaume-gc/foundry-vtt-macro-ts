@@ -73,6 +73,23 @@ var getInputElement = (htm, selector) => {
   return element;
 };
 
+// src/common/error/user-warning.ts
+var UserWarning = class extends Error {
+};
+
+// src/common/util/notifications.ts
+var notifyError = (error) => {
+  if (error instanceof UserWarning) {
+    console.warn(error);
+    ui.notifications.warn(error.message);
+    return;
+  }
+  console.error(error);
+  ui.notifications.error(
+    "L'ex\xE9cution du script a \xE9chou\xE9, voir la console pour plus d'information"
+  );
+};
+
 // src/macro/pf1-metamorph/config.ts
 var config = {
   style: {
@@ -230,6 +247,11 @@ var config = {
       label: "Rapetissement",
       description: "Effectif uniquement sur les humanoids",
       type: "transformation",
+      filter: {
+        type: "equality",
+        path: "system.traits.humanoid",
+        value: true
+      },
       itemsToAdd: [
         {
           name: "Rapetissement (metamorph)",
@@ -481,12 +503,61 @@ var createHtmlController = () => {
   };
 };
 
-// src/common/error/user-warning.ts
-var UserWarning = class extends Error {
+// src/common/util/object.ts
+var logger3 = getLoggerInstance();
+var getObjectValue = (obj, path) => {
+  if (obj == void 0) {
+    return;
+  }
+  const stack = path.split(".");
+  logger3.debug("Get object value: ready", {
+    stack
+  });
+  let value = obj;
+  let subAtt = stack.shift();
+  logger3.debug("Get object value: before iteration", {
+    value,
+    subAtt,
+    stack
+  });
+  while (subAtt !== void 0) {
+    value = value[subAtt];
+    subAtt = stack.shift();
+    logger3.debug("Get object value: iteration", {
+      value,
+      subAtt,
+      stack
+    });
+  }
+  logger3.debug("Get object value: final value", {
+    value,
+    subAtt,
+    stack
+  });
+  return value;
+};
+
+// src/macro/pf1-metamorph/filter.ts
+var logger4 = getLoggerInstance();
+var checkFilter = (actor, filter) => {
+  if (filter.type === "equality") {
+    return checkStrictEqualityFilter(actor, filter);
+  }
+  throw new Error("Cannot check filter: unknown filter type");
+};
+var checkStrictEqualityFilter = (actor, filter) => {
+  logger4.debug("Check strict equality filter");
+  const value = getObjectValue(actor, filter.path);
+  logger4.debug("Found value to compare", {
+    value,
+    filter,
+    actor
+  });
+  return value === filter.value;
 };
 
 // src/macro/pf1-metamorph/item.ts
-var logger3 = getLoggerInstance();
+var logger5 = getLoggerInstance();
 var findItemsInActor = (actor, itemName, itemType) => actor.items.filter(
   ({ name, type }) => name.toLowerCase() === itemName.toLowerCase() && type === itemType
 );
@@ -500,7 +571,7 @@ var findItemInCompendium = async (compendiumName, itemName, itemType) => {
   }
   const item = await compendiumCollection.getDocument(itemDescriptor._id);
   if (item === void 0) {
-    logger3.warn(
+    logger5.warn(
       "Could not find item in compendium even though its descriptor was found"
     );
     return void 0;
@@ -517,9 +588,9 @@ var createItemInActor = async (actor, item) => {
 };
 
 // src/macro/pf1-metamorph/polymorph.ts
-var logger4 = getLoggerInstance();
+var logger6 = getLoggerInstance();
 var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  logger4.debug("Prepare to add item to actor", item);
+  logger6.debug("Prepare to add item to actor", item);
   const compendiumItem = await findItemInCompendium(
     item.compendiumName,
     item.name,
@@ -530,7 +601,7 @@ var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLe
       `Could not find buff ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`
     );
   }
-  logger4.debug("Found item in compendium", {
+  logger6.debug("Found item in compendium", {
     compendiumItem,
     itemCompendiumName: item.compendiumName,
     itemName: item.name
@@ -580,12 +651,12 @@ var mixReduction = (actorReduction, polymorphReduction) => polymorphReduction !=
   value: [...actorReduction.value, ...polymorphReduction.value]
 } : actorReduction;
 var applyMetamorph = async (tokens, metamorphElementTransformation, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  logger4.info("Apply metamorph");
+  logger6.info("Apply metamorph");
   const { tokenTextureSrc, itemsToAdd, itemsToModify } = metamorphElementTransformation;
   const updates = [];
   updates.push(
     tokens.map(({ actor }) => {
-      logger4.debug("Apply metamorph to actor", actor);
+      logger6.debug("Apply metamorph to actor", actor);
       return actor.update({
         system: {
           attributes: {
@@ -625,7 +696,7 @@ var applyMetamorph = async (tokens, metamorphElementTransformation, metamorphTra
   );
   updates.push(
     tokens.map((token) => {
-      logger4.debug("Apply metamorph to token", token);
+      logger6.debug("Apply metamorph to token", token);
       return token.document.update({
         texture: {
           src: tokenTextureSrc
@@ -649,7 +720,7 @@ var applyMetamorph = async (tokens, metamorphElementTransformation, metamorphTra
   await Promise.all(updates.flat());
 };
 var createItemToAddUpdates = (tokens, itemsToAdd, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => tokens.map(({ actor }) => {
-  logger4.debug("Create metamorph items in actor", actor);
+  logger6.debug("Create metamorph items in actor", actor);
   const individualItemUpdate = itemsToAdd.map(
     (item) => addTransformationItemToActor(
       actor,
@@ -699,18 +770,24 @@ var getDisableActionUpdate = (item) => {
     `Unexpected item type ${item.type}, cannot create disable action update`
   );
 };
-var checkTokens = (tokens) => {
+var checkTokens = (tokens, elementTransformation) => {
   for (const token of tokens) {
+    const { filter } = elementTransformation;
     if (token.actor.flags?.metamorph?.active === true) {
       throw new UserWarning("Au moins un token a d\xE9j\xE0 un effet");
+    }
+    if (filter !== void 0 && !checkFilter(token.actor, filter)) {
+      throw new UserWarning(
+        "Au moins un token n'est pas compatible avec l'effet"
+      );
     }
   }
 };
 
 // src/macro/pf1-metamorph/save.ts
-var logger5 = getLoggerInstance();
+var logger7 = getLoggerInstance();
 var transformToMetamorphSave = (value) => {
-  logger5.debug("Transform flags to metamorph if they are valid", value);
+  logger7.debug("Transform flags to metamorph if they are valid", value);
   if (value === void 0) {
     throw new Error("Flag values are undefined");
   }
@@ -722,7 +799,7 @@ var transformToMetamorphSave = (value) => {
       texture: { src: tokenTextureSrc = void 0 } = {}
     } = {}
   } = value;
-  logger5.debug("Extracted values in flags", {
+  logger7.debug("Extracted values in flags", {
     actorSize,
     tokenTextureSrc
   });
@@ -732,9 +809,9 @@ var transformToMetamorphSave = (value) => {
   return value;
 };
 var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
-  logger5.info("Save data to actor flags to ensure rolling back is possible");
+  logger7.info("Save data to actor flags to ensure rolling back is possible");
   const operations = tokens.map(async (token) => {
-    logger5.debug("Save data related to a token", token);
+    logger7.debug("Save data related to a token", token);
     const actorData = {
       system: {
         attributes: {
@@ -802,11 +879,11 @@ var getTransformModifiedBuff = (actorItems, itemsToModify) => {
   );
 };
 var rollbackToPrePolymorphData = async (tokens) => {
-  logger5.info("Prepare to roll back to data before polymorph was triggered");
+  logger7.info("Prepare to roll back to data before polymorph was triggered");
   const rollbackActions = tokens.map((token) => {
-    logger5.debug("Rolling back token", token);
+    logger7.debug("Rolling back token", token);
     const save = transformToMetamorphSave(token.actor.flags?.metamorph?.save);
-    logger5.debug("Save obtained from token actor", save);
+    logger7.debug("Save obtained from token actor", save);
     const currentRollBackActions = [
       token.document.update(save.tokenDocumentData),
       token.actor.update({
@@ -820,7 +897,7 @@ var rollbackToPrePolymorphData = async (tokens) => {
       })
     ];
     if (save.transformModifiedItem !== void 0) {
-      logger5.debug("Get items to rollback", save);
+      logger7.debug("Get items to rollback", save);
       currentRollBackActions.push(
         Promise.all(
           rollbackModifiedItem(save.transformModifiedItem, token.actor.items)
@@ -828,12 +905,12 @@ var rollbackToPrePolymorphData = async (tokens) => {
       );
     }
     if (save.transformAddedItemsData !== void 0) {
-      logger5.debug("Get items to delete", save);
+      logger7.debug("Get items to delete", save);
       const itemsToDelete = getItemsToDelete(
         token,
         save.transformAddedItemsData
       );
-      logger5.debug(`Got ${itemsToDelete.length} items to delete`, {
+      logger7.debug(`Got ${itemsToDelete.length} items to delete`, {
         itemsToDelete
       });
       currentRollBackActions.push(
@@ -845,9 +922,9 @@ var rollbackToPrePolymorphData = async (tokens) => {
     }
     return currentRollBackActions;
   }).flat();
-  logger5.info("Trigger rollback");
+  logger7.info("Trigger rollback");
   await Promise.all(rollbackActions);
-  logger5.info("Rollback complete");
+  logger7.info("Rollback complete");
 };
 var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsData.reduce((previousItems, currentItem) => {
   const actorItems = findItemsInActor(
@@ -858,7 +935,7 @@ var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsDa
   if (actorItems.length > 0) {
     previousItems.push(...actorItems);
   } else {
-    logger5.warn(`Could not find ${currentItem.name} item(s) in actor`);
+    logger7.warn(`Could not find ${currentItem.name} item(s) in actor`);
   }
   return previousItems;
 }, []);
@@ -886,13 +963,13 @@ var rollbackModifiedItem = (saveTransformModifiedItems, actorItems) => actorItem
       })
     );
   } else {
-    logger5.warn("A modified item has expected type", currentItem);
+    logger7.warn("A modified item has expected type", currentItem);
   }
   return accumulator;
 }, []);
 
 // src/macro/pf1-metamorph/index.ts
-var logger6 = getLoggerInstance();
+var logger8 = getLoggerInstance();
 var getNumberFromInputIfSpecified = (htm, selector) => {
   const value = parseInt(getInputElement(htm, selector).value);
   if (!isNaN(value)) {
@@ -902,7 +979,6 @@ var getNumberFromInputIfSpecified = (htm, selector) => {
 };
 var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
   try {
-    checkTokens(controlledTokens);
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       "#transformation-spell-level"
@@ -912,6 +988,7 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
       "#transformation-spell-difficulty-check"
     );
     const elementTransformation = htmlController.getTransformation();
+    checkTokens(controlledTokens, elementTransformation);
     await savePolymorphData(controlledTokens, elementTransformation);
     await applyMetamorph(
       controlledTokens,
@@ -920,14 +997,15 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
       metamorphSpellDifficultyCheck
     );
   } catch (error) {
-    ui.notifications.error(
-      "L'ex\xE9cution du script a \xE9chou\xE9, voir la console pour plus d'information"
-    );
-    console.error(error);
+    notifyError(error);
   }
 };
 var cancelMetamorph = async (controlledTokens) => {
-  await rollbackToPrePolymorphData(controlledTokens);
+  try {
+    await rollbackToPrePolymorphData(controlledTokens);
+  } catch (error) {
+    notifyError(error);
+  }
 };
 var openDialog = (controlledTokens) => {
   const htmlController = createHtmlController();
@@ -954,19 +1032,16 @@ var openDialog = (controlledTokens) => {
   }).render(true);
 };
 try {
-  logger6.setLevel(0 /* DEBUG */);
-  logger6.setMacroName("pf1-metamorph");
+  logger8.setLevel(0 /* DEBUG */);
+  logger8.setMacroName("pf1-metamorph");
   const {
     tokens: { controlled: controlledTokens }
   } = canvas;
   if (controlledTokens.length > 0) {
     openDialog(controlledTokens);
   } else {
-    ui.notifications.info("Aucun token n'est s\xE9lectionn\xE9");
+    ui.notifications.warn("Aucun token n'est s\xE9lectionn\xE9");
   }
 } catch (error) {
-  ui.notifications.error(
-    "L'ex\xE9cution du script a \xE9chou\xE9, voir la console pour plus d'information"
-  );
-  console.error(error);
+  notifyError(error);
 }

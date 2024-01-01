@@ -8,6 +8,7 @@ import {
 } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemPFType } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { RecursivePartial } from '../../type/foundry/utils/partial'
+import { MetamorphFilter } from './filter'
 
 export type MetamorphElementsRecord = Record<string, MetamorphElement>
 
@@ -25,18 +26,23 @@ export interface MetamorphTransformationActorItem {
   action: MetamorphItemTransformationAction
 }
 
-export type MetamorphElement = {
+interface BaseMetamorphElement {
   label: string
   description?: string
-} & (MetamorphElementGroup | MetamorphElementTransformation)
+}
 
-export interface MetamorphElementGroup {
+export type MetamorphElement =
+  | MetamorphElementGroup
+  | MetamorphElementTransformation
+
+export interface MetamorphElementGroup extends BaseMetamorphElement {
   type: 'group'
   elementChildren: MetamorphElementsRecord
 }
 
-export interface MetamorphElementTransformation {
+export interface MetamorphElementTransformation extends BaseMetamorphElement {
   type: 'transformation'
+  filter?: MetamorphFilter
   itemsToAdd?: MetamorphTransformationCompendiumItem[]
   itemsToModify?: MetamorphTransformationActorItem[]
   size?: ActorPFSize
@@ -215,6 +221,11 @@ export const config: MetamorphConfig = {
       label: 'Rapetissement',
       description: 'Effectif uniquement sur les humanoids',
       type: 'transformation',
+      filter: {
+        type: 'equality',
+        path: 'system.traits.humanoid',
+        value: true,
+      },
       itemsToAdd: [
         {
           name: 'Rapetissement (metamorph)',
