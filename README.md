@@ -54,7 +54,7 @@ To use these macros in Foundry VTT, follow these steps:
 3. You can directly copy the `index.js` file content to a FoundryVTT macro.
 
 > [!NOTE]  
-> Macro prefix can be used to inform system compatibility.
+> Macro prefix can be used to give information about their system compatibility.
 
 # Thanks
 
