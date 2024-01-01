@@ -1,8 +1,9 @@
 import { getLoggerInstance } from '../../common/log/logger'
 import { getObjectValue } from '../../common/util/object'
 import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
+import { ItemPFType } from '../../type/foundry/system/pf1/documents/item/item-pf'
 
-export type MetamorphFilter = MetamorphEqualityFilter
+export type MetamorphFilter = MetamorphEqualityFilter | MetamorphHasItemFilter
 
 const logger = getLoggerInstance()
 
@@ -12,15 +13,24 @@ interface MetamorphEqualityFilter {
   value: string | number | boolean | undefined
 }
 
+interface MetamorphHasItemFilter {
+  type: 'hasItem'
+  item: {
+    name: string
+    type: ItemPFType
+  }
+}
+
 export const checkFilter = (
   actor: ActorPF,
   filter: MetamorphFilter,
 ): boolean => {
-  if (filter.type === 'equality') {
-    return checkStrictEqualityFilter(actor, filter)
+  switch (filter.type) {
+    case 'equality':
+      return checkStrictEqualityFilter(actor, filter)
+    case 'hasItem':
+      return checkHasItemFilter(actor, filter)
   }
-
-  throw new Error('Cannot check filter: unknown filter type')
 }
 
 const checkStrictEqualityFilter = (
@@ -38,4 +48,22 @@ const checkStrictEqualityFilter = (
   })
 
   return value === filter.value
+}
+
+const checkHasItemFilter = (
+  actor: ActorPF,
+  filter: MetamorphHasItemFilter,
+): boolean => {
+  logger.debug('Check has item filter', {
+    filter,
+    actor,
+  })
+
+  const foundItem = actor.items.find(
+    (item) =>
+      item.name.toLowerCase() === filter.item.name.toLowerCase() &&
+      item.type === filter.item.type,
+  )
+
+  return foundItem !== undefined
 }

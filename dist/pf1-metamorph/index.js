@@ -105,7 +105,7 @@ var config = {
           label: "Cr\xE9ature magique de taille G",
           type: "group",
           elementChildren: {
-            chimeraBestShapeIV: {
+            chimera: {
               label: "Chim\xE8re",
               description: "Ce monstre ail\xE9 a le corps d\u2019un lion et trois t\xEAtes : dragon, lion et ch\xE8vre. Pour connaitre la couleur de la t\xEAte de dragon, lancez [[/r 1d10 #Couleur de la t\xEAte de chim\xE8re]]. Si 1 ou 2 alors t\xEAte blanche, si 3 ou 4 alors t\xEAte bleue, si 5 ou 6 alors t\xEAte noire, si 7 ou 8 alors t\xEAte rouge, sinon si 9 ou 10 alors t\xEAte verte.",
               type: "transformation",
@@ -175,7 +175,7 @@ var config = {
                 sc: 30
               }
             },
-            gorgonBeastShapeIV: {
+            gorgon: {
               label: "Gorgone",
               description: "Taureau de pierre qui peut p\xE9trifier ses victimes",
               type: "transformation",
@@ -243,11 +243,84 @@ var config = {
         }
       }
     },
+    lycanthropy: {
+      label: "Lycanthropie Mythique",
+      type: "group",
+      elementChildren: {
+        canine: {
+          label: "Canine",
+          type: "transformation",
+          requirement: {
+            type: "hasItem",
+            item: {
+              name: "Lycanthrope mythique - Canine",
+              type: "feat"
+            }
+          },
+          itemsToAdd: [
+            {
+              name: "Lycanthrope mythique - Canine - Forme Hybride (metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "feat"
+            },
+            {
+              name: "Morsure (lycanthropie mythique - canine - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "attack"
+            },
+            {
+              name: "2 Griffes (lycanthropie mythique - canine - metamorph)",
+              compendiumName: "world.effets-metamorph",
+              type: "attack"
+            }
+          ],
+          itemsToModify: [
+            {
+              name: "Lycanthrope mythique - Canine - Forme Humano\xEFde",
+              type: "feat",
+              action: "disable"
+            }
+          ],
+          size: "lg",
+          stature: "tall",
+          tokenTextureSrc: "/tokens/monsters/monstrousHumanoids/Werewolf.webp",
+          actorImg: "/characters/PC/Seioden%20Loup%20Garou.jpg",
+          speed: {
+            burrow: {
+              base: 0
+            },
+            climb: {
+              base: 0
+            },
+            fly: {
+              base: 0
+            },
+            land: {
+              base: 45
+            },
+            swim: {
+              base: 0
+            }
+          },
+          senses: {
+            dv: 60,
+            ll: {
+              enabled: true,
+              multiplier: {
+                bright: 2,
+                dim: 2
+              }
+            },
+            sc: 30
+          }
+        }
+      }
+    },
     reducePerson: {
       label: "Rapetissement",
       description: "Effectif uniquement sur les humanoids",
       type: "transformation",
-      filter: {
+      requirement: {
         type: "equality",
         path: "system.traits.humanoid",
         value: true
@@ -540,10 +613,12 @@ var getObjectValue = (obj, path) => {
 // src/macro/pf1-metamorph/filter.ts
 var logger4 = getLoggerInstance();
 var checkFilter = (actor, filter) => {
-  if (filter.type === "equality") {
-    return checkStrictEqualityFilter(actor, filter);
+  switch (filter.type) {
+    case "equality":
+      return checkStrictEqualityFilter(actor, filter);
+    case "hasItem":
+      return checkHasItemFilter(actor, filter);
   }
-  throw new Error("Cannot check filter: unknown filter type");
 };
 var checkStrictEqualityFilter = (actor, filter) => {
   logger4.debug("Check strict equality filter");
@@ -555,6 +630,16 @@ var checkStrictEqualityFilter = (actor, filter) => {
   });
   return value === filter.value;
 };
+var checkHasItemFilter = (actor, filter) => {
+  logger4.debug("Check has item filter", {
+    filter,
+    actor
+  });
+  const foundItem = actor.items.find(
+    (item) => item.name.toLowerCase() === filter.item.name.toLowerCase() && item.type === filter.item.type
+  );
+  return foundItem !== void 0;
+};
 
 // src/macro/pf1-metamorph/item.ts
 var logger5 = getLoggerInstance();
@@ -562,11 +647,18 @@ var findItemsInActor = (actor, itemName, itemType) => actor.items.filter(
   ({ name, type }) => name.toLowerCase() === itemName.toLowerCase() && type === itemType
 );
 var findItemInCompendium = async (compendiumName, itemName, itemType) => {
+  logger5.debug("Find item in compendium", {
+    compendiumName
+  });
   const compendiumCollection = game.packs.get(compendiumName);
+  logger5.debug("Compendium found", {
+    compendiumCollection
+  });
   const itemDescriptor = compendiumCollection.index.find(
     ({ name, type }) => name.toLowerCase() === itemName.toLowerCase() && type === itemType
   );
   if (itemDescriptor === void 0) {
+    logger5.debug("Item descriptor not found");
     return void 0;
   }
   const item = await compendiumCollection.getDocument(itemDescriptor._id);
@@ -576,6 +668,9 @@ var findItemInCompendium = async (compendiumName, itemName, itemType) => {
     );
     return void 0;
   }
+  logger5.debug("Item found", {
+    item
+  });
   return item;
 };
 var createItemInActor = async (actor, item) => {
@@ -598,7 +693,7 @@ var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLe
   );
   if (compendiumItem === void 0) {
     throw new Error(
-      `Could not find buff ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`
+      `Could not find item ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`
     );
   }
   logger6.debug("Found item in compendium", {
@@ -772,11 +867,11 @@ var getDisableActionUpdate = (item) => {
 };
 var checkTokens = (tokens, elementTransformation) => {
   for (const token of tokens) {
-    const { filter } = elementTransformation;
+    const { requirement } = elementTransformation;
     if (token.actor.flags?.metamorph?.active === true) {
       throw new UserWarning("Au moins un token a d\xE9j\xE0 un effet");
     }
-    if (filter !== void 0 && !checkFilter(token.actor, filter)) {
+    if (requirement !== void 0 && !checkFilter(token.actor, requirement)) {
       throw new UserWarning(
         "Au moins un token n'est pas compatible avec l'effet"
       );

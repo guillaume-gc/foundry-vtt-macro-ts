@@ -42,7 +42,7 @@ export interface MetamorphElementGroup extends BaseMetamorphElement {
 
 export interface MetamorphElementTransformation extends BaseMetamorphElement {
   type: 'transformation'
-  filter?: MetamorphFilter
+  requirement?: MetamorphFilter
   itemsToAdd?: MetamorphTransformationCompendiumItem[]
   itemsToModify?: MetamorphTransformationActorItem[]
   size?: ActorPFSize
@@ -77,7 +77,7 @@ export const config: MetamorphConfig = {
           label: 'Créature magique de taille G',
           type: 'group',
           elementChildren: {
-            chimeraBestShapeIV: {
+            chimera: {
               label: 'Chimère',
               description:
                 'Ce monstre ailé a le corps d’un lion et trois têtes : dragon, lion et chèvre. Pour connaitre la couleur de la tête de dragon, lancez [[/r 1d10 #Couleur de la tête de chimère]]. Si 1 ou 2 alors tête blanche, si 3 ou 4 alors tête bleue, si 5 ou 6 alors tête noire, si 7 ou 8 alors tête rouge, sinon si 9 ou 10 alors tête verte.',
@@ -148,7 +148,7 @@ export const config: MetamorphConfig = {
                 sc: 30,
               },
             },
-            gorgonBeastShapeIV: {
+            gorgon: {
               label: 'Gorgone',
               description: 'Taureau de pierre qui peut pétrifier ses victimes',
               type: 'transformation',
@@ -217,11 +217,84 @@ export const config: MetamorphConfig = {
         },
       },
     },
+    lycanthropy: {
+      label: 'Lycanthropie Mythique',
+      type: 'group',
+      elementChildren: {
+        canine: {
+          label: 'Canine',
+          type: 'transformation',
+          requirement: {
+            type: 'hasItem',
+            item: {
+              name: 'Lycanthrope mythique - Canine',
+              type: 'feat',
+            },
+          },
+          itemsToAdd: [
+            {
+              name: 'Lycanthrope mythique - Canine - Forme Hybride (metamorph)',
+              compendiumName: 'world.effets-metamorph',
+              type: 'feat',
+            },
+            {
+              name: 'Morsure (lycanthropie mythique - canine - metamorph)',
+              compendiumName: 'world.effets-metamorph',
+              type: 'attack',
+            },
+            {
+              name: '2 Griffes (lycanthropie mythique - canine - metamorph)',
+              compendiumName: 'world.effets-metamorph',
+              type: 'attack',
+            },
+          ],
+          itemsToModify: [
+            {
+              name: 'Lycanthrope mythique - Canine - Forme Humanoïde',
+              type: 'feat',
+              action: 'disable',
+            },
+          ],
+          size: 'lg',
+          stature: 'tall',
+          tokenTextureSrc: '/tokens/monsters/monstrousHumanoids/Werewolf.webp',
+          actorImg: '/characters/PC/Seioden%20Loup%20Garou.jpg',
+          speed: {
+            burrow: {
+              base: 0,
+            },
+            climb: {
+              base: 0,
+            },
+            fly: {
+              base: 0,
+            },
+            land: {
+              base: 45,
+            },
+            swim: {
+              base: 0,
+            },
+          },
+          senses: {
+            dv: 60,
+            ll: {
+              enabled: true,
+              multiplier: {
+                bright: 2,
+                dim: 2,
+              },
+            },
+            sc: 30,
+          },
+        },
+      },
+    },
     reducePerson: {
       label: 'Rapetissement',
       description: 'Effectif uniquement sur les humanoids',
       type: 'transformation',
-      filter: {
+      requirement: {
         type: 'equality',
         path: 'system.traits.humanoid',
         value: true,

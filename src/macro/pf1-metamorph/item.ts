@@ -28,13 +28,23 @@ export const findItemInCompendium = async <T extends ItemPF = ItemPF>(
   itemName: string,
   itemType: ItemPFType,
 ): Promise<T | undefined> => {
+  logger.debug('Find item in compendium', {
+    compendiumName,
+  })
+
   const compendiumCollection = game.packs.get(compendiumName)
+
+  logger.debug('Compendium found', {
+    compendiumCollection,
+  })
+
   const itemDescriptor = compendiumCollection.index.find(
     ({ name, type }) =>
       name.toLowerCase() === itemName.toLowerCase() && type === itemType,
   )
 
   if (itemDescriptor === undefined) {
+    logger.debug('Item descriptor not found')
     return undefined
   }
 
@@ -45,6 +55,10 @@ export const findItemInCompendium = async <T extends ItemPF = ItemPF>(
     )
     return undefined
   }
+
+  logger.debug('Item found', {
+    item,
+  })
 
   return item
 }

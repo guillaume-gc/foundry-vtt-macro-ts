@@ -44,7 +44,7 @@ const addTransformationItemToActor = async (
 
   if (compendiumItem === undefined) {
     throw new Error(
-      `Could not find buff ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`,
+      `Could not find item ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`,
     )
   }
 
@@ -311,13 +311,13 @@ export const checkTokens = (
   elementTransformation: MetamorphElementTransformation,
 ) => {
   for (const token of tokens) {
-    const { filter } = elementTransformation
+    const { requirement } = elementTransformation
 
     if (token.actor.flags?.metamorph?.active === true) {
       throw new UserWarning('Au moins un token a déjà un effet')
     }
 
-    if (filter !== undefined && !checkFilter(token.actor, filter)) {
+    if (requirement !== undefined && !checkFilter(token.actor, requirement)) {
       throw new UserWarning(
         "Au moins un token n'est pas compatible avec l'effet",
       )
