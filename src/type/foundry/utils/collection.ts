@@ -39,23 +39,23 @@ export declare class Collection<T> extends Map<string, T> {
 
   forEach(fn: (element: T) => void): void
 
-  get(key: string, options: { strict: boolean } | undefined): T
+  get(key: string, options?: { strict: boolean } | undefined): T
 
-  getName(name: string, options: { strict: boolean } | undefined): T
+  getName(name: string, options?: { strict: boolean } | undefined): T
 
   map(
-    transformer: (value: T[], index: number, collection: Collection<T>) => any,
+    transformer: (value: T, index: number, collection: Collection<T>) => any,
   ): T[]
 
-  reduce(
+  reduce<AccumulatorType>(
     reducer: (
-      accumulator: T,
+      accumulator: AccumulatorType,
       currentValue: T,
-      index: number,
+      currentIndex: number,
       collection: Collection<T>,
-    ) => any,
-    initial: T,
-  ): T
+    ) => AccumulatorType,
+    initial: AccumulatorType,
+  ): AccumulatorType
 
   some(
     condition: (value: T, index: number, collection: Collection<T>) => boolean,

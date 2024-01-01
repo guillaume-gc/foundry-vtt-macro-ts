@@ -9,14 +9,18 @@ var editInnerHtml = (htm, selector, value) => {
   }
   element.innerHTML = value;
 };
-var getSelectElementValue = (htm, selector) => {
+var getSelectElement = (htm, selector) => {
   const element = htm.find(selector)?.[0];
   if (element == null) {
     throw new Error(`Could not find element "${selector}"`);
   }
   if (!(element instanceof HTMLSelectElement)) {
-    throw new Error(`Element ${selector} is not a HTML selector`);
+    throw new Error(`Element ${selector} is not a HTML select element`);
   }
+  return element;
+};
+var getSelectElementValue = (htm, selector) => {
+  const element = getSelectElement(htm, selector);
   return element.value;
 };
 
@@ -267,12 +271,12 @@ var createActorGroupOptions = (actorGroupNames) => {
   }
   return [...actorGroupNames].map(
     (actorGroup) => `<option value='${actorGroup}'>${decodeURI(actorGroup)}</option>`
-  );
+  ).join("");
 };
 var createImageOptions = (htm) => {
   const currentActorGroupsLabel = getSelectElementValue(
     htm,
-    "#pf1-mass-flip-current-actor-groups"
+    "#mass-flip-current-actor-groups"
   );
   const actorGroup = knownActorGroups[currentActorGroupsLabel];
   if (actorGroup === void 0) {
@@ -296,7 +300,7 @@ var openDialog = (currentActorGroups, ownedTokens) => {
       }
     },
     render: (htm) => {
-      htm.find("#actorGroup").change(() => refreshImageOptions(htm));
+      htm.find("#actorGroup").on("change", () => refreshImageOptions(htm));
       refreshImageOptions(htm);
     }
   }).render(true);

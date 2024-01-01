@@ -1,5 +1,5 @@
 import { ChatMessageType } from '../../type/foundry/foundry'
-import { ActorPF } from '../../type/foundry/system/pf1e'
+import { ActorPF } from '../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { getCombatDefensesTable, getSocialDefensesTable } from './html'
 
 const renderChatMessage = (chatMessage: string): void => {

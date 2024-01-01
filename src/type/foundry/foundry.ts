@@ -1,10 +1,19 @@
 import { EmbeddedCollection } from './abstract/embedded-collection'
-import { TokenPF } from './system/pf1e'
+import { CompendiumPack } from './client/compendium-pack'
+import { TokenPF } from './system/pf1/canvas/token-pf'
+import { ItemPF } from './system/pf1/documents/item/item-pf'
+import { PacksMinimalIndexPF } from './system/pf1/documents/minimal-index-pf'
 
 export type SystemName = 'PF1'
 
 type SystemToken<CurrentSystemName extends SystemName> =
   CurrentSystemName extends 'PF1' ? TokenPF : never
+
+type SystemPacksData<CurrentSystemName extends SystemName> =
+  CurrentSystemName extends 'PF1' ? ItemPF : never
+
+type SystemPacksMinimalIndex<CurrentSystemName extends SystemName> =
+  CurrentSystemName extends 'PF1' ? PacksMinimalIndexPF : never
 
 export enum ChatMessageType {
   OTHER = 0,
@@ -120,7 +129,7 @@ export interface UserInterface {
   }
 }
 
-export interface Game {
+export interface Game<CurrentSystemName extends SystemName> {
   scenes: {
     viewed: {
       updateEmbeddedDocuments: (
@@ -135,6 +144,10 @@ export interface Game {
   settings: {
     get: (module: string, key: string) => string
   }
+  packs: CompendiumPack<
+    SystemPacksMinimalIndex<CurrentSystemName>,
+    SystemPacksData<CurrentSystemName>
+  >
 }
 
 export interface Sound {

@@ -1,5 +1,5 @@
 import { editInnerHtml } from '../../common/util/jquery'
-import { TokenPF } from '../../type/foundry/system/pf1e'
+import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import { knownActorGroups } from './config'
 import { flipTokens } from './flip'
 import { createForm, createImageOptions } from './html'
@@ -21,7 +21,7 @@ const openDialog = (
       },
     },
     render: (htm) => {
-      htm.find('#actorGroup').change(() => refreshImageOptions(htm))
+      htm.find('#actorGroup').on('change', () => refreshImageOptions(htm))
 
       refreshImageOptions(htm)
     },
