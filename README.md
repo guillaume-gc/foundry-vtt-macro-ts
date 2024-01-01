@@ -47,14 +47,24 @@ A configuration can be edited to add many effects or groups.
 
 # How to use
 
-To use these macros in Foundry VTT, follow these steps:
+> [!NOTE]  
+> Macro prefix can be used to give information about their system compatibility.
+
+## Javascript compiled files
+
+The easiest way to those macros in Foundry VTT is to follow those steps:
 
 1. Navigate to the `dist` folder within the project root files.
 2. Navigate into the sub-folders named after the macro you want to use.
 3. You can directly copy the `index.js` file content to a FoundryVTT macro.
+4. (optional) Apply configuration changes. Configuration are usually present in a `config.ts` file, and its content can be used with a commentary (exemple `// src/macro/pf1-metamorph/config.ts` in `dist/pf1-metamorph` )
 
-> [!NOTE]  
-> Macro prefix can be used to give information about their system compatibility.
+## Typescript files
+
+Typescript files are in the `src` folder.
+
+After making your chance, run the `yarn run esbuild:run` command (yarn 4 must be installed). It will updates files in the `dist` folder. To use them, simply follow steps in the "Javascript compiled files section".
+
 
 # Thanks
 
