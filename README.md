@@ -1,8 +1,8 @@
 # foundry-vtt-macro-ts
 
-A project to build random macros for [Foundry VTT](https://foundryvtt.com/) in TypeScript to make my life easier when I play as a Game Master, feel free to use them.
+A project to build macros for [Foundry VTT](https://foundryvtt.com/) in TypeScript to make my life easier when I play as a Game Master, feel free to use them.
 
-Currently, only French is supported. Typing is also very incomplete.
+Currently, only French is supported. Foundry typing is also incomplete.
 
 # A hopefully updated list of scripts
 
@@ -63,11 +63,13 @@ The easiest way to those macros in Foundry VTT is to follow those steps:
 
 Typescript files are in the `src` folder.
 
-After making your chance, run the `yarn run esbuild:run` command (yarn 4 must be installed). It will updates files in the `dist` folder. To use them, simply follow steps in the "Javascript compiled files section".
+Other than Node.js 18, Yarn 4 and Javascript packages defined in `package.json`, no other tools are needed.
+
+After making your changes, run the `yarn run esbuild:run` command. It will update files in the `dist` folder, then simply follow steps in the "Javascript compiled files" section.
 
 
 # Thanks
 
-Type definition is based on League of Foundry Developers [foundry-vtt-types](https://github.com/League-of-Foundry-Developers/foundry-vtt-types).
+Foundry VTT type definition is based on League of Foundry Developers [foundry-vtt-types](https://github.com/League-of-Foundry-Developers/foundry-vtt-types).
 
 Some macros are based on websterguy's work [foundry-pf1e-macros](https://github.com/websterguy/foundry-pf1e-macros).
