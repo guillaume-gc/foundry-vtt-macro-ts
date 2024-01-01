@@ -22,6 +22,7 @@ import {
 } from './config'
 import { checkFilter } from './filter'
 import { createItemInActor, findItemInCompendium } from './item'
+import { createOwnershipChanges } from './ownership'
 
 const logger = getLoggerInstance()
 
@@ -156,9 +157,7 @@ export const applyMetamorph = async (
 
   updates.push(
     tokens.map(({ actor }) => {
-      logger.debug('Apply metamorph to actor', actor)
-
-      return actor.update({
+      const updateData = {
         system: {
           attributes: {
             speed: metamorphElementTransformation.speed,
@@ -192,19 +191,35 @@ export const applyMetamorph = async (
           },
         },
         img: metamorphElementTransformation.actorImg,
+        ownership: createOwnershipChanges(
+          actor,
+          metamorphElementTransformation.ownershipChanges,
+        ),
+      }
+
+      logger.debug('Apply metamorph to actor', {
+        actor,
+        updateData,
       })
+
+      return actor.update(updateData)
     }),
   )
 
   updates.push(
     tokens.map((token) => {
-      logger.debug('Apply metamorph to token', token)
-
-      return token.document.update({
+      const tokenData = {
         texture: {
           src: tokenTextureSrc,
         },
+      }
+
+      logger.debug('Apply metamorph to token', {
+        token,
+        tokenData,
       })
+
+      return token.document.update(tokenData)
     }),
   )
 

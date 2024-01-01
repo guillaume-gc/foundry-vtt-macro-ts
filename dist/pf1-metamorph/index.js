@@ -312,7 +312,8 @@ var config = {
               }
             },
             sc: 30
-          }
+          },
+          ownershipChanges: "clampAccessToLimited"
         }
       }
     },
@@ -648,7 +649,9 @@ var findItemsInActor = (actor, itemName, itemType) => actor.items.filter(
 );
 var findItemInCompendium = async (compendiumName, itemName, itemType) => {
   logger5.debug("Find item in compendium", {
-    compendiumName
+    compendiumName,
+    itemName,
+    itemType
   });
   const compendiumCollection = game.packs.get(compendiumName);
   logger5.debug("Compendium found", {
@@ -682,10 +685,58 @@ var createItemInActor = async (actor, item) => {
   return createdItem;
 };
 
-// src/macro/pf1-metamorph/polymorph.ts
+// src/macro/pf1-metamorph/ownership.ts
 var logger6 = getLoggerInstance();
+var createOwnershipChanges = (actor, ownershipChanges) => {
+  logger6.debug("Create ownership changes", {
+    actor,
+    ownershipChanges
+  });
+  if (ownershipChanges === void 0) {
+    return void 0;
+  }
+  switch (ownershipChanges) {
+    case "removeAccess":
+      return removeOwnershipAccess(actor.ownership);
+    case "clampAccessToLimited":
+      return clampOwnershipToLevelThreshold(
+        actor.ownership,
+        1 /* LIMITED */
+      );
+  }
+};
+var removeOwnershipAccess = (ownershipRecord) => {
+  const newOwnership = {};
+  for (const key of Object.keys(ownershipRecord)) {
+    newOwnership[key] = 0 /* NONE */;
+  }
+  logger6.debug("Remove ownership access ownership changes", {
+    ownershipRecord,
+    newOwnership
+  });
+  return newOwnership;
+};
+var clampOwnershipToLevelThreshold = (ownershipRecord, levelThreshold) => {
+  const newOwnership = {};
+  for (const key of Object.keys(ownershipRecord)) {
+    if (ownershipRecord[key] < levelThreshold) {
+      newOwnership[key] = ownershipRecord[key];
+      continue;
+    }
+    newOwnership[key] = levelThreshold;
+  }
+  logger6.debug("Clamp ownership access level", {
+    ownershipRecord,
+    newOwnership,
+    levelThreshold
+  });
+  return newOwnership;
+};
+
+// src/macro/pf1-metamorph/polymorph.ts
+var logger7 = getLoggerInstance();
 var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  logger6.debug("Prepare to add item to actor", item);
+  logger7.debug("Prepare to add item to actor", item);
   const compendiumItem = await findItemInCompendium(
     item.compendiumName,
     item.name,
@@ -696,7 +747,7 @@ var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLe
       `Could not find item ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`
     );
   }
-  logger6.debug("Found item in compendium", {
+  logger7.debug("Found item in compendium", {
     compendiumItem,
     itemCompendiumName: item.compendiumName,
     itemName: item.name
@@ -746,13 +797,12 @@ var mixReduction = (actorReduction, polymorphReduction) => polymorphReduction !=
   value: [...actorReduction.value, ...polymorphReduction.value]
 } : actorReduction;
 var applyMetamorph = async (tokens, metamorphElementTransformation, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  logger6.info("Apply metamorph");
+  logger7.info("Apply metamorph");
   const { tokenTextureSrc, itemsToAdd, itemsToModify } = metamorphElementTransformation;
   const updates = [];
   updates.push(
     tokens.map(({ actor }) => {
-      logger6.debug("Apply metamorph to actor", actor);
-      return actor.update({
+      const updateData = {
         system: {
           attributes: {
             speed: metamorphElementTransformation.speed
@@ -785,18 +835,31 @@ var applyMetamorph = async (tokens, metamorphElementTransformation, metamorphTra
             src: tokenTextureSrc
           }
         },
-        img: metamorphElementTransformation.actorImg
+        img: metamorphElementTransformation.actorImg,
+        ownership: createOwnershipChanges(
+          actor,
+          metamorphElementTransformation.ownershipChanges
+        )
+      };
+      logger7.debug("Apply metamorph to actor", {
+        actor,
+        updateData
       });
+      return actor.update(updateData);
     })
   );
   updates.push(
     tokens.map((token) => {
-      logger6.debug("Apply metamorph to token", token);
-      return token.document.update({
+      const tokenData = {
         texture: {
           src: tokenTextureSrc
         }
+      };
+      logger7.debug("Apply metamorph to token", {
+        token,
+        tokenData
       });
+      return token.document.update(tokenData);
     })
   );
   if (itemsToAdd !== void 0) {
@@ -815,7 +878,7 @@ var applyMetamorph = async (tokens, metamorphElementTransformation, metamorphTra
   await Promise.all(updates.flat());
 };
 var createItemToAddUpdates = (tokens, itemsToAdd, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => tokens.map(({ actor }) => {
-  logger6.debug("Create metamorph items in actor", actor);
+  logger7.debug("Create metamorph items in actor", actor);
   const individualItemUpdate = itemsToAdd.map(
     (item) => addTransformationItemToActor(
       actor,
@@ -880,9 +943,9 @@ var checkTokens = (tokens, elementTransformation) => {
 };
 
 // src/macro/pf1-metamorph/save.ts
-var logger7 = getLoggerInstance();
+var logger8 = getLoggerInstance();
 var transformToMetamorphSave = (value) => {
-  logger7.debug("Transform flags to metamorph if they are valid", value);
+  logger8.debug("Transform flags to metamorph if they are valid", value);
   if (value === void 0) {
     throw new Error("Flag values are undefined");
   }
@@ -894,7 +957,7 @@ var transformToMetamorphSave = (value) => {
       texture: { src: tokenTextureSrc = void 0 } = {}
     } = {}
   } = value;
-  logger7.debug("Extracted values in flags", {
+  logger8.debug("Extracted values in flags", {
     actorSize,
     tokenTextureSrc
   });
@@ -904,9 +967,9 @@ var transformToMetamorphSave = (value) => {
   return value;
 };
 var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
-  logger7.info("Save data to actor flags to ensure rolling back is possible");
+  logger8.info("Save data to actor flags to ensure rolling back is possible");
   const operations = tokens.map(async (token) => {
-    logger7.debug("Save data related to a token", token);
+    logger8.debug("Save data related to a token", token);
     const actorData = {
       system: {
         attributes: {
@@ -925,7 +988,8 @@ var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
           src: token.document.texture.src
         }
       },
-      img: token.actor.img
+      img: token.actor.img,
+      ownership: token.actor.ownership
     };
     const tokenDocumentData = {
       texture: {
@@ -974,11 +1038,11 @@ var getTransformModifiedBuff = (actorItems, itemsToModify) => {
   );
 };
 var rollbackToPrePolymorphData = async (tokens) => {
-  logger7.info("Prepare to roll back to data before polymorph was triggered");
+  logger8.info("Prepare to roll back to data before polymorph was triggered");
   const rollbackActions = tokens.map((token) => {
-    logger7.debug("Rolling back token", token);
+    logger8.debug("Rolling back token", token);
     const save = transformToMetamorphSave(token.actor.flags?.metamorph?.save);
-    logger7.debug("Save obtained from token actor", save);
+    logger8.debug("Save obtained from token actor", save);
     const currentRollBackActions = [
       token.document.update(save.tokenDocumentData),
       token.actor.update({
@@ -992,7 +1056,7 @@ var rollbackToPrePolymorphData = async (tokens) => {
       })
     ];
     if (save.transformModifiedItem !== void 0) {
-      logger7.debug("Get items to rollback", save);
+      logger8.debug("Get items to rollback", save);
       currentRollBackActions.push(
         Promise.all(
           rollbackModifiedItem(save.transformModifiedItem, token.actor.items)
@@ -1000,12 +1064,12 @@ var rollbackToPrePolymorphData = async (tokens) => {
       );
     }
     if (save.transformAddedItemsData !== void 0) {
-      logger7.debug("Get items to delete", save);
+      logger8.debug("Get items to delete", save);
       const itemsToDelete = getItemsToDelete(
         token,
         save.transformAddedItemsData
       );
-      logger7.debug(`Got ${itemsToDelete.length} items to delete`, {
+      logger8.debug(`Got ${itemsToDelete.length} items to delete`, {
         itemsToDelete
       });
       currentRollBackActions.push(
@@ -1017,9 +1081,9 @@ var rollbackToPrePolymorphData = async (tokens) => {
     }
     return currentRollBackActions;
   }).flat();
-  logger7.info("Trigger rollback");
+  logger8.info("Trigger rollback");
   await Promise.all(rollbackActions);
-  logger7.info("Rollback complete");
+  logger8.info("Rollback complete");
 };
 var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsData.reduce((previousItems, currentItem) => {
   const actorItems = findItemsInActor(
@@ -1030,7 +1094,7 @@ var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsDa
   if (actorItems.length > 0) {
     previousItems.push(...actorItems);
   } else {
-    logger7.warn(`Could not find ${currentItem.name} item(s) in actor`);
+    logger8.warn(`Could not find ${currentItem.name} item(s) in actor`);
   }
   return previousItems;
 }, []);
@@ -1058,13 +1122,13 @@ var rollbackModifiedItem = (saveTransformModifiedItems, actorItems) => actorItem
       })
     );
   } else {
-    logger7.warn("A modified item has expected type", currentItem);
+    logger8.warn("A modified item has expected type", currentItem);
   }
   return accumulator;
 }, []);
 
 // src/macro/pf1-metamorph/index.ts
-var logger8 = getLoggerInstance();
+var logger9 = getLoggerInstance();
 var getNumberFromInputIfSpecified = (htm, selector) => {
   const value = parseInt(getInputElement(htm, selector).value);
   if (!isNaN(value)) {
@@ -1127,8 +1191,8 @@ var openDialog = (controlledTokens) => {
   }).render(true);
 };
 try {
-  logger8.setLevel(0 /* DEBUG */);
-  logger8.setMacroName("pf1-metamorph");
+  logger9.setLevel(0 /* DEBUG */);
+  logger9.setMacroName("pf1-metamorph");
   const {
     tokens: { controlled: controlledTokens }
   } = canvas;

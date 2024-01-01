@@ -1,6 +1,7 @@
 import { getLoggerInstance } from '../../common/log/logger'
 import { Document } from '../../type/foundry/abstract/document'
 import { EmbeddedCollection } from '../../type/foundry/abstract/embedded-collection'
+import { DocumentOwnershipLevelRecord } from '../../type/foundry/const/document-ownership-level'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import {
   ActorPFDamageReduction,
@@ -39,6 +40,7 @@ export interface MetamorphActorData {
   }
   prototypeToken: MetamorphTokenDocumentData
   img: string
+  ownership: DocumentOwnershipLevelRecord
 }
 
 export interface MetamorphTokenDocumentData {
@@ -130,6 +132,7 @@ export const savePolymorphData = async (
         },
       },
       img: token.actor.img,
+      ownership: token.actor.ownership,
     }
     const tokenDocumentData: MetamorphTokenDocumentData = {
       texture: {

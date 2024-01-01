@@ -30,6 +30,8 @@ export const findItemInCompendium = async <T extends ItemPF = ItemPF>(
 ): Promise<T | undefined> => {
   logger.debug('Find item in compendium', {
     compendiumName,
+    itemName,
+    itemType,
   })
 
   const compendiumCollection = game.packs.get(compendiumName)

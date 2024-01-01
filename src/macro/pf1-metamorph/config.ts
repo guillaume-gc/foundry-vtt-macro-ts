@@ -9,6 +9,7 @@ import {
 import { ItemPFType } from '../../type/foundry/system/pf1/documents/item/item-pf'
 import { RecursivePartial } from '../../type/foundry/utils/partial'
 import { MetamorphFilter } from './filter'
+import { MetamorphOwnershipChanges } from './ownership'
 
 export type MetamorphElementsRecord = Record<string, MetamorphElement>
 
@@ -53,6 +54,7 @@ export interface MetamorphElementTransformation extends BaseMetamorphElement {
   senses?: Partial<ActorPFSenses>
   damageReduction?: ActorPFDamageReduction
   energyResistance?: ActorPFEnergyResistance
+  ownershipChanges?: MetamorphOwnershipChanges
 }
 
 export interface MetamorphConfig {
@@ -287,6 +289,7 @@ export const config: MetamorphConfig = {
             },
             sc: 30,
           },
+          ownershipChanges: 'clampAccessToLimited',
         },
       },
     },
