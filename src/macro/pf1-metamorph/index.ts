@@ -26,6 +26,8 @@ const triggerMetamorph = async (
   htmlController: HTMLController,
 ): Promise<void> => {
   try {
+    checkTokens(controlledTokens)
+
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       '#transformation-spell-level',
@@ -35,8 +37,6 @@ const triggerMetamorph = async (
       htm,
       '#transformation-spell-difficulty-check',
     )
-
-    checkTokens(controlledTokens)
 
     const elementTransformation = htmlController.getTransformation()
 

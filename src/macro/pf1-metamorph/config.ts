@@ -74,7 +74,7 @@ export const config: MetamorphConfig = {
             chimeraBestShapeIV: {
               label: 'Chimère',
               description:
-                'Ce monstre ailé a le corps d’un lion et trois têtes : une de dragon et une de chèvre cornue. Pour connaitre la couleur de la tête, lancez [[/r 1d10 #Couleur de la tête de chimère]]. Si 1 ou 2 alors tête blanche, si 4 ou 4 alors tête bleue, si 5 ou 6 alors tête noire, si 7 ou 8 alors tête rouge, sinon tête verte.',
+                'Ce monstre ailé a le corps d’un lion et trois têtes : dragon, lion et chèvre. Pour connaitre la couleur de la tête de dragon, lancez [[/r 1d10 #Couleur de la tête de chimère]]. Si 1 ou 2 alors tête blanche, si 3 ou 4 alors tête bleue, si 5 ou 6 alors tête noire, si 7 ou 8 alors tête rouge, sinon si 9 ou 10 alors tête verte.',
               type: 'transformation',
               itemsToAdd: [
                 {

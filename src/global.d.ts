@@ -20,7 +20,19 @@ declare global {
 
   class Dialog {
     constructor(options: DialogOptions)
-    render(flag: boolean): void
+    render(
+      force?: boolean,
+      options?: {
+        left: number
+        top: number
+        width: number
+        height: number
+        scale: number
+        focus: boolean
+        renderContext: string
+        renderData: any
+      },
+    ): void
   }
 
   class ChatMessage {

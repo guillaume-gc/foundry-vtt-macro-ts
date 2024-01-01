@@ -90,7 +90,7 @@ var config = {
           elementChildren: {
             chimeraBestShapeIV: {
               label: "Chim\xE8re",
-              description: "Ce monstre ail\xE9 a le corps d\u2019un lion et trois t\xEAtes : une de dragon et une de ch\xE8vre cornue. Pour connaitre la couleur de la t\xEAte, lancez [[/r 1d10 #Couleur de la t\xEAte de chim\xE8re]]. Si 1 ou 2 alors t\xEAte blanche, si 4 ou 4 alors t\xEAte bleue, si 5 ou 6 alors t\xEAte noire, si 7 ou 8 alors t\xEAte rouge, sinon t\xEAte verte.",
+              description: "Ce monstre ail\xE9 a le corps d\u2019un lion et trois t\xEAtes : dragon, lion et ch\xE8vre. Pour connaitre la couleur de la t\xEAte de dragon, lancez [[/r 1d10 #Couleur de la t\xEAte de chim\xE8re]]. Si 1 ou 2 alors t\xEAte blanche, si 3 ou 4 alors t\xEAte bleue, si 5 ou 6 alors t\xEAte noire, si 7 ou 8 alors t\xEAte rouge, sinon si 9 ou 10 alors t\xEAte verte.",
               type: "transformation",
               itemsToAdd: [
                 {
@@ -261,7 +261,6 @@ var createHtmlController = () => {
     <form class='flexcol'>
       <span id='metamorph-root-element-container'>
         <div class='form-group'>
-          <label>Element :</label>
           <select>${createElementOptions(rootElements)}</select>
         </div>
         <div id='metamorph-root-element-description' class='form-group'>
@@ -345,7 +344,6 @@ var createHtmlController = () => {
     const getTransformationIteration = (element, depth) => {
       logger2.debug("Get transformation iteration", {
         element,
-        currentSelectedKeyArray,
         depth
       });
       if (element === void 0) {
@@ -362,9 +360,8 @@ var createHtmlController = () => {
       }
       return element;
     };
-    const currentSelectedKeyArray = [...masterSelectedKeyArray];
     const firstKey = createElementKey(rootElements, 0);
-    return getTransformationIteration(rootElements[firstKey], 0);
+    return getTransformationIteration(rootElements[firstKey], 1);
   };
   const setMasterSelectedKeyArray = (value) => {
     masterSelectedKeyArray = value;
@@ -458,7 +455,6 @@ var createHtmlController = () => {
   };
   const createElementFormGroup = (elementChildren, htmlId, parentDescription) => `
   <div class="form-group">
-    <label>Element :</label>
     <select id="${htmlId}">${createElementOptions(elementChildren)}</select>
   </div>
   <div class="metamorph-root-element-container-description form-group">
@@ -906,6 +902,7 @@ var getNumberFromInputIfSpecified = (htm, selector) => {
 };
 var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
   try {
+    checkTokens(controlledTokens);
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       "#transformation-spell-level"
@@ -914,7 +911,6 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
       htm,
       "#transformation-spell-difficulty-check"
     );
-    checkTokens(controlledTokens);
     const elementTransformation = htmlController.getTransformation();
     await savePolymorphData(controlledTokens, elementTransformation);
     await applyMetamorph(

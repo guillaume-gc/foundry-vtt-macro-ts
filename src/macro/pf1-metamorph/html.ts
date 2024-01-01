@@ -39,7 +39,6 @@ export const createHtmlController = (): HTMLController => {
     <form class='flexcol'>
       <span id='metamorph-root-element-container'>
         <div class='form-group'>
-          <label>Element :</label>
           <select>${createElementOptions(rootElements)}</select>
         </div>
         <div id='metamorph-root-element-description' class='form-group'>
@@ -153,7 +152,6 @@ export const createHtmlController = (): HTMLController => {
     ): MetamorphElementTransformation => {
       logger.debug('Get transformation iteration', {
         element,
-        currentSelectedKeyArray,
         depth,
       })
 
@@ -175,10 +173,10 @@ export const createHtmlController = (): HTMLController => {
       return element
     }
 
-    const currentSelectedKeyArray = [...masterSelectedKeyArray]
     const firstKey = createElementKey(rootElements, 0)
 
-    return getTransformationIteration(rootElements[firstKey], 0)
+    // Depth is 1 because root element first key is already being used.
+    return getTransformationIteration(rootElements[firstKey], 1)
   }
 
   const setMasterSelectedKeyArray = (value: Array<string | undefined>) => {
@@ -317,7 +315,6 @@ export const createHtmlController = (): HTMLController => {
     parentDescription?: string,
   ): string => `
   <div class="form-group">
-    <label>Element :</label>
     <select id="${htmlId}">${createElementOptions(elementChildren)}</select>
   </div>
   <div class="metamorph-root-element-container-description form-group">
