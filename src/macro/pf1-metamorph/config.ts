@@ -219,7 +219,34 @@ export const config: MetamorphConfig = {
         },
       },
     },
-    lycanthropy: {
+    transference: {
+      label: 'La Transférence du Premier Monde',
+      type: 'group',
+      elementChildren: {
+        incomplete: {
+          label: 'Incomplete',
+          type: 'group',
+          elementChildren: {
+            origin: {
+              label: 'Origine',
+              type: 'transformation',
+              tokenTextureSrc:
+                '/tokens/monsters/aberrations/severed-tentacle3.webp',
+              actorImg:
+                '/characters/monsters/aberrations/purpletentacules.webp',
+            },
+            destination: {
+              label: 'Destination',
+              type: 'transformation',
+              tokenTextureSrc:
+                '/tokens/monsters/aberrations/severed-tentacle.webp',
+              actorImg: '/characters/monsters/aberrations/bluetentacules.webp',
+            },
+          },
+        },
+      },
+    },
+    mythicLycanthropy: {
       label: 'Lycanthropie Mythique',
       type: 'group',
       elementChildren: {
