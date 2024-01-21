@@ -254,7 +254,7 @@ var config = {
             origin: {
               label: "Origine",
               type: "transformation",
-              tokenTextureSrc: "/tokens/monsters/aberrations/severed-tentacle3.webp",
+              tokenTextureSrc: "/tokens/monsters/aberrations/not-so-severed-tentacle3.webp",
               actorImg: "/characters/monsters/aberrations/purpletentacules.webp"
             },
             destination: {

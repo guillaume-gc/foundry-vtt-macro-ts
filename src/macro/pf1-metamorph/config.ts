@@ -231,7 +231,7 @@ export const config: MetamorphConfig = {
               label: 'Origine',
               type: 'transformation',
               tokenTextureSrc:
-                '/tokens/monsters/aberrations/severed-tentacle3.webp',
+                '/tokens/monsters/aberrations/not-so-severed-tentacle3.webp',
               actorImg:
                 '/characters/monsters/aberrations/purpletentacules.webp',
             },
