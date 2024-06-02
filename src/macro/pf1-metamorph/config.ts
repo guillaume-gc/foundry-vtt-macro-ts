@@ -246,6 +246,69 @@ export const config: MetamorphConfig = {
         },
       },
     },
+    magnus: {
+      label: 'Magnus',
+      type: 'group',
+      elementChildren: {
+        fox: {
+          label: 'Forme animale de Magnus',
+          type: 'transformation',
+          tokenTextureSrc: '/tokens/monsters/animals/fox1.webp',
+          actorImg: '/characters/monsters/animals/fox1.webp',
+          requirement: {
+            type: 'equality',
+            path: 'id',
+            // Dov Magnus ID
+            value: 'DiXoCwjCCADoVMk3',
+          },
+          itemsToAdd: [
+            {
+              name: 'Morsure de Kitsune',
+              compendiumName: 'world.effets-metamorph',
+              type: 'attack',
+            },
+          ],
+        },
+        hybrid: {
+          label: 'Forme hybride de Magnus',
+          type: 'transformation',
+          tokenTextureSrc: '/tokens/PC/magnushybrid.webp',
+          actorImg: '/characters/PC/magnusHybrid.webp',
+          requirement: {
+            type: 'equality',
+            path: 'id',
+            // Dov Magnus ID
+            value: 'DiXoCwjCCADoVMk3',
+          },
+          itemsToAdd: [
+            {
+              name: 'Morsure de Kitsune',
+              compendiumName: 'world.effets-metamorph',
+              type: 'attack',
+            },
+          ],
+        },
+        human: {
+          label: 'Forme humaine de Magnus',
+          type: 'transformation',
+          tokenTextureSrc: '/tokens/PC/magnus.webp',
+          actorImg: '/characters/PC/magnusHuman.webp',
+          requirement: {
+            type: 'equality',
+            path: 'id',
+            // Dov Magnus ID
+            value: 'DiXoCwjCCADoVMk3',
+          },
+          itemsToAdd: [
+            {
+              name: 'Morsure de Kitsune',
+              compendiumName: 'world.effets-metamorph',
+              type: 'attack',
+            },
+          ],
+        },
+      },
+    },
     mythicLycanthropy: {
       label: 'Lycanthropie Mythique',
       type: 'group',
