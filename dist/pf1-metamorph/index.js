@@ -799,6 +799,9 @@ var createAddItemsUpdates = async (actor, itemsToAdd, options) => {
         itemCompendiumName: item.compendiumName,
         itemName: item.name
       });
+      if (options) {
+        await customizeItemPF(itemPF, options);
+      }
       return itemPF;
     })
   );
@@ -806,6 +809,43 @@ var createAddItemsUpdates = async (actor, itemsToAdd, options) => {
     newItemPFsArray
   });
   return actor.createEmbeddedDocuments("Item", newItemPFsArray);
+};
+var customizeItemPF = async (item, options) => {
+  logger6.debug("Customize ItemPF before creating update", {
+    item
+  });
+  if (options === void 0) {
+    return;
+  }
+  if (item.type === "buff") {
+    await customizeItemBuffPF(item, options);
+  }
+  if (item.hasAction) {
+    await customizeItemActions(item.actions, options);
+  }
+  logger6.debug("Customized ItemPF", {
+    item
+  });
+};
+var customizeItemBuffPF = async (item, options) => {
+  await item.update({
+    system: {
+      level: options.metamorphTransformSpellLevel,
+      active: true
+    }
+  });
+};
+var customizeItemActions = async (itemActions, options) => {
+  if (options.metamorphSpellDifficultyCheck === void 0) {
+    return;
+  }
+  for (const action of itemActions) {
+    await action.update({
+      save: {
+        dc: options.metamorphSpellDifficultyCheck
+      }
+    });
+  }
 };
 
 // src/macro/pf1-metamorph/update/modify-item.ts
@@ -1245,7 +1285,7 @@ var openDialog = (controlledTokens) => {
   }).render(true);
 };
 try {
-  logger10.setLevel(0 /* DEBUG */);
+  logger10.setLevel(1 /* INFO */);
   logger10.setMacroName("pf1-metamorph");
   const {
     tokens: { controlled: controlledTokens }

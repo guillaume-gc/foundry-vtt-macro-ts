@@ -41,9 +41,9 @@ export const createAddItemsUpdates = async (
         itemName: item.name,
       })
 
-      // if (options) {
-      //   customizeItemPF(itemPF, options)
-      // }
+      if (options) {
+        await customizeItemPF(itemPF, options)
+      }
 
       return itemPF
     }),
@@ -59,7 +59,10 @@ export const createAddItemsUpdates = async (
 /*
  * Set up real time date in relation to metamorph option
  */
-const customizeItemPF = (item: ItemPF, options: MetamorphOptions) => {
+const customizeItemPF = async (
+  item: ItemPF,
+  options: MetamorphOptions,
+): Promise<void> => {
   logger.debug('Customize ItemPF before creating update', {
     item,
   })
@@ -69,11 +72,11 @@ const customizeItemPF = (item: ItemPF, options: MetamorphOptions) => {
   }
 
   if (item.type === 'buff') {
-    customizeItemBuffPF(item as ItemBuffPF, options)
+    await customizeItemBuffPF(item as ItemBuffPF, options)
   }
 
   if (item.hasAction) {
-    customizeItemActions(item.actions, options)
+    await customizeItemActions(item.actions, options)
   }
 
   logger.debug('Customized ItemPF', {
@@ -81,23 +84,31 @@ const customizeItemPF = (item: ItemPF, options: MetamorphOptions) => {
   })
 }
 
-const customizeItemBuffPF = (item: ItemBuffPF, options: MetamorphOptions) => {
-  if (options.metamorphTransformSpellLevel) {
-    item.system.level = options.metamorphTransformSpellLevel
-  }
-
-  item.system.active = true
+const customizeItemBuffPF = async (
+  item: ItemBuffPF,
+  options: MetamorphOptions,
+): Promise<void> => {
+  await item.update({
+    system: {
+      level: options.metamorphTransformSpellLevel,
+      active: true,
+    },
+  })
 }
 
-const customizeItemActions = (
+const customizeItemActions = async (
   itemActions: Collection<ItemAction>,
   options: MetamorphOptions,
-) => {
+): Promise<void> => {
   if (options.metamorphSpellDifficultyCheck === undefined) {
     return
   }
 
   for (const action of itemActions) {
-    action.data.save.dc = options?.metamorphSpellDifficultyCheck?.toString()
+    await action.update({
+      save: {
+        dc: options.metamorphSpellDifficultyCheck,
+      },
+    })
   }
 }

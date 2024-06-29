@@ -2,7 +2,7 @@ import { RecursivePartial } from '../../../utils/partial'
 
 export interface ItemActionData {
   save: {
-    dc: string
+    dc: number
     description: string
     type: string
   }

@@ -93,7 +93,7 @@ const openDialog = (controlledTokens: TokenPF[]) => {
 }
 
 try {
-  logger.setLevel(LogLevel.DEBUG)
+  logger.setLevel(LogLevel.INFO)
   logger.setMacroName('pf1-metamorph')
 
   const {
