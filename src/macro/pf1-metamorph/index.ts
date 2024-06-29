@@ -46,12 +46,10 @@ const triggerMetamorph = async (
     checkTokens(controlledTokens, elementTransformation)
 
     await savePolymorphData(controlledTokens, elementTransformation)
-    await applyMetamorph(
-      controlledTokens,
-      elementTransformation,
+    await applyMetamorph(controlledTokens, elementTransformation, {
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck,
-    )
+    })
 
     logger.info(`Transformation completed`)
   } catch (error) {
@@ -95,7 +93,7 @@ const openDialog = (controlledTokens: TokenPF[]) => {
 }
 
 try {
-  logger.setLevel(LogLevel.INFO)
+  logger.setLevel(LogLevel.DEBUG)
   logger.setMacroName('pf1-metamorph')
 
   const {

@@ -1,7 +1,12 @@
 import { Document } from '../abstract/document'
 import { Actor } from './actor'
 
-export declare class TokenDocument extends Document {
+export interface DocumentAttributes {}
+
+export declare class TokenDocument
+  extends Document
+  implements DocumentAttributes
+{
   get actor(): Actor
 
   get baseActor(): Actor

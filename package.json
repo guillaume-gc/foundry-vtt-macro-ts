@@ -6,7 +6,8 @@
     "prettier:write": "prettier -w .",
     "esbuild:run": "ts-node src/build.ts",
     "esbuild:watch": "ts-node src/build.ts --watch",
-    "eslint:check": "npx eslint . --ext .ts"
+    "eslint:check": "npx eslint . --ext .ts",
+    "yarn:upgrade-to-latest": "yarn upgrade-interactive --latest"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "@types/node": "^20.8.10",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",
+    "esbuild": "^0.19.5",
     "eslint": "^8.53.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
@@ -31,8 +33,5 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
-  "dependencies": {
-    "esbuild": "^0.19.5"
-  },
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@4.3.1"
 }

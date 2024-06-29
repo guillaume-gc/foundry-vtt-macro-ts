@@ -267,6 +267,17 @@ var config = {
         }
       }
     },
+    Gimil: {
+      label: "Gimil",
+      type: "group",
+      elementChildren: {
+        humanForm: {
+          label: "Forme humaine de Gimil",
+          type: "transformation",
+          tokenTextureSrc: "tokens/NPC/gimil/GimilHatchlingDarker.webp"
+        }
+      }
+    },
     magnus: {
       label: "Magnus",
       type: "group",
@@ -763,19 +774,83 @@ var findItemInCompendium = async (compendiumName, itemName, itemType) => {
   });
   return item;
 };
-var createItemInActor = async (actor, item) => {
-  const documents = await actor.createEmbeddedDocuments("Item", [item]);
-  const createdItem = documents[0];
-  if (createdItem === void 0) {
-    throw new Error(`Could not create item ${item.name} in actor`);
+
+// src/macro/pf1-metamorph/update/add-item.ts
+var logger6 = getLoggerInstance();
+var createAddItemsUpdates = async (actor, itemsToAdd, options) => {
+  logger6.debug("Creating update to add objects", {
+    actor,
+    itemsToAdd
+  });
+  const newItemPFsArray = await Promise.all(
+    itemsToAdd.map(async (item) => {
+      const itemPF = await findItemInCompendium(
+        item.compendiumName,
+        item.name,
+        item.type
+      );
+      if (itemPF === void 0) {
+        throw new Error(
+          `Could not find item ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`
+        );
+      }
+      logger6.debug("Found itemPF in compendium", {
+        itemPF,
+        itemCompendiumName: item.compendiumName,
+        itemName: item.name
+      });
+      return itemPF;
+    })
+  );
+  logger6.debug("Items to add to actor ready for update creation", {
+    newItemPFsArray
+  });
+  return actor.createEmbeddedDocuments("Item", newItemPFsArray);
+};
+
+// src/macro/pf1-metamorph/update/modify-item.ts
+var createModifyActorItemUpdates = (actorItems, itemsToModify) => Promise.all(
+  actorItems.reduce((accumulator, currentItem) => {
+    const modification = itemsToModify.find(
+      (item) => item.name === currentItem.name && item.type === currentItem.type
+    );
+    if (modification === void 0) {
+      return accumulator;
+    }
+    accumulator.push(createUpdate(currentItem, modification.action));
+    return accumulator;
+  }, [])
+);
+var createUpdate = (item, action) => {
+  switch (action) {
+    case "disable":
+      return createDisableItemUpdate(item);
   }
-  return createdItem;
+};
+var createDisableItemUpdate = (item) => {
+  if (item.type === "buff") {
+    return item.update({
+      system: {
+        active: false
+      }
+    });
+  }
+  if (item.type === "feat") {
+    return item.update({
+      system: {
+        disabled: true
+      }
+    });
+  }
+  throw new Error(
+    `Unexpected item type ${item.type}, cannot create disable action update`
+  );
 };
 
 // src/macro/pf1-metamorph/ownership.ts
-var logger6 = getLoggerInstance();
+var logger7 = getLoggerInstance();
 var createOwnershipChanges = (actor, ownershipChanges) => {
-  logger6.debug("Create ownership changes", {
+  logger7.debug("Create ownership changes", {
     actor,
     ownershipChanges
   });
@@ -797,7 +872,7 @@ var removeOwnershipAccess = (ownershipRecord) => {
   for (const key of Object.keys(ownershipRecord)) {
     newOwnership[key] = 0 /* NONE */;
   }
-  logger6.debug("Remove ownership access ownership changes", {
+  logger7.debug("Remove ownership access ownership changes", {
     ownershipRecord,
     newOwnership
   });
@@ -812,7 +887,7 @@ var clampOwnershipToLevelThreshold = (ownershipRecord, levelThreshold) => {
     }
     newOwnership[key] = levelThreshold;
   }
-  logger6.debug("Clamp ownership access level", {
+  logger7.debug("Clamp ownership access level", {
     ownershipRecord,
     newOwnership,
     levelThreshold
@@ -820,201 +895,92 @@ var clampOwnershipToLevelThreshold = (ownershipRecord, levelThreshold) => {
   return newOwnership;
 };
 
-// src/macro/pf1-metamorph/polymorph.ts
-var logger7 = getLoggerInstance();
-var addTransformationItemToActor = async (actor, item, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  logger7.debug("Prepare to add item to actor", item);
-  const compendiumItem = await findItemInCompendium(
-    item.compendiumName,
-    item.name,
-    item.type
-  );
-  if (compendiumItem === void 0) {
-    throw new Error(
-      `Could not find item ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`
-    );
+// src/macro/pf1-metamorph/update/override-data.ts
+var createOverrideTokenDataUpdates = (token, metamorphElementTransformation) => token.document.update({
+  texture: {
+    src: metamorphElementTransformation.tokenTextureSrc
   }
-  logger7.debug("Found item in compendium", {
-    compendiumItem,
-    itemCompendiumName: item.compendiumName,
-    itemName: item.name
-  });
-  const actorItem = await createItemInActor(actor, compendiumItem);
-  return updateAddedTransformationItem(
-    actorItem,
-    metamorphTransformSpellLevel,
-    metamorphSpellDifficultyCheck
-  );
-};
-var updateAddedTransformationItem = async (item, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  const updates = [];
-  if (item.type === "buff") {
-    updates.push(
-      item.update({
-        system: {
-          level: metamorphTransformSpellLevel,
-          active: true
-        }
-      })
-    );
-  }
-  if (item.hasAction) {
-    updates.push(
-      updateAddedTransformationItemActions(
-        item.actions,
-        metamorphSpellDifficultyCheck
+});
+var createOverrideActorDataUpdates = (actor, metamorphElementTransformation) => actor.update({
+  system: {
+    attributes: {
+      speed: metamorphElementTransformation.speed
+    },
+    traits: {
+      size: metamorphElementTransformation.size,
+      stature: metamorphElementTransformation.stature,
+      senses: {
+        ...actor.system.traits.senses,
+        ...metamorphElementTransformation.senses
+      },
+      dr: mixReduction(
+        actor.system.traits.dr,
+        metamorphElementTransformation.damageReduction
+      ),
+      eres: mixReduction(
+        actor.system.traits.eres,
+        metamorphElementTransformation.energyResistance
       )
-    );
-  }
-  if (updates.length > 0) {
-    return Promise.all(updates);
-  }
-  return item;
-};
-var updateAddedTransformationItemActions = async (actions, metamorphSpellDifficultyCheck) => actions.map(
-  (action) => action.update({
-    save: {
-      // Abilities DC must be using spell DC, if specified.
-      dc: metamorphSpellDifficultyCheck?.toString()
     }
-  })
-);
+  },
+  flags: {
+    metamorph: {
+      ...actor.flags?.metamorph,
+      active: true
+    }
+  },
+  prototypeToken: {
+    texture: {
+      src: metamorphElementTransformation.tokenTextureSrc
+    }
+  },
+  img: metamorphElementTransformation.actorImg,
+  ownership: createOwnershipChanges(
+    actor,
+    metamorphElementTransformation.ownershipChanges
+  )
+});
 var mixReduction = (actorReduction, polymorphReduction) => polymorphReduction !== void 0 ? {
   custom: [actorReduction.custom, polymorphReduction.custom].filter((value) => value).join(";"),
   value: [...actorReduction.value, ...polymorphReduction.value]
 } : actorReduction;
-var applyMetamorph = async (tokens, metamorphElementTransformation, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => {
-  logger7.info("Apply metamorph");
-  const { tokenTextureSrc, itemsToAdd, itemsToModify } = metamorphElementTransformation;
-  const updates = [];
-  updates.push(
-    tokens.map(({ actor }) => {
-      const updateData = {
-        system: {
-          attributes: {
-            speed: metamorphElementTransformation.speed
-          },
-          traits: {
-            size: metamorphElementTransformation.size,
-            stature: metamorphElementTransformation.stature,
-            senses: {
-              ...actor.system.traits.senses,
-              ...metamorphElementTransformation.senses
-            },
-            dr: mixReduction(
-              actor.system.traits.dr,
-              metamorphElementTransformation.damageReduction
-            ),
-            eres: mixReduction(
-              actor.system.traits.eres,
-              metamorphElementTransformation.energyResistance
-            )
-          }
-        },
-        flags: {
-          metamorph: {
-            ...actor.flags?.metamorph,
-            active: true
-          }
-        },
-        prototypeToken: {
-          texture: {
-            src: tokenTextureSrc
-          }
-        },
-        img: metamorphElementTransformation.actorImg,
-        ownership: createOwnershipChanges(
-          actor,
-          metamorphElementTransformation.ownershipChanges
-        )
-      };
-      logger7.debug("Apply metamorph to actor", {
-        actor,
-        updateData
-      });
-      return actor.update(updateData);
-    })
+
+// src/macro/pf1-metamorph/polymorph.ts
+var logger8 = getLoggerInstance();
+var applyMetamorph = async (tokens, metamorphElementTransformation, options) => {
+  logger8.info("Apply metamorph");
+  await Promise.all(
+    createMetamorphUpdate(tokens, metamorphElementTransformation, options)
   );
-  updates.push(
-    tokens.map((token) => {
-      const tokenData = {
-        texture: {
-          src: tokenTextureSrc
-        }
-      };
-      logger7.debug("Apply metamorph to token", {
-        token,
-        tokenData
-      });
-      return token.document.update(tokenData);
-    })
+};
+var createMetamorphUpdate = (tokens, metamorphElementTransformation, options) => tokens.map((token) => {
+  const tokenUpdates = [];
+  tokenUpdates.push(
+    createOverrideActorDataUpdates(
+      token.actor,
+      metamorphElementTransformation
+    ),
+    createOverrideTokenDataUpdates(token, metamorphElementTransformation)
   );
-  if (itemsToAdd !== void 0) {
-    updates.push(
-      createItemToAddUpdates(
-        tokens,
-        itemsToAdd,
-        metamorphTransformSpellLevel,
-        metamorphSpellDifficultyCheck
+  if (metamorphElementTransformation.itemsToAdd !== void 0) {
+    tokenUpdates.push(
+      createAddItemsUpdates(
+        token.actor,
+        metamorphElementTransformation.itemsToAdd,
+        options
       )
     );
   }
-  if (itemsToModify !== void 0) {
-    updates.push(getItemToModifyUpdate(tokens, itemsToModify));
-  }
-  await Promise.all(updates.flat());
-};
-var createItemToAddUpdates = (tokens, itemsToAdd, metamorphTransformSpellLevel, metamorphSpellDifficultyCheck) => tokens.map(({ actor }) => {
-  logger7.debug("Create metamorph items in actor", actor);
-  const individualItemUpdate = itemsToAdd.map(
-    (item) => addTransformationItemToActor(
-      actor,
-      item,
-      metamorphTransformSpellLevel,
-      metamorphSpellDifficultyCheck
-    )
-  );
-  return Promise.all(individualItemUpdate);
-});
-var getItemToModifyUpdate = (tokens, itemsToModify) => tokens.map(
-  ({ actor }) => actor.items.reduce((accumulator, currentItem) => {
-    const modification = itemsToModify.find(
-      (item) => item.name === currentItem.name && item.type === currentItem.type
+  if (metamorphElementTransformation.itemsToModify !== void 0) {
+    tokenUpdates.push(
+      createModifyActorItemUpdates(
+        token.actor.items,
+        metamorphElementTransformation.itemsToModify
+      )
     );
-    if (modification === void 0) {
-      return accumulator;
-    }
-    accumulator.push(
-      getTransformActionUpdate(modification.action, currentItem)
-    );
-    return accumulator;
-  }, [])
-).flat();
-var getTransformActionUpdate = (action, item) => {
-  switch (action) {
-    case "disable":
-      return getDisableActionUpdate(item);
   }
-};
-var getDisableActionUpdate = (item) => {
-  if (item.type === "buff") {
-    return item.update({
-      system: {
-        active: false
-      }
-    });
-  }
-  if (item.type === "feat") {
-    return item.update({
-      system: {
-        disabled: true
-      }
-    });
-  }
-  throw new Error(
-    `Unexpected item type ${item.type}, cannot create disable action update`
-  );
-};
+  return tokenUpdates;
+}).flat();
 var checkTokens = (tokens, elementTransformation) => {
   for (const token of tokens) {
     const { requirement } = elementTransformation;
@@ -1030,9 +996,9 @@ var checkTokens = (tokens, elementTransformation) => {
 };
 
 // src/macro/pf1-metamorph/save.ts
-var logger8 = getLoggerInstance();
+var logger9 = getLoggerInstance();
 var transformToMetamorphSave = (value) => {
-  logger8.debug("Transform flags to metamorph if they are valid", value);
+  logger9.debug("Transform flags to metamorph if they are valid", value);
   if (value === void 0) {
     throw new Error("Flag values are undefined");
   }
@@ -1044,7 +1010,7 @@ var transformToMetamorphSave = (value) => {
       texture: { src: tokenTextureSrc = void 0 } = {}
     } = {}
   } = value;
-  logger8.debug("Extracted values in flags", {
+  logger9.debug("Extracted values in flags", {
     actorSize,
     tokenTextureSrc
   });
@@ -1054,9 +1020,9 @@ var transformToMetamorphSave = (value) => {
   return value;
 };
 var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
-  logger8.info("Save data to actor flags to ensure rolling back is possible");
+  logger9.info("Save data to actor flags to ensure rolling back is possible");
   const operations = tokens.map(async (token) => {
-    logger8.debug("Save data related to a token", token);
+    logger9.debug("Save data related to a token", token);
     const actorData = {
       system: {
         attributes: {
@@ -1125,11 +1091,11 @@ var getTransformModifiedBuff = (actorItems, itemsToModify) => {
   );
 };
 var rollbackToPrePolymorphData = async (tokens) => {
-  logger8.info("Prepare to roll back to data before polymorph was triggered");
+  logger9.info("Prepare to roll back to data before polymorph was triggered");
   const rollbackActions = tokens.map((token) => {
-    logger8.debug("Rolling back token", token);
+    logger9.debug("Rolling back token", token);
     const save = transformToMetamorphSave(token.actor.flags?.metamorph?.save);
-    logger8.debug("Save obtained from token actor", save);
+    logger9.debug("Save obtained from token actor", save);
     const currentRollBackActions = [
       token.document.update(save.tokenDocumentData),
       token.actor.update({
@@ -1143,7 +1109,7 @@ var rollbackToPrePolymorphData = async (tokens) => {
       })
     ];
     if (save.transformModifiedItem !== void 0) {
-      logger8.debug("Get items to rollback", save);
+      logger9.debug("Get items to rollback", save);
       currentRollBackActions.push(
         Promise.all(
           rollbackModifiedItem(save.transformModifiedItem, token.actor.items)
@@ -1151,12 +1117,12 @@ var rollbackToPrePolymorphData = async (tokens) => {
       );
     }
     if (save.transformAddedItemsData !== void 0) {
-      logger8.debug("Get items to delete", save);
+      logger9.debug("Get items to delete", save);
       const itemsToDelete = getItemsToDelete(
         token,
         save.transformAddedItemsData
       );
-      logger8.debug(`Got ${itemsToDelete.length} items to delete`, {
+      logger9.debug(`Got ${itemsToDelete.length} items to delete`, {
         itemsToDelete
       });
       currentRollBackActions.push(
@@ -1168,9 +1134,9 @@ var rollbackToPrePolymorphData = async (tokens) => {
     }
     return currentRollBackActions;
   }).flat();
-  logger8.info("Trigger rollback");
+  logger9.info("Trigger rollback");
   await Promise.all(rollbackActions);
-  logger8.info("Rollback complete");
+  logger9.info("Rollback complete");
 };
 var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsData.reduce((previousItems, currentItem) => {
   const actorItems = findItemsInActor(
@@ -1181,7 +1147,7 @@ var getItemsToDelete = (token, transformAddedItemsData) => transformAddedItemsDa
   if (actorItems.length > 0) {
     previousItems.push(...actorItems);
   } else {
-    logger8.warn(`Could not find ${currentItem.name} item(s) in actor`);
+    logger9.warn(`Could not find ${currentItem.name} item(s) in actor`);
   }
   return previousItems;
 }, []);
@@ -1209,13 +1175,13 @@ var rollbackModifiedItem = (saveTransformModifiedItems, actorItems) => actorItem
       })
     );
   } else {
-    logger8.warn("A modified item has expected type", currentItem);
+    logger9.warn("A modified item has expected type", currentItem);
   }
   return accumulator;
 }, []);
 
 // src/macro/pf1-metamorph/index.ts
-var logger9 = getLoggerInstance();
+var logger10 = getLoggerInstance();
 var getNumberFromInputIfSpecified = (htm, selector) => {
   const value = parseInt(getInputElement(htm, selector).value);
   if (!isNaN(value)) {
@@ -1225,7 +1191,7 @@ var getNumberFromInputIfSpecified = (htm, selector) => {
 };
 var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
   try {
-    logger9.info("Trigger Metamorph");
+    logger10.info("Trigger Metamorph");
     const metamorphTransformSpellLevel = getNumberFromInputIfSpecified(
       htm,
       "#transformation-spell-level"
@@ -1235,16 +1201,14 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
       "#transformation-spell-difficulty-check"
     );
     const elementTransformation = htmlController.getTransformation();
-    logger9.info(`Transformation will be ${elementTransformation.label}`);
+    logger10.info(`Transformation will be ${elementTransformation.label}`);
     checkTokens(controlledTokens, elementTransformation);
     await savePolymorphData(controlledTokens, elementTransformation);
-    await applyMetamorph(
-      controlledTokens,
-      elementTransformation,
+    await applyMetamorph(controlledTokens, elementTransformation, {
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck
-    );
-    logger9.info(`Transformation completed`);
+    });
+    logger10.info(`Transformation completed`);
   } catch (error) {
     notifyError(error);
   }
@@ -1281,8 +1245,8 @@ var openDialog = (controlledTokens) => {
   }).render(true);
 };
 try {
-  logger9.setLevel(1 /* INFO */);
-  logger9.setMacroName("pf1-metamorph");
+  logger10.setLevel(0 /* DEBUG */);
+  logger10.setMacroName("pf1-metamorph");
   const {
     tokens: { controlled: controlledTokens }
   } = canvas;
