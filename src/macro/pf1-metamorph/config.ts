@@ -246,6 +246,32 @@ export const config: MetamorphConfig = {
         },
       },
     },
+    gimil: {
+      label: 'Gimil',
+      type: 'group',
+      elementChildren: {
+        humanForm: {
+          label: 'Forme humaine de Gimil',
+          type: 'transformation',
+          tokenTextureSrc: '/tokens/NPC/gimilHumanForm.webp',
+          actorImg: '/characters/NPC/gimilYoungHumanForm.webp',
+          itemsToAdd: [
+            {
+              name: 'Coup (humain - metamorph)',
+              compendiumName: 'world.effets-metamorph',
+              type: 'attack',
+            },
+          ],
+          requirement: {
+            type: 'equality',
+            path: 'id',
+            // Gimil ID
+            value: 's4Ea9b7sZAZeCn6z',
+          },
+          size: 'med',
+        },
+      },
+    },
     magnus: {
       label: 'Magnus',
       type: 'group',
@@ -261,32 +287,6 @@ export const config: MetamorphConfig = {
             // Dov Magnus ID
             value: 'DiXoCwjCCADoVMk3',
           },
-          itemsToAdd: [
-            {
-              name: 'Morsure de Kitsune',
-              compendiumName: 'world.effets-metamorph',
-              type: 'attack',
-            },
-          ],
-        },
-        hybrid: {
-          label: 'Forme hybride de Magnus',
-          type: 'transformation',
-          tokenTextureSrc: '/tokens/PC/magnushybrid.webp',
-          actorImg: '/characters/PC/magnusHybrid.webp',
-          requirement: {
-            type: 'equality',
-            path: 'id',
-            // Dov Magnus ID
-            value: 'DiXoCwjCCADoVMk3',
-          },
-          itemsToAdd: [
-            {
-              name: 'Morsure de Kitsune',
-              compendiumName: 'world.effets-metamorph',
-              type: 'attack',
-            },
-          ],
         },
         human: {
           label: 'Forme humaine de Magnus',
@@ -299,13 +299,6 @@ export const config: MetamorphConfig = {
             // Dov Magnus ID
             value: 'DiXoCwjCCADoVMk3',
           },
-          itemsToAdd: [
-            {
-              name: 'Morsure de Kitsune',
-              compendiumName: 'world.effets-metamorph',
-              type: 'attack',
-            },
-          ],
         },
       },
     },
