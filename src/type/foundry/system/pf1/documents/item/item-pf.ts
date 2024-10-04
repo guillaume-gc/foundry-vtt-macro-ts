@@ -26,6 +26,6 @@ export declare class ItemPF extends ItemBasePF {
   get img(): string
   get thumbnail(): string
 
-  getDefaultChargeCost(rollData: {}): number
+  getDefaultChargeCost(rollData: Record<string, any>): number
   getRollData(): object
 }

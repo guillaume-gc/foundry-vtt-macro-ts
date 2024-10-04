@@ -10,6 +10,6 @@ export interface PF1Utils {
       type?: DocumentType
     },
   ) =>
-    | { pack: CompendiumCollection<PacksMinimalIndexPF, T>; index: Object }
+    | { pack: CompendiumCollection<PacksMinimalIndexPF, T>; index: any }
     | undefined
 }
