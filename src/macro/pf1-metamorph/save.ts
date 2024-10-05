@@ -5,6 +5,7 @@ import { DocumentOwnershipLevelRecord } from '../../type/foundry/const/document-
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import {
   ActorPFDamageReduction,
+  ActorPFDetails,
   ActorPFEnergyResistance,
   ActorPFSenses,
   ActorPFSize,
@@ -27,6 +28,7 @@ import { findItemsInActor } from './item'
 
 export interface MetamorphActorData {
   system: {
+    details: ActorPFDetails
     attributes: {
       speed: ActorPFSpeed
     }
@@ -117,6 +119,11 @@ export const savePolymorphData = async (
       system: {
         attributes: {
           speed: token.actor.system.attributes.speed,
+        },
+        details: {
+          biography: {
+            value: token.actor.system.details.biography.value,
+          },
         },
         traits: {
           size: token.actor.system.traits.size,

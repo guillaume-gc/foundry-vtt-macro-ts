@@ -137,6 +137,7 @@ export interface ActorPFRollData {
     wis: PFRollDataAbility
     cha: PFRollDataAbility
   }
+  details: ActorPFDetails
   attributes: {
     hd: {
       total: string
@@ -183,12 +184,15 @@ export interface ActorPFRollData {
   }
 }
 
-export interface ActorPFDetails {}
+export interface ActorPFDetails {
+  biography: {
+    value: string
+  }
+}
 
 interface ActorPFAttributes extends ActorAttributes {
   name: string
   system: ActorPFRollData
-  details: ActorPFDetails
   items: EmbeddedCollection<ItemPF>
   img: string
 }

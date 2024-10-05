@@ -289,7 +289,8 @@ var config = {
             // Gimil ID
             value: "s4Ea9b7sZAZeCn6z"
           },
-          size: "med"
+          size: "med",
+          biography: "<p>Personne ne sait vraiment d'o\xF9 vient Gimil. Son comportement sugg\xE8re qu'il n'a pas re\xE7u une \xE9ducation traditionnelle; le jeune homme arbore une allure sauvage, avec des v\xEAtements us\xE9s et des yeux per\xE7ants qui semblent toujours en alerte.</p>"
         }
       }
     },
@@ -928,6 +929,11 @@ var createOverrideActorDataUpdates = (actor, metamorphElementTransformation) => 
     attributes: {
       speed: metamorphElementTransformation.speed
     },
+    details: {
+      biography: {
+        value: metamorphElementTransformation.biography
+      }
+    },
     traits: {
       size: metamorphElementTransformation.size,
       stature: metamorphElementTransformation.stature,
@@ -1049,6 +1055,11 @@ var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
       system: {
         attributes: {
           speed: token.actor.system.attributes.speed
+        },
+        details: {
+          biography: {
+            value: token.actor.system.details.biography.value
+          }
         },
         traits: {
           size: token.actor.system.traits.size,

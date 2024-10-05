@@ -55,6 +55,7 @@ export interface MetamorphElementTransformation extends BaseMetamorphElement {
   damageReduction?: ActorPFDamageReduction
   energyResistance?: ActorPFEnergyResistance
   ownershipChanges?: MetamorphOwnershipChanges
+  biography?: string
 }
 
 export interface MetamorphConfig {
@@ -269,6 +270,8 @@ export const config: MetamorphConfig = {
             value: 's4Ea9b7sZAZeCn6z',
           },
           size: 'med',
+          biography:
+            "<p>Personne ne sait vraiment d'où vient Gimil. Son comportement suggère qu'il n'a pas reçu une éducation traditionnelle; le jeune homme arbore une allure sauvage, avec des vêtements usés et des yeux perçants qui semblent toujours en alerte.</p>",
         },
       },
     },

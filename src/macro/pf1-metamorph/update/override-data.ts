@@ -29,6 +29,11 @@ export const createOverrideActorDataUpdates = (
       attributes: {
         speed: metamorphElementTransformation.speed,
       },
+      details: {
+        biography: {
+          value: metamorphElementTransformation.biography,
+        },
+      },
       traits: {
         size: metamorphElementTransformation.size,
         stature: metamorphElementTransformation.stature,
