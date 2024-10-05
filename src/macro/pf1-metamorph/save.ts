@@ -27,6 +27,7 @@ import {
 import { findItemsInActor } from './item'
 
 export interface MetamorphActorData {
+  name: string
   system: {
     details: ActorPFDetails
     attributes: {
@@ -49,6 +50,7 @@ export interface MetamorphTokenDocumentData {
   texture: {
     src: string
   }
+  name: string
 }
 
 export interface TransformModifiedItem {
@@ -116,6 +118,7 @@ export const savePolymorphData = async (
     logger.debug('Save data related to a token', token)
 
     const actorData: MetamorphActorData = {
+      name: token.actor.name,
       system: {
         attributes: {
           speed: token.actor.system.attributes.speed,
@@ -137,6 +140,7 @@ export const savePolymorphData = async (
         texture: {
           src: token.document.texture.src,
         },
+        name: token.document.name,
       },
       img: token.actor.img,
       ownership: token.actor.ownership,
@@ -145,15 +149,16 @@ export const savePolymorphData = async (
       texture: {
         src: token.document.texture.src,
       },
+      name: token.document.name,
     }
 
     const save: MetamorphSave = {
       actorData,
       tokenDocumentData,
-      transformAddedItemsData: metamorphElementTransformEffect.itemsToAdd,
+      transformAddedItemsData: metamorphElementTransformEffect.items?.toAdd,
       transformModifiedItem: getTransformModifiedBuff(
         token.actor.items,
-        metamorphElementTransformEffect.itemsToModify,
+        metamorphElementTransformEffect.items?.toModify,
       ),
     }
 

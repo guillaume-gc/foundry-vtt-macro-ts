@@ -13,4 +13,5 @@ export declare class Token implements TokenAttribute {
   texture: {
     src: string
   }
+  name: string
 }

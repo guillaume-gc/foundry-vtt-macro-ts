@@ -43,13 +43,19 @@ export interface MetamorphElementGroup extends BaseMetamorphElement {
 
 export interface MetamorphElementTransformation extends BaseMetamorphElement {
   type: 'transformation'
+  name?: string
   requirement?: MetamorphFilter
-  itemsToAdd?: MetamorphTransformationCompendiumItem[]
-  itemsToModify?: MetamorphTransformationActorItem[]
+  items?: {
+    toAdd?: MetamorphTransformationCompendiumItem[]
+    toModify?: MetamorphTransformationActorItem[]
+  }
+  token?: {
+    textureSrc?: string
+    name?: string
+  }
   size?: ActorPFSize
   stature?: ActorPFStature
   speed?: RecursivePartial<ActorPFSpeed>
-  tokenTextureSrc?: string
   actorImg?: string
   senses?: Partial<ActorPFSenses>
   damageReduction?: ActorPFDamageReduction
@@ -85,41 +91,45 @@ export const config: MetamorphConfig = {
               description:
                 'Ce monstre ailé a le corps d’un lion et trois têtes : dragon, lion et chèvre. Pour connaitre la couleur de la tête de dragon, lancez [[/r 1d10 #Couleur de la tête de chimère]]. Si 1 ou 2 alors tête blanche, si 3 ou 4 alors tête bleue, si 5 ou 6 alors tête noire, si 7 ou 8 alors tête rouge, sinon si 9 ou 10 alors tête verte.',
               type: 'transformation',
-              itemsToAdd: [
-                {
-                  name: 'Forme bestiale IV (créature magique G - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'buff',
-                },
-                {
-                  name: 'Morsure (dragon) (chimère - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'attack',
-                },
-                {
-                  name: 'Morsure (lion) (chimère - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'attack',
-                },
-                {
-                  name: 'Corne (chèvre) (chimère - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'attack',
-                },
-                {
-                  name: 'Corne (chèvre) (chimère - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'attack',
-                },
-                {
-                  name: 'Souffle de Chimère (chimère - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'feat',
-                },
-              ],
+              items: {
+                toAdd: [
+                  {
+                    name: 'Forme bestiale IV (créature magique G - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'buff',
+                  },
+                  {
+                    name: 'Morsure (dragon) (chimère - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'attack',
+                  },
+                  {
+                    name: 'Morsure (lion) (chimère - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'attack',
+                  },
+                  {
+                    name: 'Corne (chèvre) (chimère - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'attack',
+                  },
+                  {
+                    name: 'Corne (chèvre) (chimère - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'attack',
+                  },
+                  {
+                    name: 'Souffle de Chimère (chimère - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'feat',
+                  },
+                ],
+              },
               size: 'lg',
               stature: 'long',
-              tokenTextureSrc: '/tokens/monsters/magicalBeasts/chimera.webp',
+              token: {
+                textureSrc: '/tokens/monsters/magicalBeasts/chimera.webp',
+              },
               actorImg: '/characters/monsters/magicalBeasts/chimera.webp',
               speed: {
                 burrow: {
@@ -155,37 +165,41 @@ export const config: MetamorphConfig = {
               label: 'Gorgone',
               description: 'Taureau de pierre qui peut pétrifier ses victimes',
               type: 'transformation',
-              itemsToAdd: [
-                {
-                  name: 'Forme bestiale IV (créature magique G - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'buff',
-                },
-                {
-                  name: 'Corne (gorgone - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'attack',
-                },
-                {
-                  name: '2 sabots (gorgone - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'attack',
-                },
-                {
-                  name: 'Piétinement',
-                  compendiumName: 'world.aptitudes-de-classe-personnalisees',
-                  type: 'feat',
-                },
-                {
-                  name: 'Souffle de Gorgone (gorgone - metamorph)',
-                  compendiumName: 'world.effets-metamorph',
-                  type: 'feat',
-                },
-              ],
+              items: {
+                toAdd: [
+                  {
+                    name: 'Forme bestiale IV (créature magique G - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'buff',
+                  },
+                  {
+                    name: 'Corne (gorgone - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'attack',
+                  },
+                  {
+                    name: '2 sabots (gorgone - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'attack',
+                  },
+                  {
+                    name: 'Piétinement',
+                    compendiumName: 'world.aptitudes-de-classe-personnalisees',
+                    type: 'feat',
+                  },
+                  {
+                    name: 'Souffle de Gorgone (gorgone - metamorph)',
+                    compendiumName: 'world.effets-metamorph',
+                    type: 'feat',
+                  },
+                ],
+              },
               size: 'lg',
               stature: 'long',
-              tokenTextureSrc:
-                '/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp',
+              token: {
+                textureSrc:
+                  '/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp',
+              },
               actorImg: '/characters/monsters/magicalBeasts/gorgone.webp',
               speed: {
                 burrow: {
@@ -231,16 +245,20 @@ export const config: MetamorphConfig = {
             origin: {
               label: 'Origine',
               type: 'transformation',
-              tokenTextureSrc:
-                '/tokens/monsters/aberrations/not-so-severed-tentacle3.webp',
+              token: {
+                textureSrc:
+                  '/tokens/monsters/aberrations/not-so-severed-tentacle3.webp',
+              },
               actorImg:
                 '/characters/monsters/aberrations/purpletentacules.webp',
             },
             destination: {
               label: 'Destination',
               type: 'transformation',
-              tokenTextureSrc:
-                '/tokens/monsters/aberrations/severed-tentacle.webp',
+              token: {
+                textureSrc:
+                  '/tokens/monsters/aberrations/severed-tentacle.webp',
+              },
               actorImg: '/characters/monsters/aberrations/bluetentacules.webp',
             },
           },
@@ -254,15 +272,19 @@ export const config: MetamorphConfig = {
         humanForm: {
           label: 'Forme humaine de Gimil',
           type: 'transformation',
-          tokenTextureSrc: '/tokens/NPC/gimilHumanForm.webp',
+          token: {
+            textureSrc: '/tokens/NPC/gimilHumanForm.webp',
+          },
           actorImg: '/characters/NPC/gimilYoungHumanForm.webp',
-          itemsToAdd: [
-            {
-              name: 'Coup (humain - metamorph)',
-              compendiumName: 'world.effets-metamorph',
-              type: 'attack',
-            },
-          ],
+          items: {
+            toAdd: [
+              {
+                name: 'Coup (humain - metamorph)',
+                compendiumName: 'world.effets-metamorph',
+                type: 'attack',
+              },
+            ],
+          },
           requirement: {
             type: 'equality',
             path: 'id',
@@ -271,7 +293,7 @@ export const config: MetamorphConfig = {
           },
           size: 'med',
           biography:
-            "<p>Personne ne sait vraiment d'où vient Gimil. Son comportement suggère qu'il n'a pas reçu une éducation traditionnelle; le jeune homme arbore une allure sauvage, avec des vêtements usés et des yeux perçants qui semblent toujours en alerte.</p>",
+            "<p>Rares sont ceux qui savent vraiment d'où vient Gimil. Son comportement suggère qu'il n'a pas reçu une éducation traditionnelle ; le jeune homme arbore une allure sauvage, avec des vêtements usés et des yeux perçants qui semblent toujours en alerte.</p>",
         },
       },
     },
@@ -282,7 +304,9 @@ export const config: MetamorphConfig = {
         fox: {
           label: 'Forme animale de Magnus',
           type: 'transformation',
-          tokenTextureSrc: '/tokens/monsters/animals/fox1.webp',
+          token: {
+            textureSrc: '/tokens/monsters/animals/fox1.webp',
+          },
           actorImg: '/characters/monsters/animals/fox1.webp',
           requirement: {
             type: 'equality',
@@ -294,7 +318,9 @@ export const config: MetamorphConfig = {
         human: {
           label: 'Forme humaine de Magnus',
           type: 'transformation',
-          tokenTextureSrc: '/tokens/PC/magnus.webp',
+          token: {
+            textureSrc: '/tokens/PC/magnus.webp',
+          },
           actorImg: '/characters/PC/magnusHuman.webp',
           requirement: {
             type: 'equality',
@@ -319,33 +345,37 @@ export const config: MetamorphConfig = {
               type: 'feat',
             },
           },
-          itemsToAdd: [
-            {
-              name: 'Lycanthrope mythique - Canine - Forme Hybride (metamorph)',
-              compendiumName: 'world.effets-metamorph',
-              type: 'feat',
-            },
-            {
-              name: 'Morsure (lycanthropie mythique - canine - metamorph)',
-              compendiumName: 'world.effets-metamorph',
-              type: 'attack',
-            },
-            {
-              name: '2 Griffes (lycanthropie mythique - canine - metamorph)',
-              compendiumName: 'world.effets-metamorph',
-              type: 'attack',
-            },
-          ],
-          itemsToModify: [
-            {
-              name: 'Lycanthrope mythique - Canine - Forme Humanoïde',
-              type: 'feat',
-              action: 'disable',
-            },
-          ],
+          items: {
+            toAdd: [
+              {
+                name: 'Lycanthrope mythique - Canine - Forme Hybride (metamorph)',
+                compendiumName: 'world.effets-metamorph',
+                type: 'feat',
+              },
+              {
+                name: 'Morsure (lycanthropie mythique - canine - metamorph)',
+                compendiumName: 'world.effets-metamorph',
+                type: 'attack',
+              },
+              {
+                name: '2 Griffes (lycanthropie mythique - canine - metamorph)',
+                compendiumName: 'world.effets-metamorph',
+                type: 'attack',
+              },
+            ],
+            toModify: [
+              {
+                name: 'Lycanthrope mythique - Canine - Forme Humanoïde',
+                type: 'feat',
+                action: 'disable',
+              },
+            ],
+          },
           size: 'lg',
           stature: 'tall',
-          tokenTextureSrc: '/tokens/monsters/monstrousHumanoids/Werewolf.webp',
+          token: {
+            textureSrc: '/tokens/monsters/monstrousHumanoids/Werewolf.webp',
+          },
           actorImg: '/characters/PC/Seioden%20Loup%20Garou.jpg',
           speed: {
             burrow: {
@@ -379,6 +409,33 @@ export const config: MetamorphConfig = {
         },
       },
     },
+    hag: {
+      label: 'Guenaude',
+      type: 'group',
+      elementChildren: {
+        loganNice: {
+          label: 'Forme amicale de Logan',
+          name: 'Veille Dame Logan',
+          type: 'transformation',
+          size: 'med',
+          token: {
+            textureSrc: '/tokens/NPC/117805-npc_f_elderlypoor.webp',
+            name: 'Veille Dame Logan',
+          },
+          actorImg: '/characters/NPC/loganhagnice.webp',
+        },
+        meganNice: {
+          label: 'Forme amicale de Megan',
+          name: "Megan l'heureuse",
+          type: 'transformation',
+          token: {
+            textureSrc: '/tokens/NPC/117823-npc_f_poor_carrier_redhead.webp',
+            name: "Megan l'heureuse",
+          },
+          actorImg: '/characters/NPC/nicemegan.webp',
+        },
+      },
+    },
     reducePerson: {
       label: 'Rapetissement',
       description: 'Effectif uniquement sur les humanoids',
@@ -388,13 +445,15 @@ export const config: MetamorphConfig = {
         path: 'system.traits.humanoid',
         value: true,
       },
-      itemsToAdd: [
-        {
-          name: 'Rapetissement (metamorph)',
-          compendiumName: 'world.effets-metamorph',
-          type: 'buff',
-        },
-      ],
+      items: {
+        toAdd: [
+          {
+            name: 'Rapetissement (metamorph)',
+            compendiumName: 'world.effets-metamorph',
+            type: 'buff',
+          },
+        ],
+      },
       size: 'sm',
     },
   },

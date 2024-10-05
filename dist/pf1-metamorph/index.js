@@ -109,41 +109,45 @@ var config = {
               label: "Chim\xE8re",
               description: "Ce monstre ail\xE9 a le corps d\u2019un lion et trois t\xEAtes : dragon, lion et ch\xE8vre. Pour connaitre la couleur de la t\xEAte de dragon, lancez [[/r 1d10 #Couleur de la t\xEAte de chim\xE8re]]. Si 1 ou 2 alors t\xEAte blanche, si 3 ou 4 alors t\xEAte bleue, si 5 ou 6 alors t\xEAte noire, si 7 ou 8 alors t\xEAte rouge, sinon si 9 ou 10 alors t\xEAte verte.",
               type: "transformation",
-              itemsToAdd: [
-                {
-                  name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "buff"
-                },
-                {
-                  name: "Morsure (dragon) (chim\xE8re - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "attack"
-                },
-                {
-                  name: "Morsure (lion) (chim\xE8re - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "attack"
-                },
-                {
-                  name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "attack"
-                },
-                {
-                  name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "attack"
-                },
-                {
-                  name: "Souffle de Chim\xE8re (chim\xE8re - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "feat"
-                }
-              ],
+              items: {
+                toAdd: [
+                  {
+                    name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "buff"
+                  },
+                  {
+                    name: "Morsure (dragon) (chim\xE8re - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "attack"
+                  },
+                  {
+                    name: "Morsure (lion) (chim\xE8re - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "attack"
+                  },
+                  {
+                    name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "attack"
+                  },
+                  {
+                    name: "Corne (ch\xE8vre) (chim\xE8re - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "attack"
+                  },
+                  {
+                    name: "Souffle de Chim\xE8re (chim\xE8re - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "feat"
+                  }
+                ]
+              },
               size: "lg",
               stature: "long",
-              tokenTextureSrc: "/tokens/monsters/magicalBeasts/chimera.webp",
+              token: {
+                textureSrc: "/tokens/monsters/magicalBeasts/chimera.webp"
+              },
               actorImg: "/characters/monsters/magicalBeasts/chimera.webp",
               speed: {
                 burrow: {
@@ -179,36 +183,40 @@ var config = {
               label: "Gorgone",
               description: "Taureau de pierre qui peut p\xE9trifier ses victimes",
               type: "transformation",
-              itemsToAdd: [
-                {
-                  name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "buff"
-                },
-                {
-                  name: "Corne (gorgone - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "attack"
-                },
-                {
-                  name: "2 sabots (gorgone - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "attack"
-                },
-                {
-                  name: "Pi\xE9tinement",
-                  compendiumName: "world.aptitudes-de-classe-personnalisees",
-                  type: "feat"
-                },
-                {
-                  name: "Souffle de Gorgone (gorgone - metamorph)",
-                  compendiumName: "world.effets-metamorph",
-                  type: "feat"
-                }
-              ],
+              items: {
+                toAdd: [
+                  {
+                    name: "Forme bestiale IV (cr\xE9ature magique G - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "buff"
+                  },
+                  {
+                    name: "Corne (gorgone - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "attack"
+                  },
+                  {
+                    name: "2 sabots (gorgone - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "attack"
+                  },
+                  {
+                    name: "Pi\xE9tinement",
+                    compendiumName: "world.aptitudes-de-classe-personnalisees",
+                    type: "feat"
+                  },
+                  {
+                    name: "Souffle de Gorgone (gorgone - metamorph)",
+                    compendiumName: "world.effets-metamorph",
+                    type: "feat"
+                  }
+                ]
+              },
               size: "lg",
               stature: "long",
-              tokenTextureSrc: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp",
+              token: {
+                textureSrc: "/tokens/monsters/magicalBeasts/Gorgon_Bull2_Steel.webp"
+              },
               actorImg: "/characters/monsters/magicalBeasts/gorgone.webp",
               speed: {
                 burrow: {
@@ -254,13 +262,17 @@ var config = {
             origin: {
               label: "Origine",
               type: "transformation",
-              tokenTextureSrc: "/tokens/monsters/aberrations/not-so-severed-tentacle3.webp",
+              token: {
+                textureSrc: "/tokens/monsters/aberrations/not-so-severed-tentacle3.webp"
+              },
               actorImg: "/characters/monsters/aberrations/purpletentacules.webp"
             },
             destination: {
               label: "Destination",
               type: "transformation",
-              tokenTextureSrc: "/tokens/monsters/aberrations/severed-tentacle.webp",
+              token: {
+                textureSrc: "/tokens/monsters/aberrations/severed-tentacle.webp"
+              },
               actorImg: "/characters/monsters/aberrations/bluetentacules.webp"
             }
           }
@@ -274,15 +286,19 @@ var config = {
         humanForm: {
           label: "Forme humaine de Gimil",
           type: "transformation",
-          tokenTextureSrc: "/tokens/NPC/gimilHumanForm.webp",
+          token: {
+            textureSrc: "/tokens/NPC/gimilHumanForm.webp"
+          },
           actorImg: "/characters/NPC/gimilYoungHumanForm.webp",
-          itemsToAdd: [
-            {
-              name: "Coup (humain - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            }
-          ],
+          items: {
+            toAdd: [
+              {
+                name: "Coup (humain - metamorph)",
+                compendiumName: "world.effets-metamorph",
+                type: "attack"
+              }
+            ]
+          },
           requirement: {
             type: "equality",
             path: "id",
@@ -290,7 +306,7 @@ var config = {
             value: "s4Ea9b7sZAZeCn6z"
           },
           size: "med",
-          biography: "<p>Personne ne sait vraiment d'o\xF9 vient Gimil. Son comportement sugg\xE8re qu'il n'a pas re\xE7u une \xE9ducation traditionnelle; le jeune homme arbore une allure sauvage, avec des v\xEAtements us\xE9s et des yeux per\xE7ants qui semblent toujours en alerte.</p>"
+          biography: "<p>Rares sont ceux qui savent vraiment d'o\xF9 vient Gimil. Son comportement sugg\xE8re qu'il n'a pas re\xE7u une \xE9ducation traditionnelle ; le jeune homme arbore une allure sauvage, avec des v\xEAtements us\xE9s et des yeux per\xE7ants qui semblent toujours en alerte.</p>"
         }
       }
     },
@@ -301,7 +317,9 @@ var config = {
         fox: {
           label: "Forme animale de Magnus",
           type: "transformation",
-          tokenTextureSrc: "/tokens/monsters/animals/fox1.webp",
+          token: {
+            textureSrc: "/tokens/monsters/animals/fox1.webp"
+          },
           actorImg: "/characters/monsters/animals/fox1.webp",
           requirement: {
             type: "equality",
@@ -313,7 +331,9 @@ var config = {
         human: {
           label: "Forme humaine de Magnus",
           type: "transformation",
-          tokenTextureSrc: "/tokens/PC/magnus.webp",
+          token: {
+            textureSrc: "/tokens/PC/magnus.webp"
+          },
           actorImg: "/characters/PC/magnusHuman.webp",
           requirement: {
             type: "equality",
@@ -338,33 +358,37 @@ var config = {
               type: "feat"
             }
           },
-          itemsToAdd: [
-            {
-              name: "Lycanthrope mythique - Canine - Forme Hybride (metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "feat"
-            },
-            {
-              name: "Morsure (lycanthropie mythique - canine - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            },
-            {
-              name: "2 Griffes (lycanthropie mythique - canine - metamorph)",
-              compendiumName: "world.effets-metamorph",
-              type: "attack"
-            }
-          ],
-          itemsToModify: [
-            {
-              name: "Lycanthrope mythique - Canine - Forme Humano\xEFde",
-              type: "feat",
-              action: "disable"
-            }
-          ],
+          items: {
+            toAdd: [
+              {
+                name: "Lycanthrope mythique - Canine - Forme Hybride (metamorph)",
+                compendiumName: "world.effets-metamorph",
+                type: "feat"
+              },
+              {
+                name: "Morsure (lycanthropie mythique - canine - metamorph)",
+                compendiumName: "world.effets-metamorph",
+                type: "attack"
+              },
+              {
+                name: "2 Griffes (lycanthropie mythique - canine - metamorph)",
+                compendiumName: "world.effets-metamorph",
+                type: "attack"
+              }
+            ],
+            toModify: [
+              {
+                name: "Lycanthrope mythique - Canine - Forme Humano\xEFde",
+                type: "feat",
+                action: "disable"
+              }
+            ]
+          },
           size: "lg",
           stature: "tall",
-          tokenTextureSrc: "/tokens/monsters/monstrousHumanoids/Werewolf.webp",
+          token: {
+            textureSrc: "/tokens/monsters/monstrousHumanoids/Werewolf.webp"
+          },
           actorImg: "/characters/PC/Seioden%20Loup%20Garou.jpg",
           speed: {
             burrow: {
@@ -398,6 +422,33 @@ var config = {
         }
       }
     },
+    hag: {
+      label: "Guenaude",
+      type: "group",
+      elementChildren: {
+        loganNice: {
+          label: "Forme amicale de Logan",
+          name: "Veille Dame Logan",
+          type: "transformation",
+          size: "med",
+          token: {
+            textureSrc: "/tokens/NPC/117805-npc_f_elderlypoor.webp",
+            name: "Veille Dame Logan"
+          },
+          actorImg: "/characters/NPC/loganhagnice.webp"
+        },
+        meganNice: {
+          label: "Forme amicale de Megan",
+          name: "Megan l'heureuse",
+          type: "transformation",
+          token: {
+            textureSrc: "/tokens/NPC/117823-npc_f_poor_carrier_redhead.webp",
+            name: "Megan l'heureuse"
+          },
+          actorImg: "/characters/NPC/nicemegan.webp"
+        }
+      }
+    },
     reducePerson: {
       label: "Rapetissement",
       description: "Effectif uniquement sur les humanoids",
@@ -407,13 +458,15 @@ var config = {
         path: "system.traits.humanoid",
         value: true
       },
-      itemsToAdd: [
-        {
-          name: "Rapetissement (metamorph)",
-          compendiumName: "world.effets-metamorph",
-          type: "buff"
-        }
-      ],
+      items: {
+        toAdd: [
+          {
+            name: "Rapetissement (metamorph)",
+            compendiumName: "world.effets-metamorph",
+            type: "buff"
+          }
+        ]
+      },
       size: "sm"
     }
   }
@@ -921,10 +974,12 @@ var clampOwnershipToLevelThreshold = (ownershipRecord, levelThreshold) => {
 // src/macro/pf1-metamorph/update/override-data.ts
 var createOverrideTokenDataUpdates = (token, metamorphElementTransformation) => token.document.update({
   texture: {
-    src: metamorphElementTransformation.tokenTextureSrc
-  }
+    src: metamorphElementTransformation.token?.textureSrc
+  },
+  name: metamorphElementTransformation.token?.name
 });
 var createOverrideActorDataUpdates = (actor, metamorphElementTransformation) => actor.update({
+  name: metamorphElementTransformation.name,
   system: {
     attributes: {
       speed: metamorphElementTransformation.speed
@@ -959,8 +1014,9 @@ var createOverrideActorDataUpdates = (actor, metamorphElementTransformation) => 
   },
   prototypeToken: {
     texture: {
-      src: metamorphElementTransformation.tokenTextureSrc
-    }
+      src: metamorphElementTransformation.token?.textureSrc
+    },
+    name: metamorphElementTransformation.token?.name
   },
   img: metamorphElementTransformation.actorImg,
   ownership: createOwnershipChanges(
@@ -1052,6 +1108,7 @@ var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
   const operations = tokens.map(async (token) => {
     logger9.debug("Save data related to a token", token);
     const actorData = {
+      name: token.actor.name,
       system: {
         attributes: {
           speed: token.actor.system.attributes.speed
@@ -1072,7 +1129,8 @@ var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
       prototypeToken: {
         texture: {
           src: token.document.texture.src
-        }
+        },
+        name: token.document.name
       },
       img: token.actor.img,
       ownership: token.actor.ownership
@@ -1080,15 +1138,16 @@ var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
     const tokenDocumentData = {
       texture: {
         src: token.document.texture.src
-      }
+      },
+      name: token.document.name
     };
     const save = {
       actorData,
       tokenDocumentData,
-      transformAddedItemsData: metamorphElementTransformEffect.itemsToAdd,
+      transformAddedItemsData: metamorphElementTransformEffect.items?.toAdd,
       transformModifiedItem: getTransformModifiedBuff(
         token.actor.items,
-        metamorphElementTransformEffect.itemsToModify
+        metamorphElementTransformEffect.items?.toModify
       )
     };
     await token.actor.update({

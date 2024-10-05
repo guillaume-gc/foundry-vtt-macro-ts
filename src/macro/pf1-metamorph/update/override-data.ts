@@ -16,8 +16,9 @@ export const createOverrideTokenDataUpdates = (
 ): Promise<TokenDocumentPF> =>
   token.document.update({
     texture: {
-      src: metamorphElementTransformation.tokenTextureSrc,
+      src: metamorphElementTransformation.token?.textureSrc,
     },
+    name: metamorphElementTransformation.token?.name,
   })
 
 export const createOverrideActorDataUpdates = (
@@ -25,6 +26,7 @@ export const createOverrideActorDataUpdates = (
   metamorphElementTransformation: MetamorphElementTransformation,
 ): Promise<ActorPF> =>
   actor.update({
+    name: metamorphElementTransformation.name,
     system: {
       attributes: {
         speed: metamorphElementTransformation.speed,
@@ -59,8 +61,9 @@ export const createOverrideActorDataUpdates = (
     },
     prototypeToken: {
       texture: {
-        src: metamorphElementTransformation.tokenTextureSrc,
+        src: metamorphElementTransformation.token?.textureSrc,
       },
+      name: metamorphElementTransformation.token?.name,
     },
     img: metamorphElementTransformation.actorImg,
     ownership: createOwnershipChanges(
