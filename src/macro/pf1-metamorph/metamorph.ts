@@ -25,7 +25,7 @@ type UpdateData = ActorPF | TokenDocumentPF | Document | ItemPF
 type MetamorphUpdates = Promise<UpdateData[] | UpdateData>[]
 
 /*
- * Apply polymorph to an actor and its token.
+ * Apply metamorph to an actor and its token.
  */
 export const applyMetamorph = async (
   tokens: TokenPF[],
@@ -56,21 +56,21 @@ const createMetamorphUpdate = (
         createOverrideTokenDataUpdates(token, metamorphElementTransformation),
       )
 
-      if (metamorphElementTransformation.itemsToAdd !== undefined) {
+      if (metamorphElementTransformation.items?.toAdd !== undefined) {
         tokenUpdates.push(
           createAddItemsUpdates(
             token.actor,
-            metamorphElementTransformation.itemsToAdd,
+            metamorphElementTransformation.items.toAdd,
             options,
           ),
         )
       }
 
-      if (metamorphElementTransformation.itemsToModify !== undefined) {
+      if (metamorphElementTransformation.items?.toModify !== undefined) {
         tokenUpdates.push(
           createModifyActorItemUpdates(
             token.actor.items,
-            metamorphElementTransformation.itemsToModify,
+            metamorphElementTransformation.items.toModify,
           ),
         )
       }

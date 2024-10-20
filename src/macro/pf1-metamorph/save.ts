@@ -49,6 +49,8 @@ export interface MetamorphActorData {
 export interface MetamorphTokenDocumentData {
   texture: {
     src: string
+    scaleX: number
+    scaleY: number
   }
   name: string
 }
@@ -106,9 +108,9 @@ export const transformToMetamorphSave = (
 }
 
 /*
- * Save polymorph data to actor flags.
+ * Save metamorph data to actor flags.
  */
-export const savePolymorphData = async (
+export const saveMetamorphData = async (
   tokens: TokenPF[],
   metamorphElementTransformEffect: MetamorphElementTransformation,
 ) => {
@@ -139,6 +141,8 @@ export const savePolymorphData = async (
       prototypeToken: {
         texture: {
           src: token.document.texture.src,
+          scaleX: token.document.texture.scaleX,
+          scaleY: token.document.texture.scaleY,
         },
         name: token.document.name,
       },
@@ -148,6 +152,8 @@ export const savePolymorphData = async (
     const tokenDocumentData: MetamorphTokenDocumentData = {
       texture: {
         src: token.document.texture.src,
+        scaleX: token.document.texture.scaleX,
+        scaleY: token.document.texture.scaleY,
       },
       name: token.document.name,
     }
@@ -206,10 +212,10 @@ const getTransformModifiedBuff = (
 }
 
 /*
- * Rollback to pre-polymorph data using actor flags.
+ * Rollback to pre-metamorph data using actor flags.
  */
-export const rollbackToPrePolymorphData = async (tokens: TokenPF[]) => {
-  logger.info('Prepare to roll back to data before polymorph was triggered')
+export const rollbackToPreMetamorphData = async (tokens: TokenPF[]) => {
+  logger.info('Prepare to roll back to data before metamorph was triggered')
 
   const rollbackActions: (Promise<Document> | Promise<Document[]>)[] = tokens
     .map((token) => {

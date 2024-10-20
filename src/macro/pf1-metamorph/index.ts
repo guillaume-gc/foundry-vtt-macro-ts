@@ -3,8 +3,8 @@ import { getInputElement } from '../../common/util/jquery'
 import { notifyError } from '../../common/util/notifications'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
 import { HTMLController, createHtmlController } from './html'
-import { applyMetamorph, checkTokens } from './polymorph'
-import { rollbackToPrePolymorphData, savePolymorphData } from './save'
+import { applyMetamorph, checkTokens } from './metamorph'
+import { rollbackToPreMetamorphData, saveMetamorphData } from './save'
 
 const logger = getLoggerInstance()
 
@@ -45,7 +45,7 @@ const triggerMetamorph = async (
 
     checkTokens(controlledTokens, elementTransformation)
 
-    await savePolymorphData(controlledTokens, elementTransformation)
+    await saveMetamorphData(controlledTokens, elementTransformation)
     await applyMetamorph(controlledTokens, elementTransformation, {
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck,
@@ -59,7 +59,7 @@ const triggerMetamorph = async (
 
 const cancelMetamorph = async (controlledTokens: TokenPF[]): Promise<void> => {
   try {
-    await rollbackToPrePolymorphData(controlledTokens)
+    await rollbackToPreMetamorphData(controlledTokens)
   } catch (error) {
     notifyError(error)
   }

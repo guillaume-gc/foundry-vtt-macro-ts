@@ -52,6 +52,7 @@ export interface MetamorphElementTransformation extends BaseMetamorphElement {
   token?: {
     textureSrc?: string
     name?: string
+    scale?: number
   }
   size?: ActorPFSize
   stature?: ActorPFStature
@@ -274,6 +275,7 @@ export const config: MetamorphConfig = {
           type: 'transformation',
           token: {
             textureSrc: '/tokens/NPC/gimilHumanForm.webp',
+            scale: 1,
           },
           actorImg: '/characters/NPC/gimilYoungHumanForm.webp',
           items: {

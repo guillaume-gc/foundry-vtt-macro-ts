@@ -287,7 +287,8 @@ var config = {
           label: "Forme humaine de Gimil",
           type: "transformation",
           token: {
-            textureSrc: "/tokens/NPC/gimilHumanForm.webp"
+            textureSrc: "/tokens/NPC/gimilHumanForm.webp",
+            scale: 1
           },
           actorImg: "/characters/NPC/gimilYoungHumanForm.webp",
           items: {
@@ -974,7 +975,9 @@ var clampOwnershipToLevelThreshold = (ownershipRecord, levelThreshold) => {
 // src/macro/pf1-metamorph/update/override-data.ts
 var createOverrideTokenDataUpdates = (token, metamorphElementTransformation) => token.document.update({
   texture: {
-    src: metamorphElementTransformation.token?.textureSrc
+    src: metamorphElementTransformation.token?.textureSrc,
+    scaleX: metamorphElementTransformation.token?.scale,
+    scaleY: metamorphElementTransformation.token?.scale
   },
   name: metamorphElementTransformation.token?.name
 });
@@ -1014,7 +1017,9 @@ var createOverrideActorDataUpdates = (actor, metamorphElementTransformation) => 
   },
   prototypeToken: {
     texture: {
-      src: metamorphElementTransformation.token?.textureSrc
+      src: metamorphElementTransformation.token?.textureSrc,
+      scaleX: metamorphElementTransformation.token?.scale,
+      scaleY: metamorphElementTransformation.token?.scale
     },
     name: metamorphElementTransformation.token?.name
   },
@@ -1024,12 +1029,12 @@ var createOverrideActorDataUpdates = (actor, metamorphElementTransformation) => 
     metamorphElementTransformation.ownershipChanges
   )
 });
-var mixReduction = (actorReduction, polymorphReduction) => polymorphReduction !== void 0 ? {
-  custom: [actorReduction.custom, polymorphReduction.custom].filter((value) => value).join(";"),
-  value: [...actorReduction.value, ...polymorphReduction.value]
+var mixReduction = (actorReduction, metamorphReduction) => metamorphReduction !== void 0 ? {
+  custom: [actorReduction.custom, metamorphReduction.custom].filter((value) => value).join(";"),
+  value: [...actorReduction.value, ...metamorphReduction.value]
 } : actorReduction;
 
-// src/macro/pf1-metamorph/polymorph.ts
+// src/macro/pf1-metamorph/metamorph.ts
 var logger8 = getLoggerInstance();
 var applyMetamorph = async (tokens, metamorphElementTransformation, options) => {
   logger8.info("Apply metamorph");
@@ -1046,20 +1051,20 @@ var createMetamorphUpdate = (tokens, metamorphElementTransformation, options) =>
     ),
     createOverrideTokenDataUpdates(token, metamorphElementTransformation)
   );
-  if (metamorphElementTransformation.itemsToAdd !== void 0) {
+  if (metamorphElementTransformation.items?.toAdd !== void 0) {
     tokenUpdates.push(
       createAddItemsUpdates(
         token.actor,
-        metamorphElementTransformation.itemsToAdd,
+        metamorphElementTransformation.items.toAdd,
         options
       )
     );
   }
-  if (metamorphElementTransformation.itemsToModify !== void 0) {
+  if (metamorphElementTransformation.items?.toModify !== void 0) {
     tokenUpdates.push(
       createModifyActorItemUpdates(
         token.actor.items,
-        metamorphElementTransformation.itemsToModify
+        metamorphElementTransformation.items.toModify
       )
     );
   }
@@ -1103,7 +1108,7 @@ var transformToMetamorphSave = (value) => {
   }
   return value;
 };
-var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
+var saveMetamorphData = async (tokens, metamorphElementTransformEffect) => {
   logger9.info("Save data to actor flags to ensure rolling back is possible");
   const operations = tokens.map(async (token) => {
     logger9.debug("Save data related to a token", token);
@@ -1128,7 +1133,9 @@ var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
       },
       prototypeToken: {
         texture: {
-          src: token.document.texture.src
+          src: token.document.texture.src,
+          scaleX: token.document.texture.scaleX,
+          scaleY: token.document.texture.scaleY
         },
         name: token.document.name
       },
@@ -1137,7 +1144,9 @@ var savePolymorphData = async (tokens, metamorphElementTransformEffect) => {
     };
     const tokenDocumentData = {
       texture: {
-        src: token.document.texture.src
+        src: token.document.texture.src,
+        scaleX: token.document.texture.scaleX,
+        scaleY: token.document.texture.scaleY
       },
       name: token.document.name
     };
@@ -1182,8 +1191,8 @@ var getTransformModifiedBuff = (actorItems, itemsToModify) => {
     []
   );
 };
-var rollbackToPrePolymorphData = async (tokens) => {
-  logger9.info("Prepare to roll back to data before polymorph was triggered");
+var rollbackToPreMetamorphData = async (tokens) => {
+  logger9.info("Prepare to roll back to data before metamorph was triggered");
   const rollbackActions = tokens.map((token) => {
     logger9.debug("Rolling back token", token);
     const save = transformToMetamorphSave(token.actor.flags?.metamorph?.save);
@@ -1295,7 +1304,7 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
     const elementTransformation = htmlController.getTransformation();
     logger10.info(`Transformation will be ${elementTransformation.label}`);
     checkTokens(controlledTokens, elementTransformation);
-    await savePolymorphData(controlledTokens, elementTransformation);
+    await saveMetamorphData(controlledTokens, elementTransformation);
     await applyMetamorph(controlledTokens, elementTransformation, {
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck
@@ -1307,7 +1316,7 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
 };
 var cancelMetamorph = async (controlledTokens) => {
   try {
-    await rollbackToPrePolymorphData(controlledTokens);
+    await rollbackToPreMetamorphData(controlledTokens);
   } catch (error) {
     notifyError(error);
   }

@@ -17,6 +17,8 @@ export const createOverrideTokenDataUpdates = (
   token.document.update({
     texture: {
       src: metamorphElementTransformation.token?.textureSrc,
+      scaleX: metamorphElementTransformation.token?.scale,
+      scaleY: metamorphElementTransformation.token?.scale,
     },
     name: metamorphElementTransformation.token?.name,
   })
@@ -62,6 +64,8 @@ export const createOverrideActorDataUpdates = (
     prototypeToken: {
       texture: {
         src: metamorphElementTransformation.token?.textureSrc,
+        scaleX: metamorphElementTransformation.token?.scale,
+        scaleY: metamorphElementTransformation.token?.scale,
       },
       name: metamorphElementTransformation.token?.name,
     },
@@ -79,16 +83,16 @@ const mixReduction = <
   ReductionType extends [string, string] = [string, string],
 >(
   actorReduction: ActorPFCustomizableValue<ActorPFReduction<ReductionType>[]>,
-  polymorphReduction?: ActorPFCustomizableValue<
+  metamorphReduction?: ActorPFCustomizableValue<
     ActorPFReduction<ReductionType>[]
   >,
 ): ActorPFCustomizableValue<ActorPFReduction<ReductionType>[]> =>
-  polymorphReduction !== undefined
+  metamorphReduction !== undefined
     ? {
-        custom: [actorReduction.custom, polymorphReduction.custom]
+        custom: [actorReduction.custom, metamorphReduction.custom]
           // Remove empty strings
           .filter((value) => value)
           .join(';'),
-        value: [...actorReduction.value, ...polymorphReduction.value],
+        value: [...actorReduction.value, ...metamorphReduction.value],
       }
     : actorReduction

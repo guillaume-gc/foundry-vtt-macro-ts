@@ -7,7 +7,7 @@ import { ItemPF } from '../../../type/foundry/system/pf1/documents/item/item-pf'
 import { Collection } from '../../../type/foundry/utils/collection'
 import { MetamorphTransformationCompendiumItem } from '../config'
 import { findItemInCompendium } from '../item'
-import { MetamorphOptions } from '../polymorph'
+import { MetamorphOptions } from '../metamorph'
 
 const logger = getLoggerInstance()
 
