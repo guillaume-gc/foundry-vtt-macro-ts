@@ -469,6 +469,20 @@ var config = {
         ]
       },
       size: "sm"
+    },
+    frightfulAspect: {
+      label: "Aspect terrifiant",
+      type: "transformation",
+      items: {
+        toAdd: [
+          {
+            name: "Aspect terrifiant (metamorph)",
+            compendiumName: "world.effets-metamorph",
+            type: "buff"
+          }
+        ]
+      },
+      size: "lg"
     }
   }
 };
