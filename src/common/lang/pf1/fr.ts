@@ -34,5 +34,5 @@ export const translatePf1 = (value: string): string => {
     deaf: 'Sourd(e)',
   }
 
-  return translationMap[value] ?? value
+  return translationMap[value.toLowerCase()] ?? value
 }

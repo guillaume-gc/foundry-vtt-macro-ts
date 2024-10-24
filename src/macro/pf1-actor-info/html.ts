@@ -235,21 +235,46 @@ const getSrTable = (actors: ActorPF[]) => {
 const getEnergyResistanceTable = (actors: ActorPF[]) => {
   const header = `
     <tr>
-      <td colSpan="2">Resistance aux énérgies</td>
+      <td colSpan="3">Resistance aux énérgies</td>
     <tr>
     <td style='${cellStyle}'>Acteur</td>
-    <td style='${cellStyle}'>Resistances</td>
+    <td style='${cellStyle}'>Type</td>
+    <td style='${cellStyle}'>Résistance</td>
   `
 
   const rows = actors.map((actor) => {
     const rollData = actor.getRollData({ forceRefresh: false })
-    const resistances = rollData.traits.eres
+
+    const resistanceData = rollData.traits.eres.value.map(
+      ({ types, operator, amount }) => ({
+        value: amount.toString(),
+        label: types
+          // Remove empty types
+          .filter((type) => type)
+          .map(translatePf1)
+          .join(operator ? ' ou ' : ' et '),
+      }),
+    )
+
+    const customRes = rollData.traits.eres.custom
+    const customResLineBreakCount = customRes.split(';').length
+    const actorRow = `<td rowspan='${(resistanceData.length + customRes ? 1 + customResLineBreakCount : 0) * 3}'>${actor.name}</td>`
+
+    const resRows = getTableSubRows(resistanceData)
 
     return `
-      <tr>
-        <td style='${cellStyle}'>${actor.name}</td>
-        <td style='${cellStyle}'>${resistances}</td>
-      </tr>`
+      <tr>${actorRow}</tr>
+      <tr>${resRows}</tr>
+      ${
+        rollData.traits.eres.custom
+          ? `
+          <tr>
+            <td style='${cellStyle}' colSpan="2">${customRes.replace(';', '<br>')}</td>
+          </tr>
+        `
+          : ''
+      }
+    `
   })
 
   return getTable(header, rows)
