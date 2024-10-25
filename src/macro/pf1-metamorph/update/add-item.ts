@@ -3,6 +3,7 @@ import { Document } from '../../../type/foundry/abstract/document'
 import { ItemAction } from '../../../type/foundry/system/pf1/components/item-action'
 import { ActorPF } from '../../../type/foundry/system/pf1/documents/actor/actor-pf'
 import { ItemBuffPF } from '../../../type/foundry/system/pf1/documents/item/item-buff-pf'
+import { ItemFeatPF } from '../../../type/foundry/system/pf1/documents/item/item-feat-pf'
 import { ItemPF } from '../../../type/foundry/system/pf1/documents/item/item-pf'
 import { Collection } from '../../../type/foundry/utils/collection'
 import { MetamorphTransformationCompendiumItem } from '../config'
@@ -14,7 +15,7 @@ const logger = getLoggerInstance()
 export const createAddItemsUpdates = async (
   actor: ActorPF,
   itemsToAdd: MetamorphTransformationCompendiumItem[],
-  options: MetamorphOptions | undefined,
+  options: MetamorphOptions,
 ): Promise<Document[]> => {
   logger.debug('Creating update to add objects', {
     actor,
@@ -35,15 +36,11 @@ export const createAddItemsUpdates = async (
         )
       }
 
-      logger.debug('Found itemPF in compendium', {
+      await customizeItemPF(
         itemPF,
-        itemCompendiumName: item.compendiumName,
-        itemName: item.name,
-      })
-
-      if (options) {
-        await customizeItemPF(itemPF, options)
-      }
+        options,
+        'disable' in item ? item.disable : undefined,
+      )
 
       return itemPF
     }),
@@ -62,17 +59,18 @@ export const createAddItemsUpdates = async (
 const customizeItemPF = async (
   item: ItemPF,
   options: MetamorphOptions,
+  disable: boolean | undefined,
 ): Promise<void> => {
   logger.debug('Customize ItemPF before creating update', {
     item,
   })
 
-  if (options === undefined) {
-    return
+  if (item.type === 'buff') {
+    await customizeItemBuffPF(item as ItemBuffPF, options, disable)
   }
 
-  if (item.type === 'buff') {
-    await customizeItemBuffPF(item as ItemBuffPF, options)
+  if (item.type === 'feat') {
+    await customizeItemFeatPF(item as ItemFeatPF, disable)
   }
 
   if (item.hasAction) {
@@ -87,11 +85,23 @@ const customizeItemPF = async (
 const customizeItemBuffPF = async (
   item: ItemBuffPF,
   options: MetamorphOptions,
+  disable: boolean | undefined,
 ): Promise<void> => {
   await item.update({
     system: {
       level: options.metamorphTransformSpellLevel,
-      active: true,
+      active: disable === false || disable === undefined,
+    },
+  })
+}
+
+const customizeItemFeatPF = async (
+  item: ItemFeatPF,
+  disable: boolean | undefined,
+): Promise<void> => {
+  await item.update({
+    system: {
+      disabled: disable === true,
     },
   })
 }

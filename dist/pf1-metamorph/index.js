@@ -345,6 +345,60 @@ var config = {
         }
       }
     },
+    template: {
+      label: "Arch\xE9types",
+      type: "group",
+      elementChildren: {
+        celestial: {
+          label: "C\xE9leste",
+          type: "transformation",
+          items: {
+            toAdd: [
+              {
+                name: "C\xE9leste",
+                compendiumName: "world.archetypes-personnalises",
+                type: "feat"
+              },
+              {
+                name: "Ch\xE2timent du mal",
+                compendiumName: "world.aptitudes-de-classe-personnalisees",
+                type: "feat"
+              },
+              {
+                name: "Ch\xE2timent du mal",
+                compendiumName: "world.effets-de-classes",
+                type: "buff",
+                disable: true
+              }
+            ]
+          }
+        },
+        fiendish: {
+          label: "C\xE9leste",
+          type: "transformation",
+          items: {
+            toAdd: [
+              {
+                name: "Fi\xE9lon",
+                compendiumName: "world.archetypes-personnalises",
+                type: "feat"
+              },
+              {
+                name: "Ch\xE2timent du bien",
+                compendiumName: "world.aptitudes-de-classe-personnalisees",
+                type: "feat"
+              },
+              {
+                name: "Ch\xE2timent du bien",
+                compendiumName: "world.effets-de-classes",
+                type: "buff",
+                disable: true
+              }
+            ]
+          }
+        }
+      }
+    },
     mythicLycanthropy: {
       label: "Lycanthropie Mythique",
       type: "group",
@@ -845,14 +899,11 @@ var createAddItemsUpdates = async (actor, itemsToAdd, options) => {
           `Could not find item ${item.name} (type ${item.type}) in compendium ${item.compendiumName}`
         );
       }
-      logger6.debug("Found itemPF in compendium", {
+      await customizeItemPF(
         itemPF,
-        itemCompendiumName: item.compendiumName,
-        itemName: item.name
-      });
-      if (options) {
-        await customizeItemPF(itemPF, options);
-      }
+        options,
+        "disable" in item ? item.disable : void 0
+      );
       return itemPF;
     })
   );
@@ -861,15 +912,15 @@ var createAddItemsUpdates = async (actor, itemsToAdd, options) => {
   });
   return actor.createEmbeddedDocuments("Item", newItemPFsArray);
 };
-var customizeItemPF = async (item, options) => {
+var customizeItemPF = async (item, options, disable) => {
   logger6.debug("Customize ItemPF before creating update", {
     item
   });
-  if (options === void 0) {
-    return;
-  }
   if (item.type === "buff") {
-    await customizeItemBuffPF(item, options);
+    await customizeItemBuffPF(item, options, disable);
+  }
+  if (item.type === "feat") {
+    await customizeItemFeatPF(item, disable);
   }
   if (item.hasAction) {
     await customizeItemActions(item.actions, options);
@@ -878,11 +929,18 @@ var customizeItemPF = async (item, options) => {
     item
   });
 };
-var customizeItemBuffPF = async (item, options) => {
+var customizeItemBuffPF = async (item, options, disable) => {
   await item.update({
     system: {
       level: options.metamorphTransformSpellLevel,
-      active: true
+      active: disable === false || disable === void 0
+    }
+  });
+};
+var customizeItemFeatPF = async (item, disable) => {
+  await item.update({
+    system: {
+      disabled: disable === true
     }
   });
 };

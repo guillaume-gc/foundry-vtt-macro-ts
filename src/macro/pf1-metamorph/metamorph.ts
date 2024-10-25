@@ -30,7 +30,7 @@ type MetamorphUpdates = Promise<UpdateData[] | UpdateData>[]
 export const applyMetamorph = async (
   tokens: TokenPF[],
   metamorphElementTransformation: MetamorphElementTransformation,
-  options?: MetamorphOptions,
+  options: MetamorphOptions,
 ) => {
   logger.info('Apply metamorph')
 
@@ -42,7 +42,7 @@ export const applyMetamorph = async (
 const createMetamorphUpdate = (
   tokens: TokenPF[],
   metamorphElementTransformation: MetamorphElementTransformation,
-  options?: MetamorphOptions,
+  options: MetamorphOptions,
 ): MetamorphUpdates =>
   tokens
     .map((token) => {

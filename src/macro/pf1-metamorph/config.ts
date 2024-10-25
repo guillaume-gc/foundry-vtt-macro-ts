@@ -13,10 +13,29 @@ import { MetamorphOwnershipChanges } from './ownership'
 
 export type MetamorphElementsRecord = Record<string, MetamorphElement>
 
-export interface MetamorphTransformationCompendiumItem {
+export type MetamorphTransformationCompendiumItem =
+  | MetamorphTransformationCompendiumBuff
+  | MetamorphTransformationCompendiumAttack
+  | MetamorphTransformationCompendiumFeat
+
+type MetamorphTransformationCompendiumBuff = {
   name: string
   compendiumName: string
-  type: ItemPFType
+  type: 'buff'
+  disable?: boolean
+}
+
+type MetamorphTransformationCompendiumAttack = {
+  name: string
+  compendiumName: string
+  type: 'attack'
+}
+
+type MetamorphTransformationCompendiumFeat = {
+  name: string
+  compendiumName: string
+  type: 'feat'
+  disable?: boolean
 }
 
 export type MetamorphItemTransformationAction = 'disable'
@@ -59,8 +78,8 @@ export interface MetamorphElementTransformation extends BaseMetamorphElement {
   speed?: RecursivePartial<ActorPFSpeed>
   actorImg?: string
   senses?: Partial<ActorPFSenses>
-  damageReduction?: ActorPFDamageReduction
-  energyResistance?: ActorPFEnergyResistance
+  damageReduction?: RecursivePartial<ActorPFDamageReduction>
+  energyResistance?: RecursivePartial<ActorPFEnergyResistance>
   ownershipChanges?: MetamorphOwnershipChanges
   biography?: string
 }
@@ -329,6 +348,60 @@ export const config: MetamorphConfig = {
             path: 'id',
             // Dov Magnus ID
             value: 'DiXoCwjCCADoVMk3',
+          },
+        },
+      },
+    },
+    template: {
+      label: 'Archétypes',
+      type: 'group',
+      elementChildren: {
+        celestial: {
+          label: 'Céleste',
+          type: 'transformation',
+          items: {
+            toAdd: [
+              {
+                name: 'Céleste',
+                compendiumName: 'world.archetypes-personnalises',
+                type: 'feat',
+              },
+              {
+                name: 'Châtiment du mal',
+                compendiumName: 'world.aptitudes-de-classe-personnalisees',
+                type: 'feat',
+              },
+              {
+                name: 'Châtiment du mal',
+                compendiumName: 'world.effets-de-classes',
+                type: 'buff',
+                disable: true,
+              },
+            ],
+          },
+        },
+        fiendish: {
+          label: 'Céleste',
+          type: 'transformation',
+          items: {
+            toAdd: [
+              {
+                name: 'Fiélon',
+                compendiumName: 'world.archetypes-personnalises',
+                type: 'feat',
+              },
+              {
+                name: 'Châtiment du bien',
+                compendiumName: 'world.aptitudes-de-classe-personnalisees',
+                type: 'feat',
+              },
+              {
+                name: 'Châtiment du bien',
+                compendiumName: 'world.effets-de-classes',
+                type: 'buff',
+                disable: true,
+              },
+            ],
           },
         },
       },
