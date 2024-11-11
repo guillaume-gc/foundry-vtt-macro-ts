@@ -503,11 +503,24 @@ export const config: MetamorphConfig = {
           label: 'Forme amicale de Megan',
           name: "Megan l'heureuse",
           type: 'transformation',
+          size: 'med',
           token: {
             textureSrc: '/tokens/NPC/117823-npc_f_poor_carrier_redhead.webp',
             name: "Megan l'heureuse",
           },
           actorImg: '/characters/NPC/nicemegan.webp',
+        },
+        higanNice: {
+          label: "Forme amicale d'Higan",
+          name: 'Higan la botaniste',
+          type: 'transformation',
+          size: 'med',
+          token: {
+            textureSrc: '/tokens/NPC/generics/nobles1/117991-npc_f_noble.webp',
+            name: 'Higan la botaniste',
+          },
+          actorImg:
+            '/characters/NPC/elven-women-a896-4b18-979f-8995a89baa1d.webp',
         },
       },
     },
