@@ -503,6 +503,28 @@ var config = {
           },
           actorImg: "/characters/NPC/nicemegan.webp"
         },
+        siou: {
+          label: "Forme de Siou",
+          name: "Siou",
+          type: "transformation",
+          size: "med",
+          token: {
+            textureSrc: "/tokens/NPC/kid-m.webp",
+            name: "Siou"
+          },
+          actorImg: "/characters/NPC/elfkid2.webp"
+        },
+        blugna: {
+          label: "Forme de Blugna",
+          name: "Blugna",
+          type: "transformation",
+          size: "med",
+          token: {
+            textureSrc: "/tokens/NPC/lyra.webp",
+            name: "Siou"
+          },
+          actorImg: "/characters/NPC/lyra.webp"
+        },
         higanNice: {
           label: "Forme amicale d'Higan",
           name: "Higan la botaniste",
