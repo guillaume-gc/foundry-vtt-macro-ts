@@ -85,11 +85,12 @@ const createMetamorphUpdate = (
 export const checkTokens = (
   tokens: TokenPF[],
   elementTransformation: MetamorphElementTransformation,
+  metamorphReplace: boolean,
 ) => {
   for (const token of tokens) {
     const { requirement } = elementTransformation
 
-    if (token.actor.flags?.metamorph?.active === true) {
+    if (token.actor.flags?.metamorph?.active === true && !metamorphReplace) {
       throw new UserWarning('Au moins un token a déjà un effet')
     }
 
@@ -100,3 +101,6 @@ export const checkTokens = (
     }
   }
 }
+
+export const isAtLeastOneTokenActive = (tokens: TokenPF[]): boolean =>
+  tokens.some((token) => token.actor.flags?.metamorph?.active === true)

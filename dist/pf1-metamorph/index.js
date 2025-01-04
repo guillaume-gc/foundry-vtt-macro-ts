@@ -96,6 +96,9 @@ var config = {
     descriptionIcon: "padding-right: 5px;",
     description: ""
   },
+  behavior: {
+    postTransformationCancelWaitTimeInMilliseconds: 3e3
+  },
   rootElements: {
     beastShapeIV: {
       label: "Forme Bestiale IV",
@@ -610,6 +613,10 @@ var createHtmlController = () => {
       </div>
       <div class="form-group">
          <p style="${style.description}"><i style="${style.descriptionIcon}" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha</p>
+      </div>
+      <div class="form-group">
+        <label for="transformation-value">Remplace transformation existante ?</label>
+        <input type="checkbox" id="transformation-replace"/>
       </div>
     </form>
   `;
@@ -1176,10 +1183,10 @@ var createMetamorphUpdate = (tokens, metamorphElementTransformation, options) =>
   }
   return tokenUpdates;
 }).flat();
-var checkTokens = (tokens, elementTransformation) => {
+var checkTokens = (tokens, elementTransformation, metamorphReplace) => {
   for (const token of tokens) {
     const { requirement } = elementTransformation;
-    if (token.actor.flags?.metamorph?.active === true) {
+    if (token.actor.flags?.metamorph?.active === true && !metamorphReplace) {
       throw new UserWarning("Au moins un token a d\xE9j\xE0 un effet");
     }
     if (requirement !== void 0 && !checkFilter(token.actor, requirement)) {
@@ -1189,6 +1196,7 @@ var checkTokens = (tokens, elementTransformation) => {
     }
   }
 };
+var isAtLeastOneTokenActive = (tokens) => tokens.some((token) => token.actor.flags?.metamorph?.active === true);
 
 // src/macro/pf1-metamorph/save.ts
 var logger9 = getLoggerInstance();
@@ -1390,8 +1398,17 @@ var rollbackModifiedItem = (saveTransformModifiedItems, actorItems) => actorItem
 // src/macro/pf1-metamorph/index.ts
 var logger10 = getLoggerInstance();
 var getNumberFromInputIfSpecified = (htm, selector) => {
-  const value = parseInt(getInputElement(htm, selector).value);
+  const value = parseInt(
+    getInputElement(htm, selector)?.value
+  );
   if (!isNaN(value)) {
+    return value;
+  }
+  return;
+};
+var getCheckedFromInputIfSpecified = (htm, selector) => {
+  const value = getInputElement(htm, selector).checked;
+  if (value !== void 0) {
     return value;
   }
   return value;
@@ -1407,9 +1424,13 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
       htm,
       "#transformation-spell-difficulty-check"
     );
+    const metamorphReplace = getCheckedFromInputIfSpecified(htm, "#transformation-replace") ?? false;
     const elementTransformation = htmlController.getTransformation();
     logger10.info(`Transformation will be ${elementTransformation.label}`);
-    checkTokens(controlledTokens, elementTransformation);
+    checkTokens(controlledTokens, elementTransformation, metamorphReplace);
+    if (metamorphReplace) {
+      await cancelMetamorphBeforeApply(controlledTokens);
+    }
     await saveMetamorphData(controlledTokens, elementTransformation);
     await applyMetamorph(controlledTokens, elementTransformation, {
       metamorphTransformSpellLevel,
@@ -1419,6 +1440,20 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
   } catch (error) {
     notifyError(error);
   }
+};
+var cancelMetamorphBeforeApply = async (controlledTokens) => {
+  if (!isAtLeastOneTokenActive(controlledTokens)) {
+    logger10.info("No token is active, nothing to cancel");
+    return;
+  }
+  logger10.info("At least one token is active and should be canceled");
+  await cancelMetamorph(controlledTokens);
+  await new Promise(
+    (resolve) => setTimeout(
+      resolve,
+      config.behavior.postTransformationCancelWaitTimeInMilliseconds
+    )
+  );
 };
 var cancelMetamorph = async (controlledTokens) => {
   try {

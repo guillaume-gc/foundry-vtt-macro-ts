@@ -6,7 +6,7 @@
     "prettier:write": "prettier -w .",
     "esbuild:run": "ts-node src/build.ts",
     "esbuild:watch": "ts-node src/build.ts --watch",
-    "eslint:check": "yarn run eslint . --ext .ts",
+    "eslint:check": "yarn run eslint",
     "yarn:upgrade-to-latest": "yarn upgrade-interactive"
   },
   "repository": {

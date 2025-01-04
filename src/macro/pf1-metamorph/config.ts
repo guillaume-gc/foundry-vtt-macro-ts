@@ -90,12 +90,19 @@ export interface MetamorphConfig {
     description: string
   }
   rootElements: MetamorphElementsRecord
+  behavior: {
+    // When a transformation is canceled, a creature is quickly switched back to its "base" form, how long does this last?
+    postTransformationCancelWaitTimeInMilliseconds: number
+  }
 }
 
 export const config: MetamorphConfig = {
   style: {
     descriptionIcon: 'padding-right: 5px;',
     description: '',
+  },
+  behavior: {
+    postTransformationCancelWaitTimeInMilliseconds: 3000,
   },
   rootElements: {
     beastShapeIV: {

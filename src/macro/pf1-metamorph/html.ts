@@ -35,7 +35,7 @@ export const createHtmlController = (): HTMLController => {
     return htm
   }
 
-  const createForm = () => `
+  const createMainForm = () => `
     <form class='flexcol'>
       <span id='metamorph-root-element-container'>
         <div class='form-group'>
@@ -57,6 +57,10 @@ export const createHtmlController = (): HTMLController => {
          <p style="${style.description}"><i style="${
            style.descriptionIcon
          }" class="fa-solid fa-circle-info"></i>10 + niveau du sort + modificateur int / sag / cha</p>
+      </div>
+      <div class="form-group">
+        <label for="transformation-value">Remplace transformation existante ?</label>
+        <input type="checkbox" id="transformation-replace"/>
       </div>
     </form>
   `
@@ -344,7 +348,7 @@ export const createHtmlController = (): HTMLController => {
   }
 
   return {
-    createForm,
+    createForm: createMainForm,
     resetElementOptionsTree,
     setHtm,
     getTransformation,

@@ -27,9 +27,10 @@ This script gets information on all selected tokens.
 
 Compatibility: PF1 system.
 
-This script applies changes to an actor related to a system specific effect, such as DnD reduce person or werewolf lycanthropy. 
+This script applies changes to an actor related to a system specific effect, such as DnD reduce person or werewolf lycanthropy.
 
 Those changes can include:
+
 - Change token and actor images.
 - Add items to actor.
 - Edit items to actor.
@@ -66,7 +67,6 @@ Typescript files are in the `src` folder.
 Other than Node.js 18, Yarn 4 and Javascript packages defined in `package.json`, no other tools are needed.
 
 After making your changes, run the `yarn run esbuild:run` command. It will update files in the `dist` folder, then simply follow steps in the "Javascript compiled files" section.
-
 
 # Thanks
 
