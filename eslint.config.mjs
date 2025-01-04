@@ -20,10 +20,11 @@ export default tsEslint.config(
       'no-undef': 'off',
       'prettier/prettier': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
     },
   },
   {
-    ignores: ['.idea', '.yarn', 'dist', '.prettierrc.js'],
+    ignores: ['.idea', '.yarn', 'dist', '.prettierrc.js', '.pnp.*'],
   },
   prettierEsLintRecommended,
 )
