@@ -78,8 +78,8 @@ export interface MetamorphElementTransformation extends BaseMetamorphElement {
   speed?: RecursivePartial<ActorPFSpeed>
   actorImg?: string
   senses?: Partial<ActorPFSenses>
-  damageReduction?: RecursivePartial<ActorPFDamageReduction>
-  energyResistance?: RecursivePartial<ActorPFEnergyResistance>
+  damageReduction?: ActorPFDamageReduction
+  energyResistance?: ActorPFEnergyResistance
   ownershipChanges?: MetamorphOwnershipChanges
   biography?: string
 }
@@ -90,19 +90,12 @@ export interface MetamorphConfig {
     description: string
   }
   rootElements: MetamorphElementsRecord
-  behavior: {
-    // When a transformation is canceled, a creature is quickly switched back to its "base" form, how long does this last?
-    postTransformationCancelWaitTimeInMilliseconds: number
-  }
 }
 
 export const config: MetamorphConfig = {
   style: {
     descriptionIcon: 'padding-right: 5px;',
     description: '',
-  },
-  behavior: {
-    postTransformationCancelWaitTimeInMilliseconds: 3000,
   },
   rootElements: {
     beastShapeIV: {

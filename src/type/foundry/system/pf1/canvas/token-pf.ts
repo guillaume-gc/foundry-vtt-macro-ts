@@ -1,11 +1,11 @@
 import { Token, TokenAttribute } from '../../../client/token'
-import { DocumentModificationContext } from '../../../foundry'
-import { RecursivePartial } from '../../../utils/partial'
 import { ActorPF } from '../documents/actor/actor-pf'
 import { TokenDocumentPF } from '../documents/token-document-pf'
 
 interface TokenPDFAttributes extends TokenAttribute {
   document: TokenDocumentPF
+  id: string
+  visible: boolean
 }
 
 export declare class TokenPF extends Token implements TokenPDFAttributes {
@@ -13,9 +13,5 @@ export declare class TokenPF extends Token implements TokenPDFAttributes {
 
   get actor(): ActorPF
   id: string
-
-  update(
-    data?: RecursivePartial<TokenPDFAttributes>,
-    context?: DocumentModificationContext,
-  ): Promise<TokenPF>
+  visible: boolean
 }

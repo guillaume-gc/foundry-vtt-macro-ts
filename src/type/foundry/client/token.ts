@@ -16,6 +16,7 @@ export interface TokenAttribute {
   name: string
   x: number
   y: number
+  visible: boolean
 }
 
 export declare class Token implements TokenAttribute {
@@ -35,4 +36,5 @@ export declare class Token implements TokenAttribute {
   name: string
   x: number
   y: number
+  visible: boolean
 }

@@ -96,9 +96,6 @@ var config = {
     descriptionIcon: "padding-right: 5px;",
     description: ""
   },
-  behavior: {
-    postTransformationCancelWaitTimeInMilliseconds: 3e3
-  },
   rootElements: {
     beastShapeIV: {
       label: "Forme Bestiale IV",
@@ -593,7 +590,7 @@ var createHtmlController = () => {
     }
     return htm;
   };
-  const createForm = () => `
+  const createMainForm = () => `
     <form class='flexcol'>
       <span id='metamorph-root-element-container'>
         <div class='form-group'>
@@ -813,7 +810,7 @@ var createHtmlController = () => {
     return Object.keys(elements).map((key) => `<option value='${key}'>${elements[key].label}</option>`).join("");
   };
   return {
-    createForm,
+    createForm: createMainForm,
     resetElementOptionsTree,
     setHtm,
     getTransformation,
@@ -1428,6 +1425,8 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
     const elementTransformation = htmlController.getTransformation();
     logger10.info(`Transformation will be ${elementTransformation.label}`);
     checkTokens(controlledTokens, elementTransformation, metamorphReplace);
+    const tokensToHide = controlledTokens.filter(({ visible }) => visible);
+    await setTokensVisibility(tokensToHide, false);
     if (metamorphReplace) {
       await cancelMetamorphBeforeApply(controlledTokens);
     }
@@ -1436,6 +1435,7 @@ var triggerMetamorph = async (htm, controlledTokens, htmlController) => {
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck
     });
+    await setTokensVisibility(tokensToHide, true);
     logger10.info(`Transformation completed`);
   } catch (error) {
     notifyError(error);
@@ -1448,12 +1448,6 @@ var cancelMetamorphBeforeApply = async (controlledTokens) => {
   }
   logger10.info("At least one token is active and should be canceled");
   await cancelMetamorph(controlledTokens);
-  await new Promise(
-    (resolve) => setTimeout(
-      resolve,
-      config.behavior.postTransformationCancelWaitTimeInMilliseconds
-    )
-  );
 };
 var cancelMetamorph = async (controlledTokens) => {
   try {
@@ -1461,6 +1455,12 @@ var cancelMetamorph = async (controlledTokens) => {
   } catch (error) {
     notifyError(error);
   }
+};
+var setTokensVisibility = async (controlledTokens, visible) => {
+  const actions = controlledTokens.map(
+    (token) => token.document.update({ visible })
+  );
+  await Promise.all(actions);
 };
 var openDialog = (controlledTokens) => {
   const htmlController = createHtmlController();

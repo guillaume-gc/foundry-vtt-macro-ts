@@ -2,7 +2,6 @@ import { LogLevel, getLoggerInstance } from '../../common/log/logger'
 import { getInputElement } from '../../common/util/jquery'
 import { notifyError } from '../../common/util/notifications'
 import { TokenPF } from '../../type/foundry/system/pf1/canvas/token-pf'
-import { config } from './config'
 import { HTMLController, createHtmlController } from './html'
 import {
   applyMetamorph,
@@ -68,6 +67,10 @@ const triggerMetamorph = async (
 
     checkTokens(controlledTokens, elementTransformation, metamorphReplace)
 
+    // Hide visible token before updating them (so that players cannot see if a transmutation is canceled before happening).
+    const tokensToHide = controlledTokens.filter(({ visible }) => visible)
+    await setTokensVisibility(tokensToHide, false)
+
     if (metamorphReplace) {
       await cancelMetamorphBeforeApply(controlledTokens)
     }
@@ -77,6 +80,9 @@ const triggerMetamorph = async (
       metamorphTransformSpellLevel,
       metamorphSpellDifficultyCheck,
     })
+
+    // Now that the transformation is complete, show hidden tokens.
+    await setTokensVisibility(tokensToHide, true)
 
     logger.info(`Transformation completed`)
   } catch (error) {
@@ -96,14 +102,6 @@ const cancelMetamorphBeforeApply = async (
   logger.info('At least one token is active and should be canceled')
 
   await cancelMetamorph(controlledTokens)
-
-  // Wait one second to simulate the fact the replacement is not immediate.
-  await new Promise((resolve) =>
-    setTimeout(
-      resolve,
-      config.behavior.postTransformationCancelWaitTimeInMilliseconds,
-    ),
-  )
 }
 
 const cancelMetamorph = async (controlledTokens: TokenPF[]): Promise<void> => {
@@ -112,6 +110,17 @@ const cancelMetamorph = async (controlledTokens: TokenPF[]): Promise<void> => {
   } catch (error) {
     notifyError(error)
   }
+}
+
+const setTokensVisibility = async (
+  controlledTokens: TokenPF[],
+  visible: boolean,
+): Promise<void> => {
+  const actions = controlledTokens.map((token) =>
+    token.document.update({ visible }),
+  )
+
+  await Promise.all(actions)
 }
 
 const openDialog = (controlledTokens: TokenPF[]) => {
