@@ -170,7 +170,10 @@ export interface ActorPFRollData {
   }
   traits: {
     eres: ActorPFEnergyResistance
-    size: ActorPFSize
+    size: {
+      base: ActorPFSize
+      value: number
+    }
     stature: ActorPFStature
     di: ActorPFCustomizableValue<string[]>
     cres: string
@@ -181,6 +184,17 @@ export interface ActorPFRollData {
     humanoid: boolean
     fastHealing: string
     regen: string
+  }
+}
+
+export interface ActorPFRollDataUpdate extends Omit<ActorPFRollData, 'traits'> {
+  traits: {
+    eres: ActorPFEnergyResistance
+    size: ActorPFSize
+    stature: ActorPFStature
+    di: ActorPFCustomizableValue<string[]>
+    cres: string
+    ci: ActorPFCustomizableValue<string[]>
   }
 }
 
@@ -197,6 +211,13 @@ interface ActorPFAttributes extends ActorAttributes {
   img: string
 }
 
+interface ActorPFAttributesUpdate extends Omit<ActorPFAttributes, 'system'> {
+  name: string
+  system: ActorPFRollDataUpdate
+  items: EmbeddedCollection<ItemPF>
+  img: string
+}
+
 export declare class ActorPF extends ActorBasePf implements ActorPFAttributes {
   name: string
   system: ActorPFRollData
@@ -207,7 +228,7 @@ export declare class ActorPF extends ActorBasePf implements ActorPFAttributes {
   getRollData: (options: GetRollDataOptions) => ActorPFRollData
 
   update(
-    data?: RecursivePartial<ActorPFAttributes>,
+    data?: RecursivePartial<ActorPFAttributesUpdate>,
     context?: DocumentModificationContext,
   ): Promise<ActorPF>
 }

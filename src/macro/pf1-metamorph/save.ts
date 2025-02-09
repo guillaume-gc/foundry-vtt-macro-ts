@@ -131,7 +131,7 @@ export const saveMetamorphData = async (
           },
         },
         traits: {
-          size: token.actor.system.traits.size,
+          size: token.actor.system.traits.size.base,
           stature: token.actor.system.traits.stature,
           senses: token.actor.system.traits.senses,
           dr: token.actor.system.traits.dr,
