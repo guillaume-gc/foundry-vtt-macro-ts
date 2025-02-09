@@ -28,7 +28,7 @@ export const createOverrideActorDataUpdates = (
   metamorphElementTransformation: MetamorphElementTransformation,
 ): Promise<ActorPF> =>
   actor.update({
-    name: metamorphElementTransformation.name,
+    name: metamorphElementTransformation.name ?? actor.name,
     system: {
       attributes: {
         speed: metamorphElementTransformation.speed,
