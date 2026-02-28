@@ -56,6 +56,8 @@ export interface DialogOptions {
     [key: string]: DialogButton
   }
   render?: (htm: JQuery) => void
+  default: string
+  close: (htm: JQuery) => void
 }
 
 export interface User {
